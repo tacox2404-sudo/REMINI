@@ -36,7 +36,7 @@ The photos live in `public/assets/` (web-sized JPGs); the full-size originals ar
 | `trip_1..6.jpg` | Friends trip, Philippines (17 photos: these 6 plus a "+11" tile) |
 | `friend_marta.jpg` | Paola, the friend |
 | `friend_marta_90s.jpg`, `remix_me_90s.jpg` | Optional: Paola's "90s yearbook" and your remix (fall back to `friend_marta.jpg` and `me_look_5.jpg`) |
-| `generic_*.jpg` | Optional face-free imagery for Today mode (gradient placeholders otherwise) |
+| `generic_*.jpg` | Today mode sample imagery, cropped from screenshots of the current app |
 
 ## Presenting
 

@@ -69,9 +69,9 @@ export function TodayHome() {
         right={<button onClick={() => openGallery('Retouch')} className="h-9 rounded-full border border-white/25 px-4 text-[14px] font-semibold">See all</button>}
       />
       <div className="no-scrollbar flex gap-3 overflow-x-auto px-4">
-        {['FACE SCULPT', 'HAIR CHANGE', 'ADD MUSCLES', 'NEW LOOK'].map((l, i) => (
+        {([['FACE SCULPT', 1], ['HAIR CHANGE', 2], ['ADD MUSCLES', 3], ['NEW LOOK', 51]] as const).map(([l, n]) => (
           <button key={l} onClick={() => openGallery('Retouch')}>
-            <Tile src={G(i + 1)} label={l} className="h-[176px] w-[128px]" />
+            <Tile src={G(n)} label={l} className="h-[176px] w-[128px]" />
           </button>
         ))}
       </div>
@@ -188,7 +188,7 @@ export function TodayScreen({ screen }: { screen: 'photos' | 'filters' | 'videos
           <span className="flex h-10 shrink-0 items-center rounded-full bg-white/[0.09] px-4 text-[14px] font-semibold">Casual Headshot 👔</span>
           <span className="flex h-10 shrink-0 items-center px-3 text-[14px] font-semibold">Century of Fashion 🧥</span>
         </div>
-        {[['Casual Headshot 👔', 15], ['Century of Fashion 🧥', 12]].map(([t, n], k) => (
+        {([['Casual Headshot 👔', 15, [20, 21, 22, 23, 24, 25]], ['Century of Fashion 🧥', 12, [26, 27, 28]]] as const).map(([t, n, imgs]) => (
           <div key={t} className="mx-3 mt-4 rounded-[26px] bg-card p-4">
             <div className="flex items-start justify-between">
               <div>
@@ -198,8 +198,8 @@ export function TodayScreen({ screen }: { screen: 'photos' | 'filters' | 'videos
               <button onClick={() => showToast('Redo needs new selfies')} className="flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[14px] font-semibold text-black">Redo <I.Refresh size={15} /></button>
             </div>
             <div className="mt-3 grid grid-cols-3 gap-1.5">
-              {Array.from({ length: 6 }, (_, i) => (
-                <Img key={i} src={G(20 + k * 6 + i)} className="aspect-[3/4] rounded-xl" label={false} />
+              {imgs.map((g) => (
+                <Img key={g} src={G(g)} className="aspect-[3/4] rounded-xl" label={false} />
               ))}
             </div>
           </div>
@@ -252,7 +252,8 @@ export function TodayScreen({ screen }: { screen: 'photos' | 'filters' | 'videos
           </div>
           {[['LIVE PHOTOS', 'Make your photos live'], ['AI HUG', 'Two photos, one moment']].map(([k, t], i) => (
             <div key={k} className="relative mt-8 h-[300px] overflow-hidden rounded-[22px]">
-              <Img src={G(60 + i)} className="absolute inset-0" label={false} />
+              {/* The source screenshot was dimmed behind a tooltip; lift it back up. */}
+              <Img src={G(60 + i)} className="absolute inset-0" label={false} style={{ filter: 'brightness(1.9) contrast(1.05)' }} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
               <div className="absolute bottom-4 left-4">
                 <div className="text-[11px] font-bold tracking-wider text-white/60">{k}</div>
