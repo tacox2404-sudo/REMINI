@@ -1,26 +1,11 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
-import { chatReply, seedSummerChat } from './chat';
-import { A, IDENTITIES, LINKEDIN_SETUP, LOOKS, SAVED_LOOKS, linkedInPhotos, photo, seedProjects } from './data';
-import type {
-  ChatMsg,
-  Generating,
-  Identity,
-  Lever,
-  LogEvent,
-  Look,
-  Mode,
-  Project,
-  Route,
-  SavedLook,
-  Setup,
-  Sheet,
-  Tab,
-  TemplateId,
-} from './types';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { chatReply } from './chat';
+import { A, FRIEND, IDENTITIES, INTENTS, LOOK_TITLES, SEGMENTS, look, photo, returningCreations, seedStyles, starterFor, tripAlbum } from './data';
+import type { ChatMsg, CommunityStyle, Creation, Generating, Identity, Intent, Lever, LogEvent, Mode, Route, Segment, Sheet, Tab } from './types';
 
 export const FREE_LIMIT = 5;
 
-/** A mutable value mirrored into React state, so actions can read the latest value synchronously. */
+/** A value mirrored into React state, so actions can read the latest value synchronously. */
 function useSyncState<T>(initial: T | (() => T)) {
   const [state, setState] = useState<T>(initial);
   const ref = useRef(state);
@@ -32,62 +17,7 @@ function useSyncState<T>(initial: T | (() => T)) {
   return [state, set, ref] as const;
 }
 
-let lookSeq = 100;
-const newLook = (src: string, title: string, category: Look['category'], identityId = 'me'): Look => ({
-  id: `lk${++lookSeq}`,
-  src,
-  title,
-  category,
-  identityId,
-  when: 'Just now',
-  isNew: true,
-});
-
-const SETUPS: Record<TemplateId, Setup> = {
-  profile: LINKEDIN_SETUP,
-  archive: {
-    name: 'Faithful restore',
-    style: 'Restore, keep period look',
-    background: 'Keep original',
-    outfit: 'Keep original',
-    prompt: 'Repair scratches and fading, sharpen faces, subtle colorization',
-  },
-  trip: {
-    name: 'Golden hour',
-    style: 'Warm film, late sun',
-    background: 'Keep original',
-    outfit: 'Keep original',
-    prompt: 'Golden hour light, warm tones, soft grain, consistent across the set',
-  },
-  couple: {
-    name: 'Editorial duo',
-    style: 'Editorial, natural light',
-    background: 'City street, shallow depth',
-    outfit: 'Coordinated neutrals',
-    prompt: 'Two friends laughing, candid editorial shot, 50mm',
-  },
-  freestyle: {
-    name: 'Freestyle',
-    style: 'Defined by your chat',
-    background: 'Anything',
-    outfit: 'Anything',
-    prompt: 'Built up message by message with Remini chat',
-  },
-};
-
-function seedAll(): Project[] {
-  return seedProjects().map((p) => (p.id === 'summer' ? { ...p, chat: seedSummerChat() } : p));
-}
-
 let chatSeq = 0;
-
-const NEXT_STEP: Record<TemplateId, string> = {
-  profile: 'Add a headshot with natural light for a better match',
-  archive: 'Animate a memory from the album',
-  trip: 'Apply one look to the whole set',
-  couple: 'Add a friend to the scene',
-  freestyle: 'Describe an idea to Remini and iterate',
-};
 
 function useStoreValue() {
   const [mode, setModeState] = useState<Mode>('today');
@@ -100,13 +30,14 @@ function useStoreValue() {
   const [showLevers, setShowLevers] = useState(false);
   const [events, setEvents] = useState<LogEvent[]>([]);
   const [identities, setIdentities] = useSyncState<Identity[]>(IDENTITIES);
-  const [looks, setLooks] = useSyncState<Look[]>(LOOKS);
-  const [projects, setProjects, projectsRef] = useSyncState<Project[]>(seedAll);
+  const [creations, setCreations, creationsRef] = useSyncState<Creation[]>(returningCreations);
+  const [styles, setStyles] = useSyncState<CommunityStyle[]>(seedStyles);
+  const [segment, setSegment] = useState<Segment | null>(null);
+  const [onboarded, setOnboarded] = useState<Record<Mode, boolean>>({ today: false, studio: false });
   const [chatTyping, setChatTyping] = useState<string | null>(null);
-  const [introSeen, setIntroSeen] = useState(false);
   const [lastDemoDone, setLastDemoDone] = useState(false);
-  const [savedLooks] = useState<SavedLook[]>(SAVED_LOOKS);
-  const [freeUsed, setFreeUsed] = useState(4);
+  const [closing, setClosing] = useState(false);
+  const [freeUsed, setFreeUsed] = useState(0);
   const [isPro, setIsPro] = useState(false);
   const [demo, setDemo] = useState<number | null>(null);
   const [splash, setSplash] = useState(true);
@@ -128,13 +59,14 @@ function useStoreValue() {
     genDone.current = null;
     setGenerating(null);
     setProcessing(null);
+    setChatTyping(null);
   }, []);
 
   // ---------- analytics ----------
   const track = useCallback((name: string, lever?: Lever) => {
     const s = Math.floor((Date.now() - startedAt.current) / 1000);
     const at = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-    setEvents((ev) => [{ id: ++evSeq.current, name, lever, at }, ...ev].slice(0, 60));
+    setEvents((ev) => [{ id: ++evSeq.current, name, lever, at }, ...ev].slice(0, 80));
   }, []);
 
   // ---------- navigation ----------
@@ -196,285 +128,215 @@ function useStoreValue() {
     }, g.duration);
   }, [later]);
 
-  // ---------- domain ----------
-  const updateProject = useCallback((id: string, fn: (p: Project) => Project) => {
-    setProjects((ps) => ps.map((p) => (p.id === id ? fn(p) : p)));
-  }, [setProjects]);
+  // ---------- creations ----------
+  const updateCreation = useCallback((id: string, fn: (c: Creation) => Creation) => {
+    setCreations((cs) => cs.map((c) => (c.id === id ? fn(c) : c)));
+  }, [setCreations]);
 
-  const createProject = useCallback(
-    (opts: { template: TemplateId; title: string; identityId: string; photos: string[]; fromPhoto?: string }) => {
-      const id = `p${Date.now().toString(36)}`;
-      const archive = opts.template === 'archive';
-      const photos = [
-        ...(opts.fromPhoto ? [photo(opts.fromPhoto, 'enhanced' as const)] : []),
-        ...opts.photos.map((src) => {
-          const m = src.match(/archive_old_(\d+)/);
-          return photo(src, 'original', archive && m ? A.restored(Number(m[1])) : undefined);
-        }),
-      ];
-      const p: Project = {
-        id,
-        title: opts.title || 'Untitled project',
-        template: opts.template,
-        identityId: opts.identityId,
-        cover: opts.fromPhoto ?? photos[0]?.original ?? A.ref(1),
-        photos,
-        looks: [],
-        setup: SETUPS[opts.template],
-        lastEdit: 'Just now',
-        nextStep: NEXT_STEP[opts.template],
-      };
-      setProjects((ps) => [p, ...ps]);
-      track('project_created', 't');
-      return id;
-    },
-    [setProjects, track],
-  );
+  const upsertCreation = useCallback((c: Creation) => {
+    setCreations((cs) => [c, ...cs.filter((x) => x.id !== c.id)]);
+  }, [setCreations]);
 
-  const ensureLinkedIn = useCallback((fresh = false) => {
-    const existing = projectsRef.current.find((p) => p.template === 'profile');
-    if (existing && !fresh) return existing.id;
-    const p: Project = {
-      id: existing?.id ?? 'linkedin',
-      title: existing?.title ?? 'LinkedIn refresh',
-      template: 'profile',
-      identityId: 'me',
-      cover: existing?.cover ?? A.enhanceSrc,
-      photos: linkedInPhotos(existing?.photos[0]?.original ?? A.enhanceSrc),
-      looks: [],
-      setup: LINKEDIN_SETUP,
-      lastEdit: 'Just now',
-      nextStep: NEXT_STEP.profile,
-    };
-    setProjects((ps) => [p, ...ps.filter((x) => x.id !== p.id)]);
-    return p.id;
-  }, [projectsRef, setProjects]);
-
-  /** Demo helper: mark every photo of a project as enhanced. */
-  const completeProject = useCallback((id: string) => {
-    updateProject(id, (pr) => ({ ...pr, photos: pr.photos.map((ph) => ({ ...ph, status: 'enhanced' })) }));
-  }, [updateProject]);
-
-  const processProject = useCallback(
-    (id: string) => {
-      const p = projectsRef.current.find((x) => x.id === id);
-      if (!p) return;
-      const todo = p.photos.filter((ph) => ph.status !== 'enhanced').map((ph) => ph.id);
-      if (!todo.length) return;
-      setProcessing(id);
-      updateProject(id, (pr) => ({
-        ...pr,
-        lastEdit: 'Just now',
-        photos: pr.photos.map((ph) => (todo.includes(ph.id) ? { ...ph, status: 'processing' } : ph)),
-      }));
-      todo.forEach((phId, i) => {
-        later(() => {
-          updateProject(id, (pr) => ({
-            ...pr,
-            photos: pr.photos.map((ph) => (ph.id === phId ? { ...ph, status: 'enhanced' } : ph)),
-          }));
-          if (i === todo.length - 1) {
-            setProcessing(null);
-            track('batch_enhance_completed', 'c');
-            showToast(`${todo.length} photos enhanced`);
-            updateProject(id, (pr) => ({
-              ...pr,
-              nextStep: pr.template === 'profile' ? 'Generate 4 looks with your saved setup' : pr.nextStep,
-            }));
-          }
-        }, 500 + i * 110);
-      });
-    },
-    [later, projectsRef, showToast, track, updateProject],
-  );
-
-  const enhanceAll = useCallback(
-    (id: string) => {
-      const p = projectsRef.current.find((x) => x.id === id);
-      if (!p) return;
-      const remaining = p.photos.filter((ph) => ph.status === 'original').length;
-      if (!remaining) {
-        showToast('Everything in this project is enhanced');
-        return;
-      }
-      track('enhance_all_tapped', 't');
-      if (!isPro && freeUsed + remaining > FREE_LIMIT) {
-        setFreeUsed(FREE_LIMIT);
-        track('paywall_viewed_in_project', 't');
-        setSheet({ type: 'paywall', projectId: id, stage: 'offer' });
-        return;
-      }
-      processProject(id);
-    },
-    [freeUsed, isPro, processProject, projectsRef, showToast, track],
-  );
-
-  const startTrial = useCallback(
-    (projectId: string) => {
-      setIsPro(true);
-      track('trial_started', 't');
-      setSheet({ type: 'paywall', projectId, stage: 'success' });
-    },
-    [track],
-  );
-
-  const addLooksToProject = useCallback(
-    (id: string, list: Look[]) => {
-      updateProject(id, (pr) => ({ ...pr, looks: [...list, ...pr.looks], lastEdit: 'Just now' }));
-      setLooks((ls) => [...list.map((l) => ({ ...l, id: `${l.id}i` })), ...ls]);
-    },
-    [setLooks, updateProject],
-  );
-
-  const lookSet = (p: Project, n: number) => {
-    if (p.template === 'profile') {
-      const titles = ['Headshot · grey', 'Headshot · window', 'Half body · office', 'Candid · coffee'];
-      return Array.from({ length: n }, (_, i) =>
-        newLook(`${A.linkedin((p.looks.length + i) % 4 + 1)}|${A.look(7 + (i % 2))}`, titles[i % 4], 'professional', p.identityId),
-      );
+  /** Onboarding answer: log the segment; With Studio it starts a creation, Today it goes to the paywall. */
+  const answerSegment = useCallback((seg: Segment, forMode?: Mode) => {
+    const m = forMode ?? mode;
+    const label = SEGMENTS.find((s) => s.id === seg)?.label ?? seg;
+    setSegment(seg);
+    track(`segment: ${label}`, 't');
+    setOnboarded((o) => ({ ...o, [m]: true }));
+    if (m === 'studio') {
+      const starter = starterFor(seg);
+      setCreations((cs) => [starter, ...cs.filter((x) => x.id !== starter.id && x.id !== 'linkedin' && x.id !== 'family' && x.id !== 'ailooks')]);
+      track('starter_created', 'c');
+      setNavDir(1);
+      setTab('studio');
+      setStack([]);
+      showToast(`We started “${starter.title}” for you`);
+    } else {
+      setStack([]);
+      setTab('enhance');
+      track('paywall_before_use');
+      setSheet({ type: 'paywallGeneric', reason: 'onboarding' });
     }
-    return Array.from({ length: n }, (_, i) => newLook(A.look(((p.looks.length + i) % 8) + 1), p.setup?.name ?? 'New look', 'casual', p.identityId));
-  };
+  }, [mode, setCreations, setStack, showToast, track]);
 
-  const generateLooks = useCallback(
-    (id: string, instant = false) => {
-      const p = projectsRef.current.find((x) => x.id === id);
-      if (!p) return;
-      const finish = () => {
-        const p2 = projectsRef.current.find((x) => x.id === id)!;
-        addLooksToProject(id, lookSet(p2, 4));
-        track('looks_generated_from_setup', 'c');
-        updateProject(id, (pr) => ({ ...pr, nextStep: 'Pick your favourite and export the set' }));
-        if (!instant) showToast('4 new looks added');
-      };
-      if (instant) return finish();
-      runGenerating({ steps: [`Loading "${p.setup?.name ?? 'setup'}"`, 'Generating with your identity', 'Matching light and color'], duration: 2200 }, finish);
-    },
-    [addLooksToProject, projectsRef, runGenerating, showToast, track, updateProject],
-  );
+  /** Jump a few days ahead: the state of a returning free user. */
+  const becomeReturning = useCallback(() => {
+    setCreations(returningCreations());
+    setOnboarded({ today: true, studio: true });
+    setIsPro(false);
+    setFreeUsed(0);
+  }, [setCreations]);
 
-  const rerunSetup = useCallback(
-    (id: string, src: string) => {
-      const p = projectsRef.current.find((x) => x.id === id);
-      if (!p) return;
-      runGenerating({ steps: ['Applying your saved setup', `${p.setup?.style ?? 'Style'}`, 'Finishing'], duration: 2000, preview: src }, () => {
-        const look = newLook(src, `${p.setup?.name ?? 'Setup'} · new photo`, p.template === 'profile' ? 'professional' : 'casual', p.identityId);
-        addLooksToProject(id, [look]);
-        track('setup_rerun', 'c');
-        showToast('Same setup, new photo: added to Looks');
-        setNavDir(1);
-        setStack((s) => s.map((r) => (r.name === 'project' && r.id === id ? { ...r, tab: 'looks' } : r)));
+  /** Continue a look-based creation up to its goal. */
+  const continueCreation = useCallback((id: string) => {
+    const c = creationsRef.current.find((x) => x.id === id);
+    if (!c) return;
+    const missing = Math.max(0, c.goal - c.looks.length);
+    if (!missing) return showToast('This one is complete');
+    track('creation_continued', 'w');
+    runGenerating({ steps: ['Using your saved Me', `Making ${missing} more`, 'Matching the set'], duration: 2000, preview: c.cover }, () => {
+      const start = c.looks.length;
+      const add = Array.from({ length: missing }, (_, i) => {
+        const n = start + i + 1;
+        return c.intent === 'profile'
+          ? look(A.linkedin(((n - 1) % 6) + 1), ['Window light', 'Library', 'Studio grey'][i % 3], true)
+          : look(A.look(((n + 2) % 8) + 1), LOOK_TITLES[(n + 2) % 8], true);
       });
-    },
-    [addLooksToProject, projectsRef, runGenerating, setStack, showToast, track],
-  );
+      updateCreation(id, (x) => ({ ...x, looks: [...x.looks, ...add], lastEdit: 'Just now', cover: x.intent === 'profile' ? A.linkedin(1) : x.cover }));
+      track('creation_completed', 'c');
+      showToast(`${c.title}: ${c.goal} of ${c.goal} done`);
+    });
+  }, [creationsRef, runGenerating, showToast, track, updateCreation]);
 
-  const saveLookToStudio = useCallback(
-    (src: string, title: string, category: Look['category'] = 'trend') => {
-      setLooks((ls) => (ls.some((l) => l.src === src && l.isNew) ? ls : [newLook(src, title, category), ...ls]));
-      track('saved_to_studio', 'w');
-    },
-    [setLooks, track],
-  );
+  /** "Keep this": results land in My Creations automatically. */
+  const keepLook = useCallback((src: string, title: string, into?: string) => {
+    let id = into;
+    if (!id) {
+      const existing = creationsRef.current.find((c) => c.id === 'ailooks');
+      if (existing) id = existing.id;
+      else {
+        id = 'ailooks';
+        upsertCreation({ id, title: 'My AI looks', intent: 'looks', cover: src, photos: [], looks: [], goal: 6, lastEdit: 'Just now' });
+      }
+    }
+    const target = id;
+    setCreations((cs) => {
+      const c = cs.find((x) => x.id === target);
+      if (!c) return cs;
+      const updated = { ...c, cover: src, lastEdit: 'Just now', looks: c.looks.some((l) => l.src === src) ? c.looks : [look(src, title, true), ...c.looks] };
+      return [updated, ...cs.filter((x) => x.id !== target)];
+    });
+    track('kept_in_my_creations', 'w');
+    return target;
+  }, [creationsRef, setCreations, track, upsertCreation]);
 
-  const addPhotoToProject = useCallback(
-    (id: string, src: string) => {
-      updateProject(id, (pr) => ({ ...pr, photos: [photo(src, 'enhanced'), ...pr.photos], lastEdit: 'Just now' }));
-      track('photo_added_to_project', 'w');
-    },
-    [track, updateProject],
-  );
+  /** "What are you creating?": log the intent (fake-door design) and create it from the picked photos. */
+  const createFromIntent = useCallback((intent: Intent, picked: string[]) => {
+    const meta = INTENTS.find((i) => i.id === intent)!;
+    let c: Creation;
+    if (intent === 'trip') c = tripAlbum(picked);
+    else if (intent === 'family')
+      c = { id: `c${Date.now().toString(36)}`, title: 'Family memories', intent, cover: picked[0], goal: picked.length, lastEdit: 'Just now', looks: [], photos: picked.map((s) => { const m = s.match(/archive_old_(\d+)/); return photo(s, 'original', m ? A.restored(Number(m[1])) : undefined); }) };
+    else
+      c = { id: `c${Date.now().toString(36)}`, title: meta.title, intent, cover: picked[0], goal: picked.length + 2, lastEdit: 'Just now', photos: [], looks: picked.map((s) => look(s, 'Enhanced', true)) };
+    upsertCreation(c);
+    track('creation_started', 't');
+    return c.id;
+  }, [track, upsertCreation]);
 
-  const joinShared = useCallback(
-    (picked: string[]) => {
-      updateProject('summer', (pr) => ({
-        ...pr,
-        photos: [...picked.map((s) => photo(s, 'enhanced')), ...pr.photos],
-        shared: pr.shared && {
-          ...pr.shared,
-          collaborators: pr.shared.collaborators.includes('You') ? pr.shared.collaborators : [...pr.shared.collaborators, 'You'],
-          feed: [{ who: 'You', text: `joined and added ${picked.length} photos`, when: 'now' }, ...pr.shared.feed],
-        },
-      }));
-      track('invite_joined', 'I');
-    },
-    [track, updateProject],
-  );
-
-  const improveIdentity = useCallback(
-    (id: string, picked: string[]) => {
-      setIdentities((is) => is.map((i) => (i.id === id ? { ...i, refs: [...i.refs, ...picked].slice(0, 8) } : i)));
-      track('identity_improved', 'c');
-    },
-    [setIdentities, track],
-  );
-
-  const addIdentity = useCallback(
-    (name: string, refs: string[]) => {
-      const id = `id${Date.now().toString(36)}`;
-      setIdentities((is) => [...is, { id, name, subtitle: `${refs.length} photos`, cover: refs[0], refs }]);
-      track('identity_saved', 'c');
-      return id;
-    },
-    [setIdentities, track],
-  );
-
-  const markAnimated = useCallback(
-    (projectId: string, src: string) => {
-      updateProject(projectId, (pr) => ({ ...pr, animated: [...(pr.animated ?? []), src] }));
-    },
-    [updateProject],
-  );
-
-  const sendChat = useCallback(
-    (projectId: string, text: string) => {
-      const p = projectsRef.current.find((x) => x.id === projectId);
-      if (!p || !text.trim()) return;
-      const mine: ChatMsg = { id: `m${++chatSeq}`, from: 'me', text: text.trim() };
-      updateProject(projectId, (pr) => ({ ...pr, chat: [...(pr.chat ?? []), mine], lastEdit: 'Just now' }));
-      track('chat_prompt_sent', 'w');
-      setChatTyping(projectId);
-      const r = chatReply(text, p);
+  const processPhotos = useCallback((id: string, ids: string[], onDone?: () => void) => {
+    if (!ids.length) return onDone?.();
+    setProcessing(id);
+    updateCreation(id, (c) => ({ ...c, photos: c.photos.map((p) => (ids.includes(p.id) ? { ...p, status: 'processing' } : p)) }));
+    ids.forEach((pid, i) => {
       later(() => {
-        setChatTyping(null);
-        const needsPro = r.action === 'enhanced' && !isPro && p.photos.some((ph) => ph.status === 'original');
-        const msg: ChatMsg = needsPro
-          ? { id: `m${++chatSeq}`, from: 'remini', text: 'That would enhance every photo in the project, which is more than your free enhancements. Start the free trial and I will finish it now.', action: 'paywall' }
-          : { id: `m${++chatSeq}`, from: 'remini', text: r.text, images: r.images, action: r.action };
-        updateProject(projectId, (pr) => ({
-          ...pr,
-          chat: [...(pr.chat ?? []), msg],
-          looks: msg.images && msg.action !== 'animate' ? [...msg.images.map((src) => newLook(src, r.title, 'casual', pr.identityId)), ...pr.looks] : pr.looks,
-        }));
-        if (msg.images && msg.action !== 'animate') track('chat_result_added', 'c');
-        if (r.action === 'enhanced' && !needsPro) processProject(projectId);
-        if (needsPro) track('paywall_offered_in_chat', 't');
-      }, 1900);
-    },
-    [isPro, later, processProject, projectsRef, track, updateProject],
-  );
+        updateCreation(id, (c) => ({ ...c, lastEdit: 'Just now', photos: c.photos.map((p) => (p.id === pid ? { ...p, status: 'enhanced' } : p)) }));
+        if (i === ids.length - 1) {
+          setProcessing(null);
+          onDone?.();
+        }
+      }, 450 + i * 160);
+    });
+  }, [later, updateCreation]);
 
-  const createFreestyle = useCallback(() => {
-    const empty = projectsRef.current.find((x) => x.template === 'freestyle' && (x.chat ?? []).every((m) => m.from === 'remini'));
-    if (empty) return empty.id;
-    const id = `f${Date.now().toString(36)}`;
-    const p: Project = {
-      id,
-      title: 'Freestyle',
-      template: 'freestyle',
-      identityId: 'me',
-      cover: A.creative(1),
-      photos: [],
-      looks: [],
-      setup: SETUPS.freestyle,
-      lastEdit: 'Just now',
-      nextStep: NEXT_STEP.freestyle,
-      chat: [{ id: `m${++chatSeq}`, from: 'remini', text: 'Hi! I know what you look like from your identity "Me". Describe anything and I will make it, then we iterate together.' }],
-    };
-    setProjects((ps) => [p, ...ps]);
-    track('freestyle_started', 'w');
+  /** Free users get the free enhancements, then the paywall on the unfinished work. */
+  const enhanceAll = useCallback((id: string) => {
+    const c = creationsRef.current.find((x) => x.id === id);
+    if (!c) return;
+    const todo = c.photos.filter((p) => p.status === 'original').map((p) => p.id);
+    if (!todo.length) return showToast('Everything here is done');
+    track('enhance_all_tapped', 't');
+    if (isPro) {
+      processPhotos(id, todo, () => {
+        track('batch_enhance_completed', 'c');
+        showToast('All photos done');
+      });
+      return;
+    }
+    const free = Math.max(0, FREE_LIMIT - freeUsed);
+    processPhotos(id, todo.slice(0, free), () => {
+      setFreeUsed(FREE_LIMIT);
+      track('paywall_unfinished_work', 't');
+      later(() => setSheet({ type: 'paywall', creationId: id, stage: 'offer' }), 350);
+    });
+  }, [creationsRef, freeUsed, isPro, later, processPhotos, showToast, track]);
+
+  const startTrial = useCallback((id: string) => {
+    setIsPro(true);
+    track('trial_started', 't');
+    setSheet({ type: 'paywall', creationId: id, stage: 'success' });
+  }, [track]);
+
+  const finishAfterTrial = useCallback((id: string) => {
+    setSheet(null);
+    const c = creationsRef.current.find((x) => x.id === id);
+    if (!c) return;
+    processPhotos(id, c.photos.filter((p) => p.status === 'original').map((p) => p.id), () => {
+      track('batch_enhance_completed', 'c');
+      showToast(`${c.title} is finished`);
+    });
+  }, [creationsRef, processPhotos, showToast, track]);
+
+  // ---------- remix ----------
+  const remixStyle = useCallback((styleId: string, onResult: (r: Route) => void) => {
+    const st = styles.find((s) => s.id === styleId);
+    if (!st) return;
+    runGenerating({ steps: [`Applying ${st.creator}'s style to you`, 'Using your saved Me', 'Final touches'], duration: 2100, preview: st.result }, () => {
+      setStyles((ss) => ss.map((s) => (s.id === styleId ? { ...s, remixes: s.remixes + 1 } : s)));
+      track('remix_made', 'w');
+      onResult({ name: 'result', kind: 'remix', image: st.result, title: `${st.title} · your version`, styleId });
+    });
+  }, [runGenerating, setStyles, styles, track]);
+
+  const publishStyle = useCallback((title: string, image: string) => {
+    const id = `st-mine-${Date.now().toString(36)}`;
+    setStyles((ss) => [{ id, title: title || 'My style', creator: 'You', cover: image, result: image, remixes: 0, mine: true }, ...ss.filter((s) => !s.mine)]);
+    track('style_published', 'I');
     return id;
-  }, [projectsRef, setProjects, track]);
+  }, [setStyles, track]);
+
+  // The published style's counter ticks up like a filter going around.
+  const hasMine = styles.some((s) => s.mine);
+  useEffect(() => {
+    if (!hasMine) return;
+    const t = window.setInterval(() => {
+      setStyles((ss) => ss.map((s) => (s.mine && s.remixes < 480 ? { ...s, remixes: s.remixes + 1 + Math.floor(Math.random() * 6) } : s)));
+    }, 700);
+    return () => clearInterval(t);
+  }, [hasMine, setStyles]);
+
+  // ---------- chat (kept from the earlier concept, not in the main demo) ----------
+  const sendChat = useCallback((creationId: string, text: string) => {
+    const c = creationsRef.current.find((x) => x.id === creationId);
+    if (!c || !text.trim()) return;
+    const mine: ChatMsg = { id: `m${++chatSeq}`, from: 'me', text: text.trim() };
+    updateCreation(creationId, (x) => ({ ...x, chat: [...(x.chat ?? []), mine], lastEdit: 'Just now' }));
+    track('chat_prompt_sent', 'w');
+    setChatTyping(creationId);
+    const r = chatReply(text, c);
+    later(() => {
+      setChatTyping(null);
+      const msg: ChatMsg = { id: `m${++chatSeq}`, from: 'remini', text: r.text, images: r.images, action: r.action === 'enhanced' ? undefined : r.action };
+      updateCreation(creationId, (x) => ({
+        ...x,
+        chat: [...(x.chat ?? []), msg],
+        looks: msg.images && msg.action !== 'animate' ? [...msg.images.map((src) => look(src, r.title, true)), ...x.looks] : x.looks,
+      }));
+      if (msg.images) track('chat_result_kept', 'c');
+    }, 1900);
+  }, [creationsRef, later, track, updateCreation]);
+
+  // ---------- identities ----------
+  const improveIdentity = useCallback((id: string, picked: string[]) => {
+    setIdentities((is) => is.map((i) => (i.id === id ? { ...i, refs: [...i.refs, ...picked].slice(0, 8) } : i)));
+    track('identity_improved', 'c');
+  }, [setIdentities, track]);
+
+  const rememberMe = useCallback((name: string, refs: string[]) => {
+    setIdentities((is) => [...is, { id: `id${Date.now().toString(36)}`, name, subtitle: `Saved from ${refs.length} photos`, cover: refs[0], refs }]);
+    track('identity_saved', 'c');
+  }, [setIdentities, track]);
 
   const setFlags = useCallback((f: { isPro?: boolean; freeUsed?: number }) => {
     if (f.isPro !== undefined) setIsPro(f.isPro);
@@ -487,34 +349,29 @@ function useStoreValue() {
     setTab('enhance');
     setStack([]);
     setSheet(null);
-    setGenerating(null);
     setToast(null);
     setEvents([]);
     setIdentities(IDENTITIES);
-    setLooks(LOOKS);
-    setProjects(seedAll());
-    setChatTyping(null);
-    setIntroSeen(false);
-    setLastDemoDone(false);
-    setFreeUsed(4);
+    setCreations(returningCreations());
+    setStyles(seedStyles());
+    setSegment(null);
+    setOnboarded({ today: false, studio: false });
+    setFreeUsed(0);
     setIsPro(false);
-    setProcessing(null);
+    setLastDemoDone(false);
+    setClosing(false);
     startedAt.current = Date.now();
-  }, [clearTimers, setIdentities, setLooks, setProjects, setStack]);
-
-  const useFreeEnhancement = useCallback(() => {
-    setFreeUsed((n) => Math.min(FREE_LIMIT, n + 1));
-  }, []);
+  }, [clearTimers, setCreations, setIdentities, setStack, setStyles]);
 
   return {
     mode, setMode, tab, goTab, stack, stackRef, navDir, push, pop, replaceTop, resetStack,
     sheet, openSheet, closeSheet, generating, runGenerating, toast, showToast,
     showLevers, setShowLevers, events, track, clearEvents: useCallback(() => setEvents([]), []),
-    identities, looks, projects, projectsRef, savedLooks, freeUsed, isPro, processing,
-    demo, setDemo, splash, setSplash,
-    createProject, ensureLinkedIn, completeProject, sendChat, createFreestyle, chatTyping, introSeen, setIntroSeen, lastDemoDone, setLastDemoDone, enhanceAll, processProject, startTrial, generateLooks, rerunSetup,
-    saveLookToStudio, addPhotoToProject, joinShared, improveIdentity, addIdentity, markAnimated,
-    setFlags, resetAll, clearTimers, useFreeEnhancement, updateProject,
+    identities, creations, creationsRef, styles, segment, onboarded, setOnboarded, freeUsed, isPro, processing,
+    demo, setDemo, splash, setSplash, lastDemoDone, setLastDemoDone, closing, setClosing, chatTyping,
+    answerSegment, becomeReturning, continueCreation, keepLook, createFromIntent, enhanceAll, startTrial, finishAfterTrial,
+    processPhotos, remixStyle, publishStyle, sendChat, improveIdentity, rememberMe, updateCreation, upsertCreation,
+    setFlags, resetAll, clearTimers, friend: FRIEND,
   };
 }
 

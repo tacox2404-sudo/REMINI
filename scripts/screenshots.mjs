@@ -32,10 +32,11 @@ async function run(levers) {
   await page.click('[data-ctl="start-demo"]');
   for (let i = 0; ; i++) {
     const title = await page.locator('[data-ctl="demo-title"]').textContent();
-    const wait = /back into the project|chat/i.test(title) ? 3600 : 1500;
+    const wait = /make your version|enhance all|pick 3/i.test(title) ? 3200 : 1700;
     await page.waitForTimeout(wait);
     const name = `${String(i + 1).padStart(2, '0')}-${slug(title)}.png`;
-    if (levers) await page.screenshot({ path: resolve(out, 'full', name) });
+    const closing = await page.locator('[data-ctl="closing-card"]').count();
+    if (levers || closing) await page.screenshot({ path: resolve(out, levers ? 'full' : '', name) });
     else await page.locator('.phone-slot').screenshot({ path: resolve(out, name) });
     console.log(levers ? 'full/' + name : name);
     const label = await page.locator('[data-ctl="demo-next"]').textContent();

@@ -2,7 +2,10 @@ export type Mode = 'today' | 'studio';
 export type Lever = 't' | 'c' | 'w' | 'I';
 export type Tab = 'studio' | 'enhance' | 'aiphotos' | 'filters' | 'videos' | 'retouch';
 
-export type TemplateId = 'profile' | 'archive' | 'trip' | 'couple' | 'freestyle';
+/** What a creation is for; drives its starter, progress wording and suggestions. */
+export type Intent = 'profile' | 'trip' | 'family' | 'social' | 'looks' | 'other';
+
+export type Segment = 'restore' | 'lookgreat' | 'profile' | 'social' | 'trends' | 'exploring';
 
 export interface Identity {
   id: string;
@@ -16,9 +19,6 @@ export interface Look {
   id: string;
   src: string;
   title: string;
-  category: 'trend' | 'professional' | 'casual';
-  identityId: string;
-  when: string;
   isNew?: boolean;
 }
 
@@ -30,50 +30,41 @@ export interface ProjectPhoto {
   status: 'original' | 'processing' | 'enhanced';
 }
 
-export interface Setup {
-  name: string;
-  style: string;
-  background: string;
-  outfit: string;
-  prompt: string;
-}
-
-export interface FeedItem {
-  who: string;
-  text: string;
-  when: string;
-}
-
 export interface ChatMsg {
   id: string;
-  /** 'me', 'remini', or a collaborator's name in a shared album. */
+  /** 'me', 'remini', or a friend's name. */
   from: string;
   text: string;
   images?: string[];
   action?: 'paywall' | 'animate' | 'enhanced';
 }
 
-export interface Project {
+/** A "creation": ongoing work in My Creations. Persistence is automatic. */
+export interface Creation {
   id: string;
   title: string;
-  template: TemplateId;
-  identityId: string;
+  intent: Intent;
   cover: string;
+  /** Photo-based creations (trip, family) progress by enhanced photos; the rest by looks. */
   photos: ProjectPhoto[];
   looks: Look[];
-  setup: Setup | null;
+  /** Target: looks for look-based creations ("LinkedIn set 3 of 5"), slots for family. */
+  goal: number;
   lastEdit: string;
-  nextStep: string;
-  shared?: { owner: string; collaborators: string[]; link: string; feed: FeedItem[] };
-  animated?: string[];
   chat?: ChatMsg[];
 }
 
-export interface SavedLook {
+export interface CommunityStyle {
   id: string;
   title: string;
+  creator: string;
+  /** The creator's own result. */
   cover: string;
-  identityId: string;
+  /** What it looks like on you (remix result). */
+  result: string;
+  remixes: number;
+  mine?: boolean;
+  friend?: boolean;
 }
 
 export interface Trend {
@@ -82,35 +73,38 @@ export interface Trend {
   tagline: string;
   cover: string;
   result: string;
+  result2?: string;
   hot?: boolean;
 }
 
-export type ResultKind = 'trend' | 'enhance' | 'look';
+export type ResultKind = 'trend' | 'enhance' | 'look' | 'remix';
 
 export type Route =
+  | { name: 'onboarding'; step?: 'question' }
   | { name: 'trend'; trendId: string }
-  | { name: 'result'; kind: ResultKind; image: string; title: string; trendId?: string; before?: string }
-  | { name: 'picker'; title: string; max: number; preselectAll?: boolean; pool?: string[]; cta: string; onDone: (picked: string[]) => void }
+  | { name: 'result'; kind: ResultKind; image: string; title: string; trendId?: string; styleId?: string; before?: string }
+  | { name: 'picker'; title: string; min?: number; max: number; preselect?: number; pool?: string[]; cta: string; onDone: (picked: string[]) => void }
   | { name: 'identity'; id: string }
-  | { name: 'newProject'; fromPhoto?: string; template?: TemplateId; prefill?: boolean }
-  | { name: 'project'; id: string; tab?: 'photos' | 'looks' | 'setup' }
-  | { name: 'photo'; projectId: string; photoId: string }
-  | { name: 'chat'; projectId: string }
+  | { name: 'create' }
+  | { name: 'creation'; id: string }
+  | { name: 'photo'; creationId: string; photoId: string }
+  | { name: 'chat'; creationId: string }
+  | { name: 'section'; section: 'me' | 'creations' | 'remix' }
+  | { name: 'comingNext' }
   | { name: 'lock' }
-  | { name: 'recipient' }
   | { name: 'about' }
-  | { name: 'animate'; src: string; projectId: string }
+  | { name: 'animate'; src: string; creationId: string }
   | { name: 'grid'; title: string; items: { src: string; title?: string }[] };
 
 export type Sheet =
-  | { type: 'saveToProject'; photo: string; title: string }
-  | { type: 'paywall'; projectId: string; stage: 'offer' | 'success' }
-  | { type: 'share'; projectId: string }
-  | { type: 'createWith'; identityId: string }
+  | { type: 'keepThis'; photo: string; title: string }
+  | { type: 'paywall'; creationId: string; stage: 'offer' | 'success' }
+  | { type: 'paywallGeneric'; image?: string; reason: 'onboarding' | 'result' }
+  | { type: 'withFriend'; title: string; image: string; link: string; challenge?: boolean }
+  | { type: 'publish'; image: string; from: string }
   | { type: 'privacy' }
-  | { type: 'newIdentity' }
-  | { type: 'profileToday' }
-  | { type: 'studioIntro' };
+  | { type: 'rememberMe' }
+  | { type: 'profileToday' };
 
 export interface Generating {
   steps: string[];

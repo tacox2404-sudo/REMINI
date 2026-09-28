@@ -1,10 +1,9 @@
 import { motion } from 'framer-motion';
-import { A, CAMERA_ROLL } from '../state/data';
+import { A, FRIEND, returningCreations } from '../state/data';
 import { useStore } from '../state/store';
-import { Wordmark } from '../components/Chrome';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
-import { Avatar, LeverTag, PillBrand, PillWhite } from '../components/ui';
+import { LeverTag } from '../components/ui';
 
 function AppGlyph() {
   // Neutral stand-in app icon (not the real Remini logo).
@@ -17,30 +16,27 @@ function AppGlyph() {
 
 export function LockScreen() {
   const s = useStore();
-  const { track, resetStack, ensureLinkedIn, generateLooks, projectsRef, setMode, mode, goTab } = s;
+  const { track, resetStack, setMode, mode, goTab, creationsRef, upsertCreation, friend } = s;
 
-  const open = (which: 'linkedin' | 'marta' | 'y2k') => {
+  const open = (which: 'linkedin' | 'friend' | 'y2k') => {
     track(`notification_opened_${which}`, 'w');
     if (mode !== 'studio') setMode('studio');
+    goTab('studio');
     if (which === 'linkedin') {
-      const id = ensureLinkedIn();
-      const p = projectsRef.current.find((x) => x.id === id);
-      if (p && p.looks.length === 0) generateLooks(id, true);
-      goTab('studio');
-      resetStack([{ name: 'project', id, tab: 'looks' }]);
-    } else if (which === 'marta') {
-      goTab('studio');
-      resetStack([{ name: 'project', id: 'summer' }]);
+      if (!creationsRef.current.some((c) => c.id === 'linkedin')) upsertCreation(returningCreations()[0]);
+      resetStack([{ name: 'creation', id: 'linkedin' }]);
+    } else if (which === 'friend') {
+      resetStack([{ name: 'section', section: 'remix' }]);
     } else {
-      goTab('enhance');
       resetStack([{ name: 'trend', trendId: 'y2k' }]);
     }
   };
+  void friend;
 
   const notes = [
-    { k: 'linkedin' as const, title: 'Your LinkedIn set is ready', body: '4 new looks with Studio light · navy blazer', when: 'now', img: `${A.linkedin(1)}|${A.look(7)}` },
-    { k: 'marta' as const, title: "Marta added 6 photos to Summer '26", body: 'Tap to see them and add yours', when: '1h ago', img: A.trip(6) },
-    { k: 'y2k' as const, title: 'New this week: see Y2K Yearbook on you', body: 'Already rendered on Me. No upload needed.', when: '9:00', img: A.y2kMe },
+    { k: 'linkedin' as const, title: 'Your LinkedIn set is 3 of 5 done', body: 'Two more and it is ready. Continue?', when: 'now', img: A.linkedin(2) },
+    { k: 'friend' as const, title: `${FRIEND} remixed your style`, body: '“90s yearbook” just passed 12k remixes', when: '1h ago', img: A.friend90s },
+    { k: 'y2k' as const, title: 'Y2K Yearbook is trending', body: 'Try yours with your saved Me. No new selfies.', when: '9:00', img: A.y2kMe },
   ];
 
   return (
@@ -76,7 +72,7 @@ export function LockScreen() {
                 <div className="truncate text-[13px] text-white/75">{n.body}</div>
               </div>
               <Img src={n.img} className="h-10 w-10 shrink-0 rounded-lg" label={false} />
-              <LeverTag l={n.k === 'marta' ? 'I' : 'w'} />
+              <LeverTag l={n.k === 'friend' ? 'I' : 'w'} />
             </motion.button>
           ))}
         </div>
@@ -89,108 +85,3 @@ export function LockScreen() {
   );
 }
 
-export function RecipientScreen() {
-  const { pop, push, runGenerating, joinShared, track, resetStack, goTab, setMode, mode, projects } = useStore();
-  const p = projects.find((x) => x.id === 'summer')!;
-  const joined = p.shared?.collaborators.includes('You') ?? false;
-
-  const join = () => {
-    push({
-      name: 'picker',
-      title: 'Add your photos',
-      max: 3,
-      preselectAll: true,
-      pool: [A.trip(7), A.trip(8), A.trip(2), A.ref(3), ...CAMERA_ROLL.slice(0, 6)],
-      cta: 'Add to Summer ’26',
-      onDone: (picked) => {
-        pop();
-        runGenerating({ steps: ['Uploading', 'Enhancing your photos', 'Adding to Summer ’26'], duration: 1800 }, () => {
-          joinShared(picked);
-        });
-      },
-    });
-  };
-
-  return (
-    <div className="flex h-full flex-col bg-[#F4F4F6] text-black">
-      {/* Browser chrome */}
-      <div className="border-b border-black/10 bg-[#F4F4F6] px-3 pb-2">
-        <div className="flex items-center gap-2">
-          <button onClick={pop} className="grid h-8 w-8 place-items-center text-[#0A84FF]" aria-label="Close">
-            <I.Close size={20} />
-          </button>
-          <div className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-black/[0.07] text-[14px]">
-            <I.Lock size={12} /> remini.app/p/summer26
-          </div>
-          <span className="flex items-center gap-1 rounded-full bg-black/[0.07] px-2 py-1 text-[11px] font-semibold text-black/60">
-            <I.Globe size={12} /> Web
-          </span>
-        </div>
-      </div>
-
-      <div className="no-scrollbar flex-1 overflow-y-auto">
-        <div className="grid grid-cols-3 gap-0.5">
-          {p.photos.slice(0, 6).map((ph, i) => (
-            <Img key={ph.id} src={ph.original} className={`${i === 0 ? 'col-span-2 row-span-2' : ''} aspect-square`} label={false} />
-          ))}
-        </div>
-        <div className="px-5 pt-5">
-          <div className="flex items-center gap-2">
-            <Wordmark className="text-[20px]" />
-            <span className="rounded-full bg-black/[0.06] px-2 py-0.5 text-[11px] font-semibold text-black/50">Shared project</span>
-          </div>
-          {!joined ? (
-            <>
-              <h1 className="mt-4 text-[26px] font-bold leading-tight tracking-tight">Marta invited you to “Summer ’26”</h1>
-              <div className="mt-3 flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {p.shared!.collaborators.map((c) => (
-                    <Avatar key={c} name={c} size={30} className="shadow-[0_0_0_2px_#F4F4F6]" />
-                  ))}
-                </div>
-                <span className="text-[13px] text-black/60">
-                  {p.photos.length} photos · {p.shared!.collaborators.length} people
-                </span>
-              </div>
-              <p className="mt-4 text-[14px] leading-relaxed text-black/65">Add your photos from the trip. Everyone's shots get enhanced with the same look, in one shared album. No app needed to join.</p>
-            </>
-          ) : (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <h1 className="mt-4 text-[26px] font-bold leading-tight tracking-tight">You're in 🎉</h1>
-              <p className="mt-2 text-[14px] leading-relaxed text-black/65">Your photos were enhanced and added to Summer ’26. Get the app to see yourself in the group looks and get notified when friends add more.</p>
-            </motion.div>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-2.5 px-5 pb-6 pt-3">
-        {!joined ? (
-          <>
-            <PillBrand demo="join" onClick={join}>
-              Join and add your photos
-              <LeverTag l="I" />
-            </PillBrand>
-            <p className="text-center text-[12px] text-black/45">Works in any browser · iOS · Android · web</p>
-          </>
-        ) : (
-          <>
-            <PillBrand
-              onClick={() => {
-                track('app_install_from_invite', 'I');
-                if (mode !== 'studio') setMode('studio');
-                goTab('studio');
-                resetStack([{ name: 'project', id: 'summer' }]);
-              }}
-            >
-              Get Remini · open the project
-              <LeverTag l="I" />
-            </PillBrand>
-            <PillWhite className="!bg-black/[0.06] !text-black" onClick={pop}>
-              Back
-            </PillWhite>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}

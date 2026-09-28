@@ -1,5 +1,5 @@
 import { A, FRIEND } from './data';
-import type { ChatMsg, Project } from './types';
+import type { ChatMsg, Creation } from './types';
 
 /**
  * Simulated Remini chat. Keyword rules map a free-text instruction to a reply,
@@ -13,7 +13,7 @@ export interface ChatReply {
   title: string;
 }
 
-const rules: { test: RegExp; reply: (p: Project) => ChatReply }[] = [
+const rules: { test: RegExp; reply: (p: Creation) => ChatReply }[] = [
   {
     test: /\b(fix|improve|enhance|sharpen|lighting|blurry|blur|quality|restore|colori[sz]e)\b/,
     reply: (p) => ({
@@ -28,15 +28,15 @@ const rules: { test: RegExp; reply: (p: Project) => ChatReply }[] = [
   },
   {
     test: /\b(poster|movie|cinema|netflix)\b/,
-    reply: (p) => ({
-      text: p.shared ? 'Movie poster, starring all of you. I kept everyone’s faces from their identities.' : 'Your movie poster, lit like a thriller.',
+    reply: () => ({
+      text: 'Your movie poster, lit like a thriller.',
       images: [A.creative(1)],
       title: 'Movie poster',
     }),
   },
   {
     test: /\b(y2k|yearbook|2000s|90s|80s|retro|vintage)\b/,
-    reply: (p) => ({ text: p.shared ? 'Yearbook spread for the whole group.' : 'Y2K yearbook, glossy and a bit too much. As it should be.', images: [A.y2kMe, A.creative(2)], title: 'Yearbook' }),
+    reply: () => ({ text: 'Y2K yearbook, glossy and a bit too much. As it should be.', images: [A.y2kMe, A.creative(2)], title: 'Yearbook' }),
   },
   {
     test: /\b(linkedin|professional|headshot|cv|work|office|approachable|dating|profile)\b/,
@@ -57,7 +57,7 @@ const rules: { test: RegExp; reply: (p: Project) => ChatReply }[] = [
 ];
 
 let n = 0;
-export function chatReply(text: string, p: Project): ChatReply {
+export function chatReply(text: string, p: Creation): ChatReply {
   const t = text.toLowerCase();
   const rule = rules.find((r) => r.test.test(t));
   if (rule) return rule.reply(p);
@@ -69,20 +69,10 @@ export function chatReply(text: string, p: Project): ChatReply {
   };
 }
 
-/** Creativity spurs: suggested prompts that fit the project. */
-export function spurs(p: Project): string[] {
-  if (p.shared) return ['Make a movie poster of all of us', 'Put us in a Y2K yearbook', 'Fix the light on every photo', 'Turn it into a 5-second video'];
-  if (p.template === 'profile') return ['Make it more approachable', 'A version for my dating profile', 'Same look, outdoor light', 'Fix the light on every photo'];
-  if (p.template === 'archive') return ['Animate the wedding photo', 'Restore and colorize everything', 'Make a family poster', 'Put me next to grandma'];
-  if (p.template === 'trip') return ['Make a movie poster of the trip', 'Add me with my friends', 'Golden hour on every photo', 'Turn it into a 5-second video'];
+/** Creativity spurs: suggested prompts that fit the creation. */
+export function spurs(p: Creation): string[] {
+  if (p.intent === 'profile') return ['Make it more approachable', 'A version for my dating profile', 'Same look, outdoor light', 'A 90s album cover of me'];
+  if (p.intent === 'family') return ['Animate the first photo', 'Restore and colorize everything', 'Make a family poster', 'Put me next to grandma'];
+  if (p.intent === 'trip') return ['Make a movie poster of the trip', 'Golden hour on every photo', 'Turn it into a 5-second video', 'Put me on the beach at sunset'];
   return ['Me as an astronaut on a film set', 'A 90s album cover of me', 'Renaissance portrait, oil on canvas', 'Surprise me'];
-}
-
-export function seedSummerChat(): ChatMsg[] {
-  return [
-    { id: 'c1', from: 'Luca', text: 'Make a movie poster of all of us' },
-    { id: 'c2', from: 'remini', text: 'Movie poster, starring all of you. I kept everyone’s faces from their identities.', images: [A.creative(1)] },
-    { id: 'c3', from: FRIEND, text: 'Now add me on the beach with Sofia, golden hour' },
-    { id: 'c4', from: 'remini', text: `Put ${FRIEND} and Sofia in the same shot, same light, same film look.`, images: [A.creative(3)] },
-  ];
 }

@@ -10,7 +10,8 @@ import { HScroll, LeverTag, NewBadge, PillWhite, SectionHeader } from '../compon
 function TrendCard({ id, big }: { id: string; big?: boolean }) {
   const { mode } = useStore();
   const { openTrend } = useFlows();
-  const t = TRENDS.find((x) => x.id === id)!;
+  const t = TRENDS.find((x) => x.id === id);
+  if (!t) return null;
   const studio = mode === 'studio';
   return (
     <div
@@ -35,7 +36,7 @@ function TrendCard({ id, big }: { id: string; big?: boolean }) {
           >
             {studio ? (
               <>
-                <Img src={A.ref(1)} className="h-5 w-5 rounded-full" label={false} /> Try with Me
+                <Img src={A.ref(1)} className="h-5 w-5 rounded-full" label={false} /> Try mine
               </>
             ) : (
               'Try now'
@@ -57,7 +58,7 @@ export function EnhanceHome() {
       <TopBar />
       <div className="px-4 pt-2">
         <div className="relative overflow-hidden rounded-[22px] bg-card">
-          <BeforeAfter after={A.enhanceSrc} className="h-[230px]" />
+          <BeforeAfter after={A.enhanceSrc} before={A.enhanceBefore} className="h-[230px]" />
           <div className="flex items-center justify-between gap-3 p-4">
             <div>
               <div className="text-[18px] font-bold">Enhance</div>
@@ -74,7 +75,7 @@ export function EnhanceHome() {
         <button onClick={() => push({ name: 'identity', id: 'me' })} className="mx-4 mt-4 flex w-[calc(100%-2rem)] items-center gap-3 rounded-2xl bg-white/[0.06] p-3 text-left">
           <Img src={A.ref(1)} className="h-10 w-10 rounded-full" label={false} />
           <div className="flex-1 text-[13px] leading-snug text-white/80">
-            Trends now use <b className="text-white">Me</b>. No re-upload, results land in your Studio.
+            Trends now use your saved <b className="text-white">Me</b>. No new selfies, and results are kept in Studio.
           </div>
           <I.Chevron size={18} className="text-mute" />
         </button>
@@ -84,12 +85,12 @@ export function EnhanceHome() {
       <HScroll>
         <TrendCard id="y2k" big />
         <TrendCard id="oldmoney" />
-        <TrendCard id="film90s" />
+        <TrendCard id="redcarpet" />
       </HScroll>
 
       <SectionHeader title="AI Photos packs" onSeeAll={() => grid('AI Photos packs')} />
       <HScroll>
-        {['neon', 'renaissance', 'chalet', 'oldmoney'].map((id) => (
+        {['academia', 'bluehour', 'fashion', 'oldmoney'].map((id) => (
           <TrendCard key={id} id={id} />
         ))}
       </HScroll>
@@ -108,7 +109,7 @@ export function AIPhotosTab() {
       <p className="px-4 text-[14px] text-mute">Pick a pack and see yourself in it.</p>
       {mode === 'studio' && (
         <button onClick={() => goTab('studio')} className="mx-4 mt-4 flex w-[calc(100%-2rem)] items-center justify-between rounded-2xl bg-brand/15 p-3.5 text-left ring-1 ring-[#FF2E7E]/30">
-          <span className="text-[14px] font-semibold">Your identities now live in Studio</span>
+          <span className="text-[14px] font-semibold">Your saved Me now lives in Studio</span>
           <I.Chevron size={18} />
         </button>
       )}
@@ -177,7 +178,7 @@ export function VideosTab() {
   const { quickTool } = useFlows();
   const items = [
     { t: 'Animate a photo', s: 'Bring any portrait to life', src: A.restored(2) },
-    { t: 'AI Hug', s: 'Two photos, one moment', src: A.marta },
+    { t: 'AI Hug', s: 'Two photos, one moment', src: A.friend },
     { t: 'Dance', s: 'Trending moves, your face', src: A.look(2) },
     { t: 'Age journey', s: 'From 5 to 85 in 10 seconds', src: A.ref(3) },
   ];
@@ -214,7 +215,7 @@ export function RetouchTab() {
       <p className="px-4 text-[14px] text-mute">Precise edits, done by AI.</p>
       <div className="px-4 pt-5">
         <div className="relative h-[200px] overflow-hidden rounded-[20px]">
-          <BeforeAfter after={A.ref(2)} className="h-full" />
+          <BeforeAfter after={A.enhance2After} before={A.enhance2Before} className="h-full" />
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">
           {tools.map((t) => (

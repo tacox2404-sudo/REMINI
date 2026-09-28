@@ -7,16 +7,19 @@ import { useStore } from './state/store';
 import type { Route } from './state/types';
 import { AboutScreen, AnimateScreen, GridScreen, PickerScreen, ResultScreen, Splash, TrendScreen } from './screens/Flows';
 import { ChatScreen } from './screens/Chat';
-import { IdentityScreen, NewProjectScreen } from './screens/Identity';
-import { LockScreen, RecipientScreen } from './screens/Outside';
-import { PhotoScreen, ProjectScreen } from './screens/Project';
+import { CreateScreen, IdentityScreen } from './screens/Identity';
+import { OnboardingScreen } from './screens/Onboarding';
+import { CreationScreen, PhotoScreen } from './screens/Creation';
+import { LockScreen } from './screens/Outside';
 import { SheetHost } from './screens/Sheets';
-import { StudioHome } from './screens/Studio';
+import { ComingNextScreen, SectionScreen, StudioHome } from './screens/Studio';
 import { AIPhotosTab, EnhanceHome, FiltersTab, RetouchTab, VideosTab } from './screens/Tabs';
 import { Shell } from './shell/Shell';
 
 function renderRoute(r: Route) {
   switch (r.name) {
+    case 'onboarding':
+      return <OnboardingScreen start={r.step} />;
     case 'trend':
       return <TrendScreen trendId={r.trendId} />;
     case 'result':
@@ -25,22 +28,24 @@ function renderRoute(r: Route) {
       return <PickerScreen {...r} />;
     case 'identity':
       return <IdentityScreen id={r.id} />;
-    case 'newProject':
-      return <NewProjectScreen fromPhoto={r.fromPhoto} template={r.template} prefill={r.prefill} />;
-    case 'project':
-      return <ProjectScreen id={r.id} tab={r.tab} />;
+    case 'create':
+      return <CreateScreen />;
+    case 'creation':
+      return <CreationScreen id={r.id} />;
     case 'photo':
-      return <PhotoScreen projectId={r.projectId} photoId={r.photoId} />;
+      return <PhotoScreen creationId={r.creationId} photoId={r.photoId} />;
     case 'chat':
-      return <ChatScreen projectId={r.projectId} />;
+      return <ChatScreen creationId={r.creationId} />;
+    case 'section':
+      return <SectionScreen section={r.section} />;
+    case 'comingNext':
+      return <ComingNextScreen />;
     case 'lock':
       return <LockScreen />;
-    case 'recipient':
-      return <RecipientScreen />;
     case 'about':
       return <AboutScreen />;
     case 'animate':
-      return <AnimateScreen src={r.src} projectId={r.projectId} />;
+      return <AnimateScreen src={r.src} creationId={r.creationId} />;
     case 'grid':
       return <GridScreen title={r.title} items={r.items} />;
   }
@@ -75,13 +80,19 @@ function Layer({ visible, fromRight, dir, web, children }: { visible: boolean; f
 }
 
 function PhoneContent() {
-  const { stack, tab, mode, navDir, splash, setSplash } = useStore();
+  const { stack, tab, mode, navDir, splash, setSplash, demo, onboarded, resetStack } = useStore();
   const top = stack[stack.length - 1];
 
   useEffect(() => {
     const t = window.setTimeout(() => setSplash(false), 1400);
     return () => clearTimeout(t);
   }, [setSplash]);
+
+  // First open in each mode starts with onboarding, like the real app.
+  useEffect(() => {
+    if (splash || demo !== null || onboarded[mode] || stack.length) return;
+    resetStack([{ name: 'onboarding' }]);
+  }, [splash, demo, onboarded, mode, stack.length, resetStack]);
 
   return (
     <>
@@ -90,7 +101,7 @@ function PhoneContent() {
         const isTop = i === stack.length;
         const layerKey = r ? `${i}-${r.name}-${'id' in r ? r.id : ''}` : `root-${mode}-${tab}`;
         const lock = r?.name === 'lock';
-        const web = r?.name === 'recipient';
+        const web = false;
         return (
           <Layer key={layerKey} visible={isTop} fromRight={!!r} dir={navDir} web={web}>
             {lock ? (

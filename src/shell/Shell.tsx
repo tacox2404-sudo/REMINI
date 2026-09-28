@@ -15,26 +15,26 @@ function LeverPill({ l }: { l: Lever }) {
 
 const LEVER_DETAIL: Record<Lever, { why: string; where: string }> = {
   t: {
-    why: 'The trial is offered at a moment of intent: the user wants to finish something bigger than one photo, so the paywall is framed around completing their project instead of a generic upsell.',
-    where: 'New project, Save to a Project, Enhance all, Start free trial, a chat request that goes beyond the free enhancements.',
+    why: 'The trial is offered on unfinished work the user already cares about ("Finish your Barcelona trip with Pro"), after they have seen free results, instead of a generic paywall before any use. Onboarding answers and "What are you creating?" tell us the job to be done.',
+    where: 'Onboarding question, What are you creating?, Enhance all, the unfinished-work paywall, Trending from Remini.',
   },
   c: {
-    why: 'During the 7 days, value has to build up: an identity with better likeness, setups that re-run in one tap, looks created in chat. Cancelling would mean losing a working space, not a one-off result.',
-    where: 'Identities, Improve likeness, saved setup, Re-run setup, Generate looks, chat results.',
+    why: 'During the 7 days, value builds up in the Studio: a remembered identity, creations that are half done, results that are kept. Cancelling means walking away from work in progress, not from one image.',
+    where: 'Starter creation, Remember me, Improve likeness, the unfinished-work paywall.',
   },
   w: {
-    why: 'Reasons to open the app every week: trends already rendered on you, projects to continue, notifications about ready sets and friends, a chat that turns a spare minute into something new.',
-    where: 'Try with Me, Projects, Looks, lock-screen notifications, Ask Remini.',
+    why: 'Reasons to open the app every week: a creation waiting at "3 of 5", trends that run on your saved Me in seconds, community styles to remix, results that are kept automatically.',
+    where: 'Welcome back card, Keep going, Try mine, Keep this, Make your version, notifications.',
   },
   I: {
-    why: 'Every shared album and shared look is an invitation. It opens on the web first and asks for the app only after the friend has seen their own photos in it.',
-    where: 'Share project, invite links, Join and add your photos, Shared albums.',
+    why: 'Every remix, challenge and published style is an invitation. A friend gets a link to make their own version with their own identity, and published styles travel like Instagram filters.',
+    where: 'Styles from the community, Challenge a friend, Publish as a style, Make this with a friend.',
   },
 };
 
 export function Controls({ compact = false }: { compact?: boolean }) {
   const s = useStore();
-  const { mode, setMode, demo, setDemo, resetAll, resetStack, goTab } = s;
+  const { mode, setMode, demo, setDemo, resetAll, resetStack, goTab, becomeReturning } = s;
   return (
     <div className="space-y-4">
       {!compact && (
@@ -48,7 +48,7 @@ export function Controls({ compact = false }: { compact?: boolean }) {
       {!compact && (
         <div className="rounded-xl bg-white/[0.04] p-3.5 text-[12.5px] leading-relaxed text-white/60">
           <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-white/40">The idea</div>
-          Remini today is a one-shot tool: the face identity is trained, used once per trend, and nothing persists. <b className="text-white/85">Studio</b> turns that tech into a personal creative space: identities you reuse, projects you finish, looks you keep, albums you create with friends, and a chat that sparks new ideas. Trends still bring people in; now every trend lands in the Studio.
+          Remini today is a one-shot tool: a trend, one image, a paywall, gone. <b className="text-white/85">Studio</b> keeps what people make: <b className="text-white/85">Me</b> (saved identities), <b className="text-white/85">My Creations</b> (ongoing work that saves itself) and <b className="text-white/85">Remix</b> (styles from the community). Trends keep bringing people in, and now every trend lands in the Studio.
         </div>
       )}
       <div>
@@ -83,6 +83,16 @@ export function Controls({ compact = false }: { compact?: boolean }) {
             Exit demo
           </button>
         )}
+        <button
+          onClick={() => {
+            becomeReturning();
+            if (mode !== 'studio') setMode('studio');
+            goTab('studio');
+          }}
+          className="h-9 w-full rounded-xl bg-white/[0.06] text-[12px] font-semibold text-white/80"
+        >
+          ⏩ 3 days later (returning user)
+        </button>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => {
@@ -242,15 +252,18 @@ export function DemoCaption({ compact = false }: { compact?: boolean }) {
 
 function useDemoDriver() {
   const s = useStore();
-  const { demo, setDemo, setLastDemoDone, setIntroSeen } = s;
+  const { demo, setDemo, setLastDemoDone, setOnboarded, setClosing } = s;
   const prev = useRef<number | null>(null);
 
   useEffect(() => {
     if (demo === null && prev.current === BEATS.length - 1) setLastDemoDone(true);
     prev.current = demo;
-    if (demo === null) return;
-    // The demo shows the welcome sheet itself; don't pop it again afterwards.
-    setIntroSeen(true);
+    if (demo === null) {
+      setClosing(false);
+      return;
+    }
+    // The demo walks through onboarding itself; don't start it again afterwards.
+    setOnboarded({ today: true, studio: true });
     BEATS[demo]?.enter(s);
     // Only re-run when the beat changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -267,6 +280,78 @@ function useDemoDriver() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [demo, setDemo]);
+}
+
+/** End of the guided demo: the business case, with the figures from the model. */
+function ClosingCard() {
+  const { closing, setClosing, setDemo } = useStore();
+  const levers: [Lever, string][] = [
+    ['t', 'Trial start'],
+    ['c', 'Trial → paid'],
+    ['w', 'Paid weeks'],
+  ];
+  const pos = (v: number) => `${((v - 2) / (12 - 2)) * 100}%`;
+  return (
+    <AnimatePresence>
+      {closing && (
+        <motion.div className="fixed inset-0 z-[300] grid place-items-center bg-black/70 p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.div data-ctl="closing-card" initial={{ y: 20, scale: 0.97 }} animate={{ y: 0, scale: 1 }} className="w-full max-w-[640px] rounded-[28px] border border-white/10 bg-[#111116] p-7 shadow-2xl">
+            <div className="text-[12px] font-bold uppercase tracking-[0.16em] text-[#FF6A8E]">Remini Studio</div>
+            <h2 className="mt-1 text-[34px] font-extrabold tracking-tight">Why it pays</h2>
+
+            <div className="mt-5 grid grid-cols-3 gap-2.5">
+              {levers.map(([l, name]) => (
+                <div key={l} className="rounded-2xl bg-white/[0.05] p-4">
+                  <div className="flex items-center gap-2 text-[13px] font-semibold text-white/75">
+                    <LeverPill l={l} /> {name}
+                  </div>
+                  <div className="mt-2 text-[30px] font-extrabold leading-none">≈ +5.6%</div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-2 text-[13px] text-white/55">Each lever needs about +5.6% to reach $5M NPV.</p>
+
+            <div className="mt-5 grid grid-cols-[1fr_1.3fr] gap-2.5">
+              <div className="rounded-2xl bg-white/[0.05] p-4">
+                <div className="text-[13px] font-semibold text-white/75">One extra paid week per subscriber</div>
+                <div className="mt-2 text-[30px] font-extrabold leading-none">≈ $7.1M</div>
+                <div className="mt-1 text-[12px] text-white/50">on its own</div>
+              </div>
+              <div className="rounded-2xl bg-gradient-to-br from-[#2a1320] to-white/[0.04] p-4 ring-1 ring-[#FF2E7E]/30">
+                <div className="text-[13px] font-semibold text-white/75">NPV, base case</div>
+                <div className="mt-2 text-[38px] font-extrabold leading-none">$5.9M</div>
+                <div className="relative mt-4 h-2 rounded-full bg-white/10">
+                  <div className="absolute inset-y-0 rounded-full bg-brand" style={{ left: pos(2.6), right: `calc(100% - ${pos(11.2)})` }} />
+                  <div className="absolute -top-1 h-4 w-1 rounded-full bg-white" style={{ left: pos(5.9) }} />
+                </div>
+                <div className="mt-1.5 flex justify-between text-[12px] text-white/55">
+                  <span>Low $2.6M</span>
+                  <span>High $11.2M</span>
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-5 text-[11.5px] text-white/40">Figures from the business case model, fictitious case data.</p>
+            <div className="mt-5 flex gap-2">
+              <button
+                data-ctl="closing-done"
+                onClick={() => {
+                  setClosing(false);
+                  setDemo(null);
+                }}
+                className="h-11 flex-1 rounded-xl bg-white text-[14px] font-semibold text-black"
+              >
+                Finish demo
+              </button>
+              <button onClick={() => setClosing(false)} className="h-11 rounded-xl bg-white/10 px-4 text-[14px] font-semibold">
+                Back to the app
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 }
 
 export function Shell({ phone }: { phone: ReactNode }) {
@@ -302,6 +387,8 @@ export function Shell({ phone }: { phone: ReactNode }) {
           </div>
         )}
       </aside>
+
+      <ClosingCard />
 
       <div className="levers-desktop">
         <LeversPanel />

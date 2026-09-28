@@ -14,13 +14,13 @@ function ReminiAvatar() {
   );
 }
 
-export function ChatScreen({ projectId }: { projectId: string }) {
-  const { projects, pop, push, sendChat, chatTyping, openSheet, identities } = useStore();
-  const p = projects.find((x) => x.id === projectId);
+export function ChatScreen({ creationId }: { creationId: string }) {
+  const { creations, pop, push, sendChat, chatTyping, identities } = useStore();
+  const p = creations.find((x) => x.id === creationId);
   const [text, setText] = useState('');
   const list = useRef<HTMLDivElement>(null);
   const msgs = p?.chat ?? [];
-  const typing = chatTyping === projectId;
+  const typing = chatTyping === creationId;
 
   useEffect(() => {
     const el = list.current;
@@ -28,7 +28,7 @@ export function ChatScreen({ projectId }: { projectId: string }) {
   }, [msgs.length, typing]);
 
   if (!p) return <NavHeader title="Chat" onBack={pop} />;
-  const identity = identities.find((i) => i.id === p.identityId) ?? identities[0];
+  const identity = identities[0];
   const send = (t: string) => {
     if (!t.trim() || typing) return;
     sendChat(p.id, t);
@@ -48,23 +48,13 @@ export function ChatScreen({ projectId }: { projectId: string }) {
         }
         onBack={pop}
         right={
-          p.shared ? (
-            <div className="flex -space-x-2 pr-2">
-              {p.shared.collaborators.slice(0, 3).map((c) => (
-                <Avatar key={c} name={c} size={24} />
-              ))}
-            </div>
-          ) : (
-            <Img src={identity.cover} className="mr-2 h-7 w-7 rounded-full" label={false} />
-          )
+          <Img src={identity.cover} className="mr-2 h-7 w-7 rounded-full" label={false} />
         }
       />
 
       <div ref={list} className="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4 pt-2">
         <div className="mx-auto max-w-[280px] rounded-2xl bg-white/[0.04] p-3 text-center text-[12px] leading-relaxed text-mute">
-          {p.shared
-            ? 'Everyone in this album can ask Remini for ideas. Results use each person’s identity and land in the album.'
-            : `Describe an idea or an improvement. Remini uses your identity "${identity.name}" and saves results to "${p.title}".`}
+          {`Describe an idea or a change. Remini uses your saved "${identity.name}" and keeps results in "${p.title}".`}
         </div>
         {msgs.map((m) => {
           const mine = m.from === 'me';
@@ -83,7 +73,7 @@ export function ChatScreen({ projectId }: { projectId: string }) {
                         key={i}
                         onClick={() =>
                           m.action === 'animate'
-                            ? push({ name: 'animate', src, projectId: p.id })
+                            ? push({ name: 'animate', src, creationId: p.id })
                             : push({ name: 'result', kind: 'look', image: src, title: 'From Remini chat' })
                         }
                         className={`relative overflow-hidden rounded-2xl ${m.images!.length > 1 ? 'aspect-[3/4]' : 'aspect-[4/5] w-[210px]'}`}
@@ -98,14 +88,7 @@ export function ChatScreen({ projectId }: { projectId: string }) {
                     ))}
                   </div>
                 )}
-                {bot && m.images && m.action !== 'animate' && <span className="text-[11px] text-[#2ED47A]">✓ Added to {p.title}</span>}
-                {m.action === 'enhanced' && <span className="text-[11px] text-[#2ED47A]">✓ Enhancing all photos in the project</span>}
-                {m.action === 'paywall' && (
-                  <button onClick={() => openSheet({ type: 'paywall', projectId: p.id, stage: 'offer' })} className="relative mt-0.5 self-start rounded-full bg-brand px-3.5 py-2 text-[13px] font-semibold">
-                    Start free trial
-                    <LeverTag l="t" />
-                  </button>
-                )}
+                {bot && m.images && m.action !== 'animate' && <span className="text-[11px] text-[#2ED47A]">✓ Kept in {p.title}</span>}
               </div>
             </motion.div>
           );
@@ -144,7 +127,7 @@ export function ChatScreen({ projectId }: { projectId: string }) {
             data-demo="chat-input"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={p.shared ? 'Ask Remini for the group…' : 'Describe what you want…'}
+            placeholder="Describe what you want…"
             className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-white/35"
           />
           <button type="submit" disabled={!text.trim() || typing} className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-black disabled:opacity-30" aria-label="Send">
@@ -159,7 +142,7 @@ export function ChatScreen({ projectId }: { projectId: string }) {
   );
 }
 
-/** Entry bar that opens the chat, used on Studio home and project pages. */
+/** Entry bar that opens the chat, used on creation pages. */
 export function AskBar({ onOpen, label, demo }: { onOpen: () => void; label: string; demo?: string }) {
   return (
     <button data-demo={demo} onClick={onOpen} className="relative flex w-full items-center gap-3 rounded-full bg-card2 py-2 pl-2 pr-4 text-left ring-1 ring-white/10 active:bg-white/10">

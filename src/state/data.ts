@@ -1,4 +1,4 @@
-import type { Identity, Look, Project, ProjectPhoto, SavedLook, Trend } from './types';
+import type { CommunityStyle, Creation, Identity, Intent, Look, ProjectPhoto, Segment, Trend } from './types';
 
 /**
  * Image references are file names inside `public/assets/`. A reference can list
@@ -12,62 +12,57 @@ export const A = {
   old: (n: number) => `archive_old_${n}.jpg`,
   restored: (n: number) => `archive_restored_${n}.jpg`,
   trip: (n: number) => `trip_${n}.jpg`,
-  /** Creative results used by the AI chat; fall back to regular looks. */
-  creative: (n: number) => `creative_${n}.jpg|me_look_${((n - 1) % 6) + 1}.jpg`,
+  creative: (n: number) => `creative_${n}.jpg|me_look_${((n + 1) % 8) + 1}.jpg`,
   y2kMe: 'trend_y2k_me.jpg',
-  marta: 'friend_marta.jpg',
+  y2kMe2: 'trend_y2k_me_2.jpg|me_look_6.jpg',
+  friend: 'friend_marta.jpg',
+  friend90s: 'friend_marta_90s.jpg|friend_marta.jpg',
+  remix90s: 'remix_me_90s.jpg|me_look_5.jpg',
   enhanceBefore: 'enhance_before.jpg',
   enhanceSrc: 'enhance_after.jpg|me_ref_1.jpg',
+  enhance2Before: 'enhance2_before.jpg',
+  enhance2After: 'enhance2_after.jpg|me_ref_4.jpg',
 };
 
-export const FRIEND = 'Marta';
+/** The friend in the demo. Asset files keep their original names. */
+export const FRIEND = 'Paola';
 
 export const TRENDS: Trend[] = [
-  { id: 'y2k', title: 'Y2K Yearbook', tagline: 'Glossy 2000s portrait day', cover: 'pack_y2k.jpg|trend_y2k_me.jpg', result: A.y2kMe, hot: true },
-  { id: 'oldmoney', title: 'Old Money', tagline: 'Quiet luxury, linen and sun', cover: `pack_oldmoney.jpg|${A.look(1)}`, result: A.look(1) },
-  { id: 'film90s', title: '90s Film', tagline: 'Grain, flash, disposable', cover: `pack_film90s.jpg|${A.look(5)}`, result: A.look(5) },
-  { id: 'neon', title: 'Neon Nights', tagline: 'Tokyo after midnight', cover: `pack_neon.jpg|${A.look(2)}`, result: A.look(2) },
-  { id: 'renaissance', title: 'Renaissance', tagline: 'Oil on canvas, 1504', cover: `pack_renaissance.jpg|${A.look(4)}`, result: A.look(4) },
-  { id: 'chalet', title: 'Ski Chalet', tagline: 'Snow, knitwear, fire', cover: `pack_chalet.jpg|${A.look(6)}`, result: A.look(6) },
+  { id: 'y2k', title: 'Y2K Yearbook', tagline: 'Glossy 2000s, neon and chrome', cover: 'pack_y2k.jpg|trend_y2k_me.jpg', result: A.y2kMe, result2: A.y2kMe2, hot: true },
+  { id: 'oldmoney', title: 'Old Money', tagline: 'Quiet luxury, linen and sun', cover: `pack_oldmoney.jpg|${A.look(2)}`, result: A.look(2) },
+  { id: 'redcarpet', title: 'Red Carpet', tagline: 'Flashbulbs and black tie', cover: `pack_redcarpet.jpg|${A.look(4)}`, result: A.look(4) },
+  { id: 'academia', title: 'Dark Academia', tagline: 'Wood panels, wool, window light', cover: `pack_academia.jpg|${A.look(3)}`, result: A.look(3) },
+  { id: 'bluehour', title: 'Blue Hour', tagline: 'Night club editorial', cover: `pack_bluehour.jpg|${A.look(6)}`, result: A.look(6) },
+  { id: 'fashion', title: 'Fashion Week', tagline: 'Studio colour, chrome chair', cover: `pack_fashion.jpg|${A.look(8)}`, result: A.look(8) },
 ];
 
 export const IDENTITIES: Identity[] = [
-  { id: 'me', name: 'Me', subtitle: 'Default · 4 photos', cover: A.ref(1), refs: [1, 2, 3, 4].map(A.ref) },
-  { id: 'me-pro', name: 'Me · Professional', subtitle: 'Studio light · 4 photos', cover: `${A.linkedin(1)}|${A.ref(2)}`, refs: [2, 1, 4, 3].map(A.ref) },
+  { id: 'me', name: 'Me', subtitle: 'Saved from 4 photos', cover: A.ref(1), refs: [1, 2, 3, 4].map(A.ref) },
+  { id: 'me-pro', name: 'Me · Work', subtitle: 'Suit and tie version', cover: `${A.linkedin(1)}|${A.ref(3)}`, refs: [3, 1, 2, 4].map(A.ref) },
 ];
 
-export const LOOKS: Look[] = [
-  { id: 'l1', src: A.look(1), title: 'Old Money', category: 'trend', identityId: 'me', when: '3 weeks ago' },
-  { id: 'l2', src: A.look(2), title: 'Neon Nights', category: 'trend', identityId: 'me', when: '2 weeks ago' },
-  { id: 'l3', src: A.look(3), title: 'Golden hour', category: 'casual', identityId: 'me', when: '2 days ago' },
-  { id: 'l4', src: A.look(4), title: 'Renaissance', category: 'trend', identityId: 'me', when: '1 month ago' },
-  { id: 'l5', src: A.look(5), title: '90s Film', category: 'trend', identityId: 'me', when: '1 week ago' },
-  { id: 'l6', src: A.look(6), title: 'Ski Chalet', category: 'casual', identityId: 'me', when: '1 month ago' },
-  { id: 'l7', src: A.linkedin(3), title: 'Headshot · grey', category: 'professional', identityId: 'me-pro', when: '1 week ago' },
-  { id: 'l8', src: A.linkedin(4), title: 'Headshot · window', category: 'professional', identityId: 'me-pro', when: '1 week ago' },
-];
+export const LOOK_TITLES = ['Soft studio', 'Old Money', 'Dark academia', 'Red carpet', '90s hip-hop', 'Blue hour', 'Fisheye editorial', 'Fashion week'];
 
-export const SAVED_LOOKS: SavedLook[] = [
-  { id: 's1', title: 'Studio light · navy blazer', cover: A.linkedin(2), identityId: 'me-pro' },
-  { id: 's2', title: 'Golden hour', cover: A.look(3), identityId: 'me' },
-  { id: 's3', title: 'Film grain · 35mm', cover: A.look(5), identityId: 'me' },
-];
+let lid = 0;
+export const look = (src: string, title: string, isNew = false): Look => ({ id: `lk${++lid}`, src, title, isNew });
+
+export function seedStyles(): CommunityStyle[] {
+  return [
+    { id: 'st-90s', title: '90s yearbook', creator: FRIEND, cover: A.friend90s, result: A.remix90s, remixes: 12400, friend: true },
+    { id: 'st-oldmoney', title: 'Old money summer', creator: 'luca.v', cover: 'style_oldmoney.jpg|me_look_2.jpg', result: A.look(2), remixes: 8100 },
+    { id: 'st-redcarpet', title: 'Premiere night', creator: 'sofi.ph', cover: 'style_redcarpet.jpg|me_look_4.jpg', result: A.look(4), remixes: 5300 },
+    { id: 'st-fisheye', title: 'Fisheye street', creator: 'benji', cover: 'style_fisheye.jpg|me_look_7.jpg', result: A.look(7), remixes: 3200 },
+    { id: 'st-academia', title: 'Library portrait', creator: 'giulia.r', cover: 'style_academia.jpg|me_look_3.jpg', result: A.look(3), remixes: 2700 },
+  ];
+}
 
 export const CAMERA_ROLL: string[] = [
+  ...[1, 2, 3, 4, 5, 6, 7, 8].map(A.trip),
   ...[1, 2, 3, 4].map(A.ref),
   A.enhanceBefore,
-  ...[1, 2, 3, 4, 5, 6].map(A.trip),
+  A.enhance2Before,
   ...[1, 2, 3, 4].map(A.old),
-  A.marta,
-];
-
-export type TemplateMeta = { id: 'profile' | 'archive' | 'trip' | 'couple' | 'freestyle'; title: string; sub: string; cover: string; emoji: string };
-export const TEMPLATES: TemplateMeta[] = [
-  { id: 'freestyle', title: 'Freestyle', sub: 'Start from an idea and shape it by chatting with Remini', cover: A.creative(1), emoji: '✨' },
-  { id: 'profile', title: 'Profile refresh', sub: 'LinkedIn · dating · socials', cover: A.linkedin(1), emoji: '💼' },
-  { id: 'archive', title: 'Family archive', sub: 'Restore and animate old photos', cover: `${A.restored(1)}|${A.old(1)}`, emoji: '🎞️' },
-  { id: 'trip', title: 'Trip or event', sub: 'One consistent look for a set', cover: A.trip(2), emoji: '✈️' },
-  { id: 'couple', title: 'Friends shoot', sub: 'You and friends, one scene', cover: `${A.marta}|${A.trip(4)}`, emoji: '👯' },
+  A.friend,
 ];
 
 let pid = 0;
@@ -80,90 +75,93 @@ export const photo = (original: string, status: ProjectPhoto['status'], enhanced
 
 const cycle = <T,>(arr: T[], n: number) => Array.from({ length: n }, (_, i) => arr[i % arr.length]);
 
-export const LINKEDIN_SETUP = {
-  name: 'Studio light · navy blazer',
-  style: 'Studio headshot, soft key light',
-  background: 'Warm grey seamless',
-  outfit: 'Navy blazer, white shirt',
-  prompt: 'Professional headshot of {identity}, shoulders up, relaxed smile, 85mm, shallow depth of field',
-};
+export const INTENTS: { id: Intent; title: string; sub: string; cover: string; emoji: string }[] = [
+  { id: 'profile', title: 'Professional profile', sub: 'LinkedIn, CV, work profiles', cover: A.linkedin(2), emoji: '💼' },
+  { id: 'trip', title: 'Trip album', sub: 'Every photo from one trip, at its best', cover: A.trip(2), emoji: '✈️' },
+  { id: 'family', title: 'Family memories', sub: 'Restore and bring old photos back', cover: A.restored(3), emoji: '🎞️' },
+  { id: 'social', title: 'Social content', sub: 'Posts, stories and profile pictures', cover: A.look(6), emoji: '📱' },
+  { id: 'looks', title: 'My AI looks', sub: 'You, in styles and places', cover: A.look(4), emoji: '✨' },
+  { id: 'other', title: 'Something else', sub: 'Tell us, we will learn from it', cover: A.look(1), emoji: '💡' },
+];
 
-export function seedProjects(): Project[] {
-  const tripPhotos = cycle([1, 2, 3, 4, 5, 6].map(A.trip), 12).map((src, i) => photo(src, i < 9 ? 'enhanced' : 'original'));
-  const archivePhotos = [1, 2, 3, 4].map((n, i) => photo(A.old(n), i < 2 ? 'enhanced' : 'original', A.restored(n)));
-  const summerPhotos = [A.trip(5), A.trip(6), A.marta, A.trip(3), A.trip(4), A.trip(2)].map((src) => photo(src, 'enhanced'));
+export const SEGMENTS: { id: Segment; label: string; emoji: string }[] = [
+  { id: 'restore', label: 'Restore old photos', emoji: '🎞️' },
+  { id: 'lookgreat', label: 'Look great in my photos', emoji: '✨' },
+  { id: 'profile', label: 'Profile or work photos', emoji: '💼' },
+  { id: 'social', label: 'Content for social media', emoji: '📱' },
+  { id: 'trends', label: 'Try the AI trends', emoji: '🔥' },
+  { id: 'exploring', label: 'Just exploring', emoji: '👀' },
+];
+
+/** The starter creation each onboarding answer creates in My Creations. */
+export function starterFor(seg: Segment): Creation {
+  const base = { id: `starter-${seg}`, photos: [] as ProjectPhoto[], looks: [] as Look[], lastEdit: 'Just now' };
+  switch (seg) {
+    case 'restore':
+      return { ...base, title: 'Family archive', intent: 'family', cover: A.old(1), goal: 3 };
+    case 'profile':
+      return { ...base, id: 'linkedin', title: 'LinkedIn set', intent: 'profile', cover: A.ref(3), goal: 5 };
+    case 'lookgreat':
+      return { ...base, title: 'My best photos', intent: 'looks', cover: A.ref(1), goal: 5 };
+    case 'social':
+      return { ...base, title: 'Social content', intent: 'social', cover: A.look(6), goal: 6 };
+    case 'trends':
+      return { ...base, title: 'My AI looks', intent: 'looks', cover: A.look(4), goal: 4 };
+    default:
+      return { ...base, title: 'My first creation', intent: 'other', cover: A.ref(2), goal: 3 };
+  }
+}
+
+/** State of a returning free user a few days after onboarding. */
+export function returningCreations(): Creation[] {
   return [
     {
-      id: 'rome',
-      title: 'Weekend away',
-      template: 'trip',
-      identityId: 'me',
-      cover: A.trip(1),
-      photos: tripPhotos,
-      looks: [{ id: 'rl1', src: A.look(3), title: 'Golden hour', category: 'casual', identityId: 'me', when: '2 days ago' }],
-      setup: {
-        name: 'Golden hour',
-        style: 'Warm film, late sun',
-        background: 'Keep original',
-        outfit: 'Keep original',
-        prompt: 'Golden hour light, warm tones, soft grain, consistent across the set',
-      },
-      lastEdit: '2 days ago',
-      nextStep: 'Enhance the last few photos to finish the set',
+      id: 'linkedin',
+      title: 'LinkedIn set',
+      intent: 'profile',
+      cover: A.linkedin(1),
+      photos: [],
+      looks: [1, 2, 3].map((n) => look(A.linkedin(n), ['Grey backdrop', 'City walk', 'Office lobby'][n - 1])),
+      goal: 5,
+      lastEdit: '3 days ago',
     },
     {
-      id: 'nonna',
+      id: 'family',
       title: 'Family archive',
-      template: 'archive',
-      identityId: 'me',
-      cover: `${A.restored(1)}|${A.old(1)}`,
-      photos: archivePhotos,
+      intent: 'family',
+      cover: `${A.restored(3)}|${A.old(3)}`,
+      photos: [1, 2, 3].map((n, i) => photo(A.old(n), i < 1 ? 'enhanced' : 'original', A.restored(n))),
       looks: [],
-      setup: {
-        name: 'Faithful restore',
-        style: 'Restore, keep period look',
-        background: 'Keep original',
-        outfit: 'Keep original',
-        prompt: 'Repair scratches and fading, sharpen faces, subtle colorization',
-      },
+      goal: 3,
       lastEdit: '5 days ago',
-      nextStep: 'Animate a memory from the album',
     },
     {
-      id: 'summer',
-      title: "Summer '26",
-      template: 'trip',
-      identityId: 'me',
-      cover: A.trip(5),
-      photos: summerPhotos,
-      looks: [],
-      setup: null,
-      lastEdit: '1 hour ago',
-      nextStep: 'Add your photos, or ask Remini to make a group look',
-      shared: {
-        owner: FRIEND,
-        collaborators: [FRIEND, 'Luca', 'Sofia', 'Ben'],
-        link: 'remini.app/p/summer26',
-        feed: [
-          { who: FRIEND, text: 'added new photos', when: '1h' },
-          { who: 'Luca', text: 'asked Remini for "a movie poster of all of us"', when: '3h' },
-          { who: 'Sofia', text: 'applied "Golden hour" to the album', when: 'Yesterday' },
-          { who: 'Ben', text: 'joined from the web link', when: '2d' },
-        ],
-      },
+      id: 'ailooks',
+      title: 'My AI looks',
+      intent: 'looks',
+      cover: A.look(4),
+      photos: [],
+      looks: [4, 2, 3, 8].map((n) => look(A.look(n), LOOK_TITLES[n - 1])),
+      goal: 6,
+      lastEdit: '1 week ago',
     },
   ];
 }
 
-/** Photos Studio suggests from Recents for a template (faces matched to the identity). */
-export function suggestFor(template: TemplateMeta['id']): string[] {
-  if (template === 'profile') return [A.ref(2), A.ref(3), A.ref(4), A.enhanceBefore, A.trip(1), A.trip(3), A.ref(1)];
-  if (template === 'archive') return [1, 2, 3, 4].map(A.old);
-  if (template === 'trip') return [1, 2, 3, 4, 5, 6].map(A.trip);
-  if (template === 'couple') return [A.marta, A.ref(2), A.trip(4), A.trip(6)];
-  return [A.ref(1), A.ref(3)];
+/** The trip album: the photos you pick plus the rest of the trip Remini finds for you (17 in total). */
+export function tripAlbum(picked: string[]): Creation {
+  const rest = cycle([1, 2, 3, 4, 5, 6, 7, 8].map(A.trip), 17);
+  const all = [...picked, ...rest.filter((s) => !picked.includes(s))].slice(0, 8);
+  const photos = [...all, ...cycle(all, 17 - all.length)].map((src) => photo(src, 'original'));
+  return { id: 'barcelona', title: 'Barcelona trip', intent: 'trip', cover: all[0] ?? A.trip(1), photos, looks: [], goal: 17, lastEdit: 'Just now' };
 }
 
-export function linkedInPhotos(first: string): ProjectPhoto[] {
-  return [photo(first, 'enhanced'), ...suggestFor('profile').map((s) => photo(s, 'original'))];
+export function progressOf(c: Creation) {
+  if (c.intent === 'trip' || c.intent === 'family') {
+    const done = c.photos.filter((p) => p.status === 'enhanced').length;
+    const total = Math.max(c.goal, c.photos.length);
+    return { done, total, label: `${done} of ${total} ${c.intent === 'family' ? 'restored' : 'done'}` };
+  }
+  const done = c.looks.length;
+  return { done: Math.min(done, c.goal), total: c.goal, label: `${Math.min(done, c.goal)} of ${c.goal} done` };
 }
