@@ -1,6 +1,8 @@
 import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { BottomNav, StatusBar } from './components/Chrome';
+import { StatusBar, TopBar } from './components/Chrome';
+import { ChatBubble, TodayHome, TodayScreen, ToolBar } from './screens/Today';
+import { StudioIntro, VideoScreen } from './screens/StudioIntro';
 import { GeneratingOverlay, Spotlight, Toast } from './components/Overlays';
 import { BEATS } from './state/demo';
 import { useStore } from './state/store';
@@ -13,11 +15,16 @@ import { CreationScreen, PhotoScreen } from './screens/Creation';
 import { LockScreen } from './screens/Outside';
 import { SheetHost } from './screens/Sheets';
 import { ComingNextScreen, SectionScreen, StudioHome } from './screens/Studio';
-import { AIPhotosTab, EnhanceHome, FiltersTab, RetouchTab, VideosTab } from './screens/Tabs';
 import { Shell } from './shell/Shell';
 
 function renderRoute(r: Route) {
   switch (r.name) {
+    case 'today':
+      return <TodayScreen screen={r.screen} />;
+    case 'studioIntro':
+      return <StudioIntro />;
+    case 'video':
+      return <VideoScreen srcs={r.srcs} title={r.title} />;
     case 'onboarding':
       return <OnboardingScreen start={r.step} />;
     case 'trend':
@@ -52,13 +59,14 @@ function renderRoute(r: Route) {
 }
 
 function TabRoot() {
-  const { tab, mode } = useStore();
-  if (tab === 'studio' && mode === 'studio') return <StudioHome />;
-  if (tab === 'aiphotos') return <AIPhotosTab />;
-  if (tab === 'filters') return <FiltersTab />;
-  if (tab === 'videos') return <VideosTab />;
-  if (tab === 'retouch') return <RetouchTab />;
-  return <EnhanceHome />;
+  const { mode } = useStore();
+  if (mode === 'studio') return <StudioHome />;
+  return (
+    <>
+      <TopBar />
+      <TodayHome />
+    </>
+  );
 }
 
 function Layer({ visible, fromRight, dir, web, children }: { visible: boolean; fromRight: boolean; dir: 1 | -1; web: boolean; children: ReactNode }) {
@@ -88,10 +96,10 @@ function PhoneContent() {
     return () => clearTimeout(t);
   }, [setSplash]);
 
-  // First open in each mode starts with onboarding, like the real app.
+  // The first time Studio opens, it introduces itself.
   useEffect(() => {
-    if (splash || demo !== null || onboarded[mode] || stack.length) return;
-    resetStack([{ name: 'onboarding' }]);
+    if (splash || demo !== null || mode !== 'studio' || onboarded.studio || stack.length) return;
+    resetStack([{ name: 'studioIntro' }]);
   }, [splash, demo, onboarded, mode, stack.length, resetStack]);
 
   return (
@@ -117,7 +125,8 @@ function PhoneContent() {
           </Layer>
         );
       })}
-      {!top && <BottomNav />}
+      {!top && <ToolBar />}
+      {!top && <ChatBubble />}
       <SheetHost />
       <GeneratingOverlay />
       <Toast />

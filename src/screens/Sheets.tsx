@@ -293,7 +293,7 @@ function RememberMe() {
             min: 4,
             max: 4,
             preselect: 4,
-            pool: [A.ref(3), A.ref(2), A.ref(1), A.ref(4), A.enhance2Before, A.trip(7)],
+            pool: [A.ref(3), A.ref(2), A.ref(1), A.ref(4), A.enhance2Before],
             cta: 'Remember me',
             onDone: (picked) => {
               pop();

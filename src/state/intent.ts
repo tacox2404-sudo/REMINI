@@ -11,7 +11,7 @@ export function startIntent(s: Store, intent: Intent) {
       ? [1, 2, 3, 4].map(A.old)
       : intent === 'trip'
         ? CAMERA_ROLL
-        : [...[1, 2, 3, 4].map(A.ref), A.enhance2Before, A.trip(1), A.trip(7), A.trip(8), A.friend];
+        : [...[1, 2, 3, 4].map(A.ref), A.enhance2Before, A.trip(1), A.friend];
   s.push({
     name: 'picker',
     title: 'Pick 3 to 5 photos',

@@ -41,7 +41,7 @@ export function IdentityScreen({ id }: { id: string }) {
                 title: 'Add 2 more photos',
                 min: 2,
                 max: 2,
-                pool: [A.ref(1), A.ref(2), A.ref(3), A.ref(4), A.enhance2Before, A.trip(7), A.trip(8)],
+                pool: [A.ref(1), A.ref(2), A.ref(3), A.ref(4), A.enhance2Before],
                 cta: 'Remember these too',
                 onDone: (picked) => {
                   pop();

@@ -34,7 +34,7 @@ const LEVER_DETAIL: Record<Lever, { why: string; where: string }> = {
 
 export function Controls({ compact = false }: { compact?: boolean }) {
   const s = useStore();
-  const { mode, setMode, demo, setDemo, resetAll, resetStack, goTab, becomeReturning } = s;
+  const { mode, setMode, demo, setDemo, resetAll, resetStack, goTab } = s;
   return (
     <div className="space-y-4">
       {!compact && (
@@ -48,7 +48,13 @@ export function Controls({ compact = false }: { compact?: boolean }) {
       {!compact && (
         <div className="rounded-xl bg-white/[0.04] p-3.5 text-[12.5px] leading-relaxed text-white/60">
           <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-white/40">The idea</div>
-          Remini today is a one-shot tool: a trend, one image, a paywall, gone. <b className="text-white/85">Studio</b> keeps what people make: <b className="text-white/85">Me</b> (saved identities), <b className="text-white/85">My Creations</b> (ongoing work that saves itself) and <b className="text-white/85">Remix</b> (styles from the community). Trends keep bringing people in, and now every trend lands in the Studio.
+          <b className="text-white/85">Studio</b> is a new space in Remini to come back to your own photo and video creations, on your own or with friends, with gen AI along the way.
+          <ul className="mt-2 space-y-1">
+            <li><b className="text-white/85">My Creations</b>: projects that keep one style and save themselves</li>
+            <li><b className="text-white/85">Together</b>: albums with friends that change together, with a shared Remini chat</li>
+            <li><b className="text-white/85">Remix</b>: trends already on your saved Me, and styles from the community</li>
+            <li><b className="text-white/85">Me</b>: saved identities, several profiles, private</li>
+          </ul>
         </div>
       )}
       <div>
@@ -83,16 +89,6 @@ export function Controls({ compact = false }: { compact?: boolean }) {
             Exit demo
           </button>
         )}
-        <button
-          onClick={() => {
-            becomeReturning();
-            if (mode !== 'studio') setMode('studio');
-            goTab('studio');
-          }}
-          className="h-9 w-full rounded-xl bg-white/[0.06] text-[12px] font-semibold text-white/80"
-        >
-          ⏩ 3 days later (returning user)
-        </button>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => {
@@ -122,7 +118,7 @@ export function Controls({ compact = false }: { compact?: boolean }) {
 
 /** Separate "Why it matters" module: explains the levers and toggles the tags + event log. */
 export function LeversPanel({ inline = false }: { inline?: boolean }) {
-  const { showLevers, setShowLevers, demo } = useStore();
+  const { showLevers, setShowLevers, demo, setClosing } = useStore();
   const [open, setOpen] = useState(false);
   // Keep the demo caption visible: fold the explanation away when the demo moves on.
   useEffect(() => {
@@ -163,6 +159,9 @@ export function LeversPanel({ inline = false }: { inline?: boolean }) {
                 <p className="mt-1 text-[11.5px] leading-relaxed text-white/40">Tagged on: {LEVER_DETAIL[l].where}</p>
               </div>
             ))}
+            <button data-ctl="open-model" onClick={() => setClosing(true)} className="h-10 rounded-xl bg-white text-[13px] font-semibold text-black">
+              Open the business model (NPV sliders)
+            </button>
             <div className="flex h-56 flex-col">
               <EventLog />
             </div>
@@ -282,56 +281,116 @@ function useDemoDriver() {
   }, [demo, setDemo]);
 }
 
-/** End of the guided demo: the business case, with the figures from the model. */
+/** Target: $5M NPV when each lever grows about +5.6%. The levers multiply, so NPV follows the combined uplift. */
+const EQUAL_FOR_TARGET = 0.056;
+const COMBINED_FOR_TARGET = (1 + EQUAL_FOR_TARGET) ** 3 - 1; // ≈ 17.8%
+const NPV_PER_UPLIFT = 5 / COMBINED_FOR_TARGET; // $M of NPV per unit of combined uplift
+const equalFor = (npv: number) => ((1 + npv / NPV_PER_UPLIFT) ** (1 / 3) - 1) * 100;
+const PRESETS: { label: string; v: [number, number, number] }[] = [
+  { label: 'Target, split equally', v: [5.6, 5.6, 5.6] },
+  { label: 'Low case', v: Array(3).fill(+equalFor(2.6).toFixed(1)) as [number, number, number] },
+  { label: 'Base case', v: Array(3).fill(+equalFor(5.9).toFixed(1)) as [number, number, number] },
+  { label: 'High case', v: Array(3).fill(+equalFor(11.2).toFixed(1)) as [number, number, number] },
+  { label: 'Retention-led mix', v: [2, 2, 13] },
+];
+
+/** Interactive business-case model: move each lever and see the NPV. */
 function ClosingCard() {
   const { closing, setClosing, setDemo } = useStore();
+  const [v, setV] = useState<[number, number, number]>([5.6, 5.6, 5.6]);
   const levers: [Lever, string][] = [
-    ['t', 'Trial start'],
+    ['t', 'Trial starts'],
     ['c', 'Trial → paid'],
     ['w', 'Paid weeks'],
   ];
-  const pos = (v: number) => `${((v - 2) / (12 - 2)) * 100}%`;
+  const combined = (1 + v[0] / 100) * (1 + v[1] / 100) * (1 + v[2] / 100) - 1;
+  const npv = combined * NPV_PER_UPLIFT;
+  const MAX = 14;
+  const pos = (x: number) => `${Math.max(0, Math.min(100, (x / MAX) * 100))}%`;
+  const gap = npv - 5;
   return (
     <AnimatePresence>
       {closing && (
-        <motion.div className="fixed inset-0 z-[300] grid place-items-center bg-black/70 p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <motion.div data-ctl="closing-card" initial={{ y: 20, scale: 0.97 }} animate={{ y: 0, scale: 1 }} className="w-full max-w-[640px] rounded-[28px] border border-white/10 bg-[#111116] p-7 shadow-2xl">
-            <div className="text-[12px] font-bold uppercase tracking-[0.16em] text-[#FF6A8E]">Remini Studio</div>
-            <h2 className="mt-1 text-[34px] font-extrabold tracking-tight">Why it pays</h2>
+        <motion.div className="fixed inset-0 z-[300] grid place-items-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.div data-ctl="closing-card" initial={{ y: 20, scale: 0.97 }} animate={{ y: 0, scale: 1 }} className="w-full max-w-[700px] rounded-[28px] border border-white/10 bg-[#111116] p-7 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[12px] font-bold uppercase tracking-[0.16em] text-[#FF6A8E]">Remini Studio · business case</div>
+                <h2 className="mt-1 text-[32px] font-extrabold tracking-tight">Why it pays</h2>
+              </div>
+              <button onClick={() => setClosing(false)} className="grid h-9 w-9 place-items-center rounded-full bg-white/10" aria-label="Close">✕</button>
+            </div>
+            <p className="mt-2 text-[14px] leading-relaxed text-white/70">
+              Reaching <b className="text-white">$5M NPV</b> needs about <b className="text-white">+{(COMBINED_FOR_TARGET * 100).toFixed(1)}% combined</b> across the three levers, because they multiply. Split equally, that is about <b className="text-white">+5.6% each</b>. Move the sliders to try any mix.
+            </p>
 
-            <div className="mt-5 grid grid-cols-3 gap-2.5">
-              {levers.map(([l, name]) => (
-                <div key={l} className="rounded-2xl bg-white/[0.05] p-4">
-                  <div className="flex items-center gap-2 text-[13px] font-semibold text-white/75">
+            <div className="mt-5 space-y-4">
+              {levers.map(([l, name], i) => (
+                <div key={l} className="grid grid-cols-[150px_1fr_64px] items-center gap-4">
+                  <span className="flex items-center gap-2 text-[14px] font-semibold text-white/85">
                     <LeverPill l={l} /> {name}
-                  </div>
-                  <div className="mt-2 text-[30px] font-extrabold leading-none">≈ +5.6%</div>
+                  </span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={20}
+                    step={0.1}
+                    value={v[i]}
+                    data-ctl={`slider-${l}`}
+                    onChange={(e) => setV((cur) => cur.map((x, k) => (k === i ? +e.target.value : x)) as [number, number, number])}
+                    className="lever-range w-full"
+                    style={{ ['--fill' as string]: `${(v[i] / 20) * 100}%` }}
+                    aria-label={`${name} growth`}
+                  />
+                  <span className="text-right text-[16px] font-bold tabular-nums">+{v[i].toFixed(1)}%</span>
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-[13px] text-white/55">Each lever needs about +5.6% to reach $5M NPV.</p>
 
-            <div className="mt-5 grid grid-cols-[1fr_1.3fr] gap-2.5">
+            <div className="mt-6 grid grid-cols-[1fr_1.6fr] gap-3">
               <div className="rounded-2xl bg-white/[0.05] p-4">
-                <div className="text-[13px] font-semibold text-white/75">One extra paid week per subscriber</div>
-                <div className="mt-2 text-[30px] font-extrabold leading-none">≈ $7.1M</div>
-                <div className="mt-1 text-[12px] text-white/50">on its own</div>
+                <div className="text-[13px] font-semibold text-white/70">Combined uplift</div>
+                <div className="mt-1.5 text-[32px] font-extrabold leading-none tabular-nums">+{(combined * 100).toFixed(1)}%</div>
+                <div className="mt-1.5 text-[12px] text-white/50">needs +{(COMBINED_FOR_TARGET * 100).toFixed(1)}% for $5M</div>
               </div>
               <div className="rounded-2xl bg-gradient-to-br from-[#2a1320] to-white/[0.04] p-4 ring-1 ring-[#FF2E7E]/30">
-                <div className="text-[13px] font-semibold text-white/75">NPV, base case</div>
-                <div className="mt-2 text-[38px] font-extrabold leading-none">$5.9M</div>
-                <div className="relative mt-4 h-2 rounded-full bg-white/10">
-                  <div className="absolute inset-y-0 rounded-full bg-brand" style={{ left: pos(2.6), right: `calc(100% - ${pos(11.2)})` }} />
-                  <div className="absolute -top-1 h-4 w-1 rounded-full bg-white" style={{ left: pos(5.9) }} />
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[13px] font-semibold text-white/70">NPV</span>
+                  <span className={`text-[12.5px] font-semibold ${gap >= 0 ? 'text-[#2ED47A]' : 'text-[#FFB020]'}`}>
+                    {Math.abs(gap) < 0.05 ? '✓ On target' : gap > 0 ? `✓ $${gap.toFixed(1)}M above target` : `$${(-gap).toFixed(1)}M below target`}
+                  </span>
                 </div>
-                <div className="mt-1.5 flex justify-between text-[12px] text-white/55">
-                  <span>Low $2.6M</span>
-                  <span>High $11.2M</span>
+                <div data-ctl="npv" className="mt-1 text-[40px] font-extrabold leading-none tabular-nums">${npv.toFixed(1)}M</div>
+                <div className="relative mb-6 mt-9 h-2 rounded-full bg-white/10">
+                  <div className="absolute inset-y-0 left-0 rounded-full bg-brand transition-all" style={{ width: pos(npv) }} />
+                  {[
+                    ['Low', 2.6],
+                    ['Target', 5],
+                    ['Base', 5.9],
+                    ['High', 11.2],
+                  ].map(([k, x]) => (
+                    <div key={k as string} className={`absolute flex -translate-x-1/2 items-center ${k === 'Target' ? 'bottom-[-3px] flex-col-reverse' : 'top-[-3px] flex-col'}`} style={{ left: pos(x as number) }}>
+                      <span className={`h-3.5 w-[2px] ${k === 'Target' ? 'bg-white' : 'bg-white/45'}`} />
+                      <span className={`whitespace-nowrap text-[10.5px] ${k === 'Target' ? 'mb-1 font-bold text-white' : 'mt-1 text-white/55'}`}>
+                        {k} ${x}M
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            <p className="mt-5 text-[11.5px] text-white/40">Figures from the business case model, fictitious case data.</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {PRESETS.map((p) => (
+                <button key={p.label} onClick={() => setV(p.v)} className="h-8 rounded-full bg-white/[0.07] px-3 text-[12.5px] font-semibold text-white/80 hover:bg-white/15">
+                  {p.label}
+                </button>
+              ))}
+            </div>
+
+            <p className="mt-5 text-[11.5px] leading-relaxed text-white/40">
+              Figures from the business case model, fictitious case data. Simplified here: NPV scales with the combined uplift, calibrated so +5.6% on each lever gives $5M; the Low, Base and High cases are $2.6M, $5.9M and $11.2M.
+            </p>
             <div className="mt-5 flex gap-2">
               <button
                 data-ctl="closing-done"
@@ -341,7 +400,7 @@ function ClosingCard() {
                 }}
                 className="h-11 flex-1 rounded-xl bg-white text-[14px] font-semibold text-black"
               >
-                Finish demo
+                Finish
               </button>
               <button onClick={() => setClosing(false)} className="h-11 rounded-xl bg-white/10 px-4 text-[14px] font-semibold">
                 Back to the app

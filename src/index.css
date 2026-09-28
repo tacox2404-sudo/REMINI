@@ -182,3 +182,30 @@ button {
   .fake-status > * { display: none; }
   .mobile-ctl { bottom: 100px; right: 10px; }
 }
+
+/* Lever sliders in the business model */
+.lever-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff5a4e, #ff2e7e) 0 / var(--fill) 100% no-repeat, rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+.lever-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 46, 126, 0.25);
+  cursor: pointer;
+}
+.lever-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+}

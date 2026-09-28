@@ -5,6 +5,7 @@ import { useStore } from '../state/store';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
 import { Avatar, LeverTag, NavHeader } from '../components/ui';
+import { Poster, VideoTile } from './StudioIntro';
 
 function ReminiAvatar() {
   return (
@@ -48,13 +49,23 @@ export function ChatScreen({ creationId }: { creationId: string }) {
         }
         onBack={pop}
         right={
-          <Img src={identity.cover} className="mr-2 h-7 w-7 rounded-full" label={false} />
+          p.shared ? (
+            <div className="flex -space-x-2 pr-2">
+              {p.shared.members.slice(0, 3).map((m) => (
+                <Avatar key={m} name={m} size={24} />
+              ))}
+            </div>
+          ) : (
+            <Img src={identity.cover} className="mr-2 h-7 w-7 rounded-full" label={false} />
+          )
         }
       />
 
-      <div ref={list} className="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4 pt-2">
+      <div ref={list} data-demo="album-chat-thread" className="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4 pt-2">
         <div className="mx-auto max-w-[280px] rounded-2xl bg-white/[0.04] p-3 text-center text-[12px] leading-relaxed text-mute">
-          {`Describe an idea or a change. Remini uses your saved "${identity.name}" and keeps results in "${p.title}".`}
+          {p.shared
+            ? `Everyone in “${p.title}” can ask Remini. It uses the album’s photos and each person’s own saved identity; results land in the album for all.`
+            : `Describe an idea or a change. Remini uses your saved “${identity.name}” and keeps results in “${p.title}”.`}
         </div>
         {msgs.map((m) => {
           const mine = m.from === 'me';
@@ -66,6 +77,10 @@ export function ChatScreen({ creationId }: { creationId: string }) {
               <div className={`max-w-[78%] ${mine ? 'items-end' : ''} flex flex-col gap-1.5`}>
                 {!mine && !bot && <span className="text-[11px] font-semibold text-mute">{m.from}</span>}
                 <div className={`rounded-[18px] px-3.5 py-2.5 text-[14px] leading-snug ${mine ? 'rounded-br-md bg-white text-black' : 'rounded-bl-md bg-card2'}`}>{m.text}</div>
+                {m.video && <VideoTile srcs={m.video} className="aspect-[4/5] w-[210px] rounded-2xl" onClick={() => push({ name: 'video', srcs: m.video!, title: `${p.title} · recap` })} />}
+                {m.poster && <Poster src={m.poster.src} title={m.poster.title} className="aspect-[2/3] w-[180px] rounded-2xl" />}
+                {m.action === 'restyled' && <span className="text-[11px] text-[#2ED47A]">✓ Updated on every photo, for everyone</span>}
+                {bot && (m.video || m.poster) && <span className="text-[11px] text-[#2ED47A]">✓ In {p.title}{p.shared ? ', for everyone' : ''}</span>}
                 {m.images && (
                   <div className={`grid gap-1.5 ${m.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                     {m.images.map((src, i) => (
@@ -127,7 +142,7 @@ export function ChatScreen({ creationId }: { creationId: string }) {
             data-demo="chat-input"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Describe what you want…"
+            placeholder={p.shared ? 'Ask Remini for the group…' : 'Describe what you want…'}
             className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-white/35"
           />
           <button type="submit" disabled={!text.trim() || typing} className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-black disabled:opacity-30" aria-label="Send">

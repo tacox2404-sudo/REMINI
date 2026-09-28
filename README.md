@@ -1,12 +1,13 @@
 # Remini Studio · clickable concept prototype
 
-A high-fidelity mobile prototype for a proposed Remini feature: **Studio**. Remini today is a one-shot tool (a trend, one image, a paywall, gone). Studio keeps what people make, in three sections:
+**Studio** is a new space in Remini to come back to your own photo and video creations, on your own or with friends, with gen AI along the way.
 
-- **Me**: saved identities, so trends and remixes never need new selfies ("Remember me").
-- **My Creations**: ongoing work that saves itself, with progress ("LinkedIn set, 3 of 5").
-- **Remix**: trends from Remini and styles from the community, which anyone can try on their own saved Me and publish like a filter.
+- **My Creations**: projects that keep one style and save themselves ("Family archive, 4 of 12 restored").
+- **Together**: albums with friends that change together, with a shared Remini chat that makes recap videos and posters from the group's photos.
+- **Remix**: this week's trends already applied to your saved Me, and styles from the community you can remix and publish.
+- **Me**: saved identities, several profiles, private.
 
-Trends keep bringing people in, and every trend now lands in the Studio. This is a design concept, not the real app. AI steps are simulated with prepared images.
+"Today" mode is a short, deliberately limited replica of the current app for comparison. AI steps are simulated with prepared images.
 
 ## Run it
 
@@ -32,24 +33,22 @@ The photos live in `public/assets/` (web-sized JPGs); the full-size originals ar
 | `trend_y2k_me.jpg`, `trend_y2k_me_2.jpg` | Y2K Yearbook result and "Try another photo" |
 | `linkedin_1..6.jpg` | The LinkedIn set |
 | `archive_old_1..4.jpg`, `archive_restored_1..4.jpg` | Family archive before/after |
-| `trip_1..8.jpg` | Barcelona trip (17 photos: these 8 plus a "+9" tile) |
+| `trip_1..6.jpg` | Friends trip, Philippines (17 photos: these 6 plus a "+11" tile) |
 | `friend_marta.jpg` | Paola, the friend |
-| `friend_marta_90s.jpg`, `remix_me_90s.jpg` | Paola's "90s yearbook" and your remix (not added yet: fall back to Paola's photo and your 90s look) |
+| `friend_marta_90s.jpg`, `remix_me_90s.jpg` | Optional: Paola's "90s yearbook" and your remix (fall back to `friend_marta.jpg` and `me_look_5.jpg`) |
+| `generic_*.jpg` | Optional face-free imagery for Today mode (gradient placeholders otherwise) |
 
 ## Presenting
 
 - **Experience: Today / With Studio.** First open in each mode starts with onboarding, like the real app.
 - **Start demo.** Guided tour with captions and highlights. `→` next, `←` back, `Esc` exit. Every step resets the app to a known state, so clicking around never breaks it.
-- **⏩ 3 days later** jumps to the returning free user (LinkedIn set 3 of 5).
 - **Why it matters** (bottom-right corner, meant for after the demo): tags the screens with t (trial start), c (conversion), w (paid weeks) and I (installs), explains each lever, and shows the event log, including `segment: …` and `intent: …`.
 
 ### Guided demo path
 
-**Today:** onboarding question → paywall before any use → one trend → one image → generic paywall → gone.
+**Today (3 steps):** the home and bottom tools, AI Photos with a 4-selfie profile, Remini Chat.
 
-**With Studio:** onboarding question creates a starter ("LinkedIn set, 0 of 5") → Welcome back (3 of 5) → continue the LinkedIn set → trend "Try mine" lands in Studio → "What are you creating?" Trip album → Pick 3 to 5 photos → Barcelona trip "Enhance all" → 5 of 17 free, then "Finish your Barcelona trip with Pro" → Paola's style → "Make your version" → "Keep this" → "Publish as a style" → remix counter ticks up → "Challenge a friend" → closing card "Why it pays".
-
-Shared creations are shown once, as a "Coming next" screen reached from Remix.
+**With Studio:** Welcome to Studio (value proposition) → set up around you → your Studio → Keep going → Together: the Friends trip (Philippines) → change the style for everyone → the album chat (poster, recap video) → your turn → finish the album (5 of 17, trial) → New for you → Keep this → Styles from the community → Make your version → Publish as a style → Challenge a friend → Create with Remini chat → Me: saved identities → Why it pays (interactive NPV model).
 
 ### Screenshots
 

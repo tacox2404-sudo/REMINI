@@ -146,19 +146,21 @@ function useStoreValue() {
     setOnboarded((o) => ({ ...o, [m]: true }));
     if (m === 'studio') {
       const starter = starterFor(seg);
-      setCreations((cs) => [starter, ...cs.filter((x) => x.id !== starter.id && x.id !== 'linkedin' && x.id !== 'family' && x.id !== 'ailooks')]);
+      const existing = creationsRef.current.find((c) => c.intent === starter.intent);
+      if (existing) setCreations((cs) => [existing, ...cs.filter((x) => x.id !== existing.id)]);
+      else setCreations((cs) => [starter, ...cs]);
       track('starter_created', 'c');
       setNavDir(1);
       setTab('studio');
       setStack([]);
-      showToast(`We started “${starter.title}” for you`);
+      showToast(existing ? `“${existing.title}” is first in Keep going` : `We started “${starter.title}” for you`);
     } else {
       setStack([]);
       setTab('enhance');
       track('paywall_before_use');
       setSheet({ type: 'paywallGeneric', reason: 'onboarding' });
     }
-  }, [mode, setCreations, setStack, showToast, track]);
+  }, [creationsRef, mode, setCreations, setStack, showToast, track]);
 
   /** Jump a few days ahead: the state of a returning free user. */
   const becomeReturning = useCallback(() => {
@@ -306,26 +308,64 @@ function useStoreValue() {
     return () => clearInterval(t);
   }, [hasMine, setStyles]);
 
-  // ---------- chat (kept from the earlier concept, not in the main demo) ----------
+  // ---------- Remini chat ----------
+  const restyleAll = useCallback((id: string, style: string) => {
+    const c = creationsRef.current.find((x) => x.id === id);
+    if (!c) return;
+    updateCreation(id, (x) => ({ ...x, style, shared: x.shared && { ...x.shared, style, feed: [{ who: 'You', text: `changed the style to “${style}” for everyone`, when: 'now' }, ...x.shared.feed] } }));
+    const done = c.photos.filter((p) => p.status === 'enhanced').map((p) => p.id);
+    // Re-render the finished photos in the new look; unfinished ones pick it up when enhanced.
+    processPhotos(id, done);
+    track('style_changed_for_everyone', 'w');
+  }, [creationsRef, processPhotos, track, updateCreation]);
+
   const sendChat = useCallback((creationId: string, text: string) => {
     const c = creationsRef.current.find((x) => x.id === creationId);
     if (!c || !text.trim()) return;
     const mine: ChatMsg = { id: `m${++chatSeq}`, from: 'me', text: text.trim() };
     updateCreation(creationId, (x) => ({ ...x, chat: [...(x.chat ?? []), mine], lastEdit: 'Just now' }));
-    track('chat_prompt_sent', 'w');
+    track(c.shared ? 'album_chat_prompt' : 'chat_prompt_sent', 'w');
     setChatTyping(creationId);
     const r = chatReply(text, c);
     later(() => {
       setChatTyping(null);
-      const msg: ChatMsg = { id: `m${++chatSeq}`, from: 'remini', text: r.text, images: r.images, action: r.action === 'enhanced' ? undefined : r.action };
+      const msg: ChatMsg = { id: `m${++chatSeq}`, from: 'remini', text: r.text, images: r.images, video: r.video, poster: r.poster, action: r.restyle ? 'restyled' : r.action };
       updateCreation(creationId, (x) => ({
         ...x,
         chat: [...(x.chat ?? []), msg],
-        looks: msg.images && msg.action !== 'animate' ? [...msg.images.map((src) => look(src, r.title, true)), ...x.looks] : x.looks,
+        looks: r.images && r.action !== 'animate' ? [...r.images.map((src) => look(src, r.title, true)), ...x.looks] : x.looks,
+        shared: x.shared && { ...x.shared, feed: [{ who: 'You', text: `asked Remini: “${text.trim()}”`, when: 'now' }, ...x.shared.feed] },
       }));
-      if (msg.images) track('chat_result_kept', 'c');
-    }, 1900);
-  }, [creationsRef, later, track, updateCreation]);
+      if (r.restyle) restyleAll(creationId, r.restyle);
+      if (r.action === 'enhanced') {
+        const todo = creationsRef.current.find((x) => x.id === creationId)?.photos.filter((p) => p.status === 'original').map((p) => p.id) ?? [];
+        if (isPro) processPhotos(creationId, todo);
+        else later(() => setSheet({ type: 'paywall', creationId, stage: 'offer' }), 600);
+      }
+      track('chat_result_kept', 'c');
+    }, 2000);
+  }, [creationsRef, isPro, later, processPhotos, restyleAll, track, updateCreation]);
+
+  /** Studio chat: a fresh freestyle creation made with the saved Me. */
+  const createFreestyle = useCallback(() => {
+    const empty = creationsRef.current.find((x) => x.intent === 'other' && (x.chat ?? []).every((m) => m.from === 'remini'));
+    if (empty) return empty.id;
+    const id = `f${Date.now().toString(36)}`;
+    upsertCreation({
+      id,
+      title: 'Freestyle',
+      intent: 'other',
+      cover: A.look(4),
+      photos: [],
+      looks: [],
+      goal: 4,
+      lastEdit: 'Just now',
+      chat: [{ id: `m${++chatSeq}`, from: 'remini', text: 'Hi! I know what you look like from your saved Me, so no upload needed. Describe anything: I’ll make it, and we can keep going from there.' }],
+    });
+    setCreations((cs) => [...cs.filter((x) => x.id !== id), cs.find((x) => x.id === id)!]);
+    track('studio_chat_started', 'w');
+    return id;
+  }, [creationsRef, setCreations, track, upsertCreation]);
 
   // ---------- identities ----------
   const improveIdentity = useCallback((id: string, picked: string[]) => {
@@ -370,7 +410,7 @@ function useStoreValue() {
     identities, creations, creationsRef, styles, segment, onboarded, setOnboarded, freeUsed, isPro, processing,
     demo, setDemo, splash, setSplash, lastDemoDone, setLastDemoDone, closing, setClosing, chatTyping,
     answerSegment, becomeReturning, continueCreation, keepLook, createFromIntent, enhanceAll, startTrial, finishAfterTrial,
-    processPhotos, remixStyle, publishStyle, sendChat, improveIdentity, rememberMe, updateCreation, upsertCreation,
+    processPhotos, remixStyle, publishStyle, sendChat, createFreestyle, restyleAll, improveIdentity, rememberMe, updateCreation, upsertCreation,
     setFlags, resetAll, clearTimers, friend: FRIEND,
   };
 }

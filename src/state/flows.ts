@@ -48,7 +48,7 @@ export function useFlows() {
         title: 'Upload 8–12 selfies',
         max: 12,
         preselect: 8,
-        pool: [...[1, 2, 3, 4].map(A.ref), A.enhanceBefore, A.enhance2Before, A.trip(1), A.trip(7), A.trip(8)],
+        pool: [...[1, 2, 3, 4].map(A.ref), A.enhanceBefore, A.enhance2Before, A.trip(1)],
         cta: 'Continue',
         onDone: () => {
           runGenerating({ steps: ['Uploading 8 selfies', 'Training your model', `Generating ${t.title}`], duration: 2500, preview: t.result }, () => {

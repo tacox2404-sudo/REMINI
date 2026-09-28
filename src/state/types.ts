@@ -36,7 +36,11 @@ export interface ChatMsg {
   from: string;
   text: string;
   images?: string[];
-  action?: 'paywall' | 'animate' | 'enhanced';
+  /** A short video made from several photos (rendered as an animated slideshow). */
+  video?: string[];
+  /** A poster made from one photo and a title. */
+  poster?: { src: string; title: string };
+  action?: 'paywall' | 'animate' | 'enhanced' | 'restyled';
 }
 
 /** A "creation": ongoing work in My Creations. Persistence is automatic. */
@@ -52,6 +56,10 @@ export interface Creation {
   goal: number;
   lastEdit: string;
   chat?: ChatMsg[];
+  /** Albums made together: every member's photos share one style and change together. */
+  shared?: { members: string[]; style: string; feed: { who: string; text: string; when: string }[] };
+  /** One look applied across the whole creation. */
+  style?: string;
 }
 
 export interface CommunityStyle {
@@ -81,6 +89,9 @@ export type ResultKind = 'trend' | 'enhance' | 'look' | 'remix';
 
 export type Route =
   | { name: 'onboarding'; step?: 'question' }
+  | { name: 'studioIntro' }
+  | { name: 'today'; screen: 'photos' | 'filters' | 'videos' | 'chat' | 'profile' }
+  | { name: 'video'; srcs: string[]; title: string }
   | { name: 'trend'; trendId: string }
   | { name: 'result'; kind: ResultKind; image: string; title: string; trendId?: string; styleId?: string; before?: string }
   | { name: 'picker'; title: string; min?: number; max: number; preselect?: number; pool?: string[]; cta: string; onDone: (picked: string[]) => void }

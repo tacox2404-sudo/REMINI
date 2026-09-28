@@ -111,8 +111,9 @@ export function Spotlight({ target, root }: { target: string | null; root: RefOb
     let scrolled = false;
     const measure = () => {
       const r = root.current;
-      const all = r?.querySelectorAll<HTMLElement>(`[data-demo="${target}"]`);
-      const el = all && all.length ? all[all.length - 1] : null;
+      // Only elements on the visible screen (hidden stack layers keep theirs mounted).
+      const all = Array.from(r?.querySelectorAll<HTMLElement>(`[data-demo="${target}"]`) ?? []).filter((e) => e.getClientRects().length > 0);
+      const el = all.length ? all[all.length - 1] : null;
       if (!r || !el) return setRect(null);
       if (!scrolled) {
         scrolled = true;
