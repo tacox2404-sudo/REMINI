@@ -115,6 +115,7 @@ const DEFAULT_NAME: Record<TemplateId, string> = {
   archive: 'Family archive',
   trip: 'Summer trip',
   couple: 'Friends shoot',
+  freestyle: 'Freestyle',
 };
 
 export function NewProjectScreen({ fromPhoto, template: t0, prefill }: { fromPhoto?: string; template?: TemplateId; prefill?: boolean }) {
@@ -149,7 +150,7 @@ export function NewProjectScreen({ fromPhoto, template: t0, prefill }: { fromPho
                   setName(DEFAULT_NAME[tp.id]);
                   setPhotos(suggestFor(tp.id));
                 }}
-                className="relative h-[200px] overflow-hidden rounded-[20px] text-left active:scale-[0.98]"
+                className={`relative overflow-hidden rounded-[20px] text-left active:scale-[0.98] ${tp.id === 'freestyle' ? 'col-span-2 h-[130px]' : 'h-[190px]'}`}
               >
                 <Img src={tp.cover} className="absolute inset-0" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
@@ -243,6 +244,7 @@ export function NewProjectScreen({ fromPhoto, template: t0, prefill }: { fromPho
           onClick={() => {
             const id = createProject({ template, title: name.trim(), identityId, photos, fromPhoto });
             replaceTop({ name: 'project', id });
+            if (template === 'freestyle') push({ name: 'chat', projectId: id });
           }}
         >
           Create project

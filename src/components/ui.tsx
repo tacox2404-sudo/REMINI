@@ -92,20 +92,19 @@ export function ProBadge({ className = '' }: { className?: string }) {
   );
 }
 
-export function V2Badge() {
-  return <span className="rounded-md border border-white/20 px-1.5 py-[1px] text-[10px] font-bold tracking-wide text-white/60">V2</span>;
-}
-
 export function NewBadge({ className = '' }: { className?: string }) {
   return <span className={`rounded-md bg-brand px-1.5 py-[1px] text-[10px] font-extrabold tracking-wide text-white ${className}`}>NEW</span>;
 }
 
-export function SectionHeader({ title, onSeeAll, right, demo }: { title: ReactNode; onSeeAll?: () => void; right?: ReactNode; demo?: string }) {
+export function SectionHeader({ title, sub, onSeeAll, right, demo }: { title: ReactNode; sub?: string; onSeeAll?: () => void; right?: ReactNode; demo?: string }) {
   return (
-    <div data-demo={demo} className="flex items-center justify-between px-4 pb-3 pt-6">
-      <h2 className="flex items-center gap-2 text-[19px] font-bold tracking-tight">{title}</h2>
+    <div data-demo={demo} className="flex items-end justify-between gap-3 px-4 pb-3 pt-7">
+      <div className="min-w-0">
+        <h2 className="flex items-center gap-2 text-[19px] font-bold tracking-tight">{title}</h2>
+        {sub && <p className="mt-0.5 text-[12.5px] leading-snug text-mute">{sub}</p>}
+      </div>
       {right ?? (onSeeAll && (
-        <button onClick={onSeeAll} className="text-[14px] font-medium text-mute active:text-white">
+        <button onClick={onSeeAll} className="shrink-0 pb-0.5 text-[14px] font-medium text-mute active:text-white">
           See all
         </button>
       ))}

@@ -1,20 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { LEVER_META } from '../components/ui';
 import { BEATS, TOTAL_STEPS } from '../state/demo';
 import { useStore } from '../state/store';
 import type { Lever } from '../state/types';
-
-function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
-  return (
-    <button onClick={() => onChange(!on)} className="flex w-full items-center justify-between gap-3 text-[13px] font-medium text-white/85">
-      {label}
-      <span className={`relative h-[22px] w-[38px] shrink-0 rounded-full transition ${on ? 'bg-[#34C759]' : 'bg-white/15'}`}>
-        <span className={`absolute top-[2px] h-[18px] w-[18px] rounded-full bg-white transition-all ${on ? 'left-[18px]' : 'left-[2px]'}`} />
-      </span>
-    </button>
-  );
-}
 
 function LeverPill({ l }: { l: Lever }) {
   return (
@@ -24,9 +13,28 @@ function LeverPill({ l }: { l: Lever }) {
   );
 }
 
+const LEVER_DETAIL: Record<Lever, { why: string; where: string }> = {
+  t: {
+    why: 'The trial is offered at a moment of intent: the user wants to finish something bigger than one photo, so the paywall is framed around completing their project instead of a generic upsell.',
+    where: 'New project, Save to a Project, Enhance all, Start free trial, a chat request that goes beyond the free enhancements.',
+  },
+  c: {
+    why: 'During the 7 days, value has to build up: an identity with better likeness, setups that re-run in one tap, looks created in chat. Cancelling would mean losing a working space, not a one-off result.',
+    where: 'Identities, Improve likeness, saved setup, Re-run setup, Generate looks, chat results.',
+  },
+  w: {
+    why: 'Reasons to open the app every week: trends already rendered on you, projects to continue, notifications about ready sets and friends, a chat that turns a spare minute into something new.',
+    where: 'Try with Me, Projects, Looks, lock-screen notifications, Ask Remini.',
+  },
+  I: {
+    why: 'Every shared album and shared look is an invitation. It opens on the web first and asks for the app only after the friend has seen their own photos in it.',
+    where: 'Share project, invite links, Join and add your photos, Shared albums.',
+  },
+};
+
 export function Controls({ compact = false }: { compact?: boolean }) {
   const s = useStore();
-  const { mode, setMode, showLevers, setShowLevers, demo, setDemo, resetAll, resetStack, goTab } = s;
+  const { mode, setMode, demo, setDemo, resetAll, resetStack, goTab } = s;
   return (
     <div className="space-y-4">
       {!compact && (
@@ -35,6 +43,12 @@ export function Controls({ compact = false }: { compact?: boolean }) {
             Remini <span className="bg-brand bg-clip-text text-transparent">Studio</span>
           </div>
           <div className="text-[12px] text-white/45">Concept prototype · not the real app</div>
+        </div>
+      )}
+      {!compact && (
+        <div className="rounded-xl bg-white/[0.04] p-3.5 text-[12.5px] leading-relaxed text-white/60">
+          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-white/40">The idea</div>
+          Remini today is a one-shot tool: the face identity is trained, used once per trend, and nothing persists. <b className="text-white/85">Studio</b> turns that tech into a personal creative space: identities you reuse, projects you finish, looks you keep, albums you create with friends, and a chat that sparks new ideas. Trends still bring people in; now every trend lands in the Studio.
         </div>
       )}
       <div>
@@ -51,22 +65,6 @@ export function Controls({ compact = false }: { compact?: boolean }) {
             </button>
           ))}
         </div>
-      </div>
-      <div className="rounded-xl bg-white/[0.04] p-3">
-        <Toggle on={showLevers} onChange={setShowLevers} label="Show levers" />
-        <AnimatePresence>
-          {showLevers && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[12px] text-white/70">
-                {(Object.keys(LEVER_META) as Lever[]).map((l) => (
-                  <span key={l} className="flex items-center gap-1.5">
-                    <LeverPill l={l} /> {LEVER_META[l].name}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
       <div className="space-y-2">
         {demo === null ? (
@@ -108,6 +106,73 @@ export function Controls({ compact = false }: { compact?: boolean }) {
         </div>
       </div>
       {!compact && <p className="text-[11px] leading-relaxed text-white/35">Demo keys: → next · ← back · Esc exit</p>}
+    </div>
+  );
+}
+
+/** Separate "Why it matters" module: explains the levers and toggles the tags + event log. */
+export function LeversPanel({ inline = false }: { inline?: boolean }) {
+  const { showLevers, setShowLevers, demo } = useStore();
+  const [open, setOpen] = useState(false);
+  // Keep the demo caption visible: fold the explanation away when the demo moves on.
+  useEffect(() => {
+    if (demo !== null) setOpen(false);
+  }, [demo]);
+  const toggle = () => {
+    const next = !showLevers;
+    setShowLevers(next);
+    setOpen(next);
+  };
+  return (
+    <div className={inline ? '' : 'levers-corner'}>
+      <AnimatePresence>
+        {showLevers && open && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            className={`flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#111116]/95 p-4 backdrop-blur-xl ${inline ? 'mb-3' : 'mb-3 max-h-[calc(100vh-110px)] w-[360px] overflow-y-auto no-scrollbar shadow-2xl'}`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[15px] font-bold">Why it matters</div>
+                <p className="mt-1 text-[12.5px] leading-relaxed text-white/60">
+                  The coloured tags on the screens mark the elements designed to stimulate four business levers. They are hypotheses to test with experiments, not measured results.
+                </p>
+              </div>
+              <button onClick={() => setOpen(false)} className="text-[12px] font-semibold text-white/40 hover:text-white/80">
+                Hide
+              </button>
+            </div>
+            {(Object.keys(LEVER_META) as Lever[]).map((l) => (
+              <div key={l} className="rounded-xl bg-white/[0.04] p-3">
+                <div className="flex items-center gap-2 text-[13px] font-semibold">
+                  <LeverPill l={l} /> {LEVER_META[l].name}
+                </div>
+                <p className="mt-1.5 text-[12px] leading-relaxed text-white/65">{LEVER_DETAIL[l].why}</p>
+                <p className="mt-1 text-[11.5px] leading-relaxed text-white/40">Tagged on: {LEVER_DETAIL[l].where}</p>
+              </div>
+            ))}
+            <div className="flex h-56 flex-col">
+              <EventLog />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className={`flex items-center gap-3 rounded-2xl border border-white/10 bg-[#111116]/95 px-4 py-3 backdrop-blur-xl ${inline ? '' : 'w-[360px] shadow-2xl'}`}>
+        <div className="min-w-0 flex-1">
+          <div className="text-[13px] font-semibold">Why it matters</div>
+          <div className="text-[11.5px] text-white/45">{demo !== null ? 'Best after the demo' : showLevers ? 'Business levers shown on screens' : 'Show the business levers behind the design'}</div>
+        </div>
+        {showLevers && !open && (
+          <button onClick={() => setOpen(true)} className="text-[12px] font-semibold text-white/60 hover:text-white">
+            Explain
+          </button>
+        )}
+        <button data-ctl="levers-toggle" onClick={toggle} aria-label="Show levers" className={`relative h-[24px] w-[42px] shrink-0 rounded-full transition ${showLevers ? 'bg-[#34C759]' : 'bg-white/15'}`}>
+          <span className={`absolute top-[2px] h-[20px] w-[20px] rounded-full bg-white transition-all ${showLevers ? 'left-[20px]' : 'left-[2px]'}`} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -155,11 +220,6 @@ export function DemoCaption({ compact = false }: { compact?: boolean }) {
         <span>
           Step {b.step} of {TOTAL_STEPS}
         </span>
-        {b.lever && (
-          <span className="flex items-center gap-1 normal-case">
-            moves <LeverPill l={b.lever} />
-          </span>
-        )}
       </div>
       <div data-ctl={compact ? undefined : 'demo-title'} className={`mt-1 font-bold leading-tight ${compact ? 'text-[15px]' : 'text-[18px]'}`}>{b.title}</div>
       {!compact && <p className="mt-1.5 text-[14px] leading-snug text-black/70">{b.caption}</p>}
@@ -182,10 +242,15 @@ export function DemoCaption({ compact = false }: { compact?: boolean }) {
 
 function useDemoDriver() {
   const s = useStore();
-  const { demo, setDemo } = s;
+  const { demo, setDemo, setLastDemoDone, setIntroSeen } = s;
+  const prev = useRef<number | null>(null);
 
   useEffect(() => {
+    if (demo === null && prev.current === BEATS.length - 1) setLastDemoDone(true);
+    prev.current = demo;
     if (demo === null) return;
+    // The demo shows the welcome sheet itself; don't pop it again afterwards.
+    setIntroSeen(true);
     BEATS[demo]?.enter(s);
     // Only re-run when the beat changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -205,7 +270,7 @@ function useDemoDriver() {
 }
 
 export function Shell({ phone }: { phone: ReactNode }) {
-  const { showLevers, demo } = useStore();
+  const { demo, lastDemoDone } = useStore();
   const [panel, setPanel] = useState(false);
   useDemoDriver();
 
@@ -219,15 +284,28 @@ export function Shell({ phone }: { phone: ReactNode }) {
 
       <aside className="side side-right">
         <AnimatePresence mode="wait">{demo !== null && <DemoCaption key="cap" />}</AnimatePresence>
-        {showLevers && <EventLog />}
-        {demo === null && !showLevers && (
+        {demo === null && (
           <div className="rounded-2xl border border-white/[0.06] p-4 text-[13px] leading-relaxed text-white/45">
-            <b className="text-white/80">How to present</b>
-            <br />
-            Start in <b className="text-white/70">Today</b>, run a trend, then switch to <b className="text-white/70">With Studio</b>. Or press <b className="text-white/70">Start demo</b> for the guided 9-step path. Turn on <b className="text-white/70">Show levers</b> to tag UI with business levers and log events.
+            {lastDemoDone ? (
+              <>
+                <b className="text-white/85">Demo complete.</b>
+                <br />
+                Now switch on <b className="text-white/70">Why it matters</b> (bottom right) to see which business lever each part of the design is meant to move, then click around freely.
+              </>
+            ) : (
+              <>
+                <b className="text-white/80">How to explore</b>
+                <br />
+                Press <b className="text-white/70">Start demo</b> for the guided tour: Today first, then With Studio. Afterwards, switch on <b className="text-white/70">Why it matters</b> in the bottom-right corner to see the business levers behind the design.
+              </>
+            )}
           </div>
         )}
       </aside>
+
+      <div className="levers-desktop">
+        <LeversPanel />
+      </div>
 
       {/* Small screens: floating control */}
       <div className="mobile-ctl">
@@ -239,17 +317,15 @@ export function Shell({ phone }: { phone: ReactNode }) {
       <AnimatePresence>
         {panel && (
           <motion.div
-            className="fixed inset-x-3 bottom-20 z-[200] flex max-h-[70vh] flex-col gap-3 overflow-y-auto rounded-3xl border border-white/10 bg-[#111116]/95 p-4 backdrop-blur-xl"
+            className="fixed inset-x-3 bottom-20 z-[200] flex max-h-[75vh] flex-col gap-3 overflow-y-auto rounded-3xl border border-white/10 bg-[#111116]/95 p-4 backdrop-blur-xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
           >
             <Controls compact />
-            {showLevers && (
-              <div className="flex h-48 flex-col">
-                <EventLog />
-              </div>
-            )}
+            <div className="border-t border-white/10 pt-3">
+              <LeversPanel inline />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

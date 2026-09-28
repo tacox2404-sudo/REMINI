@@ -6,10 +6,11 @@ import type { Project, ProjectPhoto } from '../state/types';
 import { BeforeAfter } from '../components/BeforeAfter';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
-import { Avatar, Chip, LeverTag, NavHeader, NewBadge, PillWhite, ProgressBar, V2Badge } from '../components/ui';
+import { Avatar, Chip, LeverTag, NavHeader, NewBadge, PillWhite, ProgressBar } from '../components/ui';
+import { AskBar } from './Chat';
 import { progressOf } from './Studio';
 
-const TEMPLATE_LABEL = { profile: 'Profile refresh', archive: 'Family archive', trip: 'Trip or event', couple: 'Friends shoot' };
+const TEMPLATE_LABEL = { profile: 'Profile refresh', archive: 'Family archive', trip: 'Trip or event', couple: 'Friends shoot', freestyle: 'Freestyle' };
 
 function PhotoTile({ ph, archive, onOpen }: { ph: ProjectPhoto; archive: boolean; onOpen: () => void }) {
   const done = ph.status === 'enhanced';
@@ -47,7 +48,7 @@ export function ProjectScreen({ id, tab: initialTab }: { id: string; tab?: 'phot
   const { projects, pop, enhanceAll, generateLooks, rerunSetup, openSheet, push, isPro, freeUsed, processing, showToast, track, identities, stack } = s;
   const animateMemory = useAnimateMemory();
   const p = projects.find((x) => x.id === id);
-  const [localTab, setTab] = useState<'photos' | 'looks' | 'setup'>(initialTab ?? 'photos');
+  const [localTab, setTab] = useState<'photos' | 'looks' | 'setup'>(initialTab ?? (p && !p.photos.length ? 'looks' : 'photos'));
   // A deep link (e.g. re-run → Looks) updates the route's tab; follow it.
   const routeTab = stack[stack.length - 1]?.name === 'project' ? (stack[stack.length - 1] as { tab?: typeof localTab }).tab : undefined;
   const [seenRouteTab, setSeenRouteTab] = useState(routeTab);
@@ -99,7 +100,7 @@ export function ProjectScreen({ id, tab: initialTab }: { id: string; tab?: 'phot
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4">
             <div>
               <div className="flex items-center gap-2 text-[12px] font-semibold text-white/75">
-                {TEMPLATE_LABEL[p.template]} {p.shared && <V2Badge />}
+                {p.shared ? 'Shared album' : TEMPLATE_LABEL[p.template]}
               </div>
               <div className="text-[24px] font-bold leading-tight">{p.title}</div>
             </div>
@@ -117,12 +118,20 @@ export function ProjectScreen({ id, tab: initialTab }: { id: string; tab?: 'phot
           </div>
         </div>
 
-        <div data-demo="project-progress" className="mt-4">
+        <div data-demo="project-progress" className={`mt-4 ${p.photos.length ? '' : 'hidden'}`}>
           <div className="flex justify-between text-[13px]">
             <span className="font-semibold">{pr.label}</span>
             <span className="text-mute">{Math.round((pr.done / Math.max(pr.total, 1)) * 100)}%</span>
           </div>
           <ProgressBar value={pr.done / Math.max(pr.total, 1)} className="mt-2" />
+        </div>
+
+        <div className="mt-3">
+          <AskBar
+            demo="project-ask"
+            onOpen={() => push({ name: 'chat', projectId: p.id })}
+            label={p.shared ? 'Ask Remini: a group look, a poster, a video…' : 'Ask Remini to create or improve…'}
+          />
         </div>
 
         <div className="mt-3 flex items-center gap-3 rounded-2xl bg-white/[0.05] p-3">
@@ -145,7 +154,7 @@ export function ProjectScreen({ id, tab: initialTab }: { id: string; tab?: 'phot
             disabled={isProcessing}
             className="relative flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-white px-4 text-[14px] font-semibold text-black active:scale-95 disabled:opacity-50"
           >
-            <I.Enhance size={17} /> Enhance all {p.photos.length}
+            <I.Enhance size={17} /> Enhance all
             <LeverTag l="t" />
           </button>
         )}
@@ -155,7 +164,7 @@ export function ProjectScreen({ id, tab: initialTab }: { id: string; tab?: 'phot
               <I.Play size={14} /> Animate a memory
             </Chip>
             <Chip onClick={() => openSheet({ type: 'share', projectId: p.id })}>
-              <I.Users size={16} /> Invite family to add photos <V2Badge />
+              <I.Users size={16} /> Invite family to add photos
               <LeverTag l="I" />
             </Chip>
           </>
@@ -221,6 +230,7 @@ export function ProjectScreen({ id, tab: initialTab }: { id: string; tab?: 'phot
       </div>
 
       <div className="px-4 pt-3">
+        {tab === 'photos' && !p.photos.length && <div className="rounded-[20px] border border-dashed border-white/15 p-6 text-center text-[13px] text-mute">No photos yet. This project lives in its looks and its chat.</div>}
         {tab === 'photos' && (
           <div className="grid grid-cols-3 gap-1.5">
             {p.photos.map((ph) => (
@@ -272,7 +282,7 @@ export function PhotoScreen({ projectId, photoId }: { projectId: string; photoId
               enhanceAll(p.id);
             }}
           >
-            <I.Enhance size={18} /> Enhance all {p.photos.length}
+            <I.Enhance size={18} /> Enhance all
           </PillWhite>
         )}
         {done && !archive && <p className="text-center text-[13px] text-mute">Drag the handle to compare</p>}

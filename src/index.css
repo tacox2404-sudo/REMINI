@@ -157,8 +157,17 @@ button {
   pointer-events: none;
 }
 
+/* The levers module lives in its own corner, apart from the demo controls. */
+.levers-desktop {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 150;
+}
+
 @media (max-width: 1180px) {
   .side { display: none; }
+  .levers-desktop { display: none; }
   .mobile-ctl { display: flex; }
 }
 

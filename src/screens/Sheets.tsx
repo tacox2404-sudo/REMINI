@@ -7,7 +7,7 @@ import type { Sheet } from '../state/types';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
 import { SheetFrame } from '../components/Overlays';
-import { Avatar, LeverTag, PillBrand, PillGhost, PillWhite, V2Badge } from '../components/ui';
+import { Avatar, LeverTag, PillBrand, PillGhost, PillWhite } from '../components/ui';
 
 export function SheetHost() {
   const { sheet, closeSheet } = useStore();
@@ -38,6 +38,8 @@ function SheetBody({ sheet }: { sheet: Sheet }) {
       return <NewIdentity />;
     case 'profileToday':
       return <ProfileToday />;
+    case 'studioIntro':
+      return <StudioIntro />;
   }
 }
 
@@ -127,7 +129,6 @@ function Paywall({ projectId, stage }: { projectId: string; stage: 'offer' | 'su
       </div>
     );
 
-  const remaining = p.photos.filter((ph) => ph.status === 'original').length;
   return (
     <div className="px-5">
       <div className="relative -mx-5 -mt-1 h-[150px] overflow-hidden">
@@ -148,7 +149,7 @@ function Paywall({ projectId, stage }: { projectId: string; stage: 'offer' | 'su
 
       <ul className="mt-5 space-y-2.5 text-[14px]">
         {[
-          `Enhance all ${p.photos.length} photos in “${p.title}” (${remaining} left)`,
+          `Enhance every photo in “${p.title}”`,
           'Keep your identities, projects and saved setups',
           'New looks with Me every week, no re-uploads',
         ].map((t) => (
@@ -205,7 +206,6 @@ function ShareSheet({ projectId }: { projectId: string }) {
     <div className="px-5 pt-1">
       <div className="flex items-center justify-between">
         <h3 className="text-[20px] font-bold">Share “{p.title}”</h3>
-        <V2Badge />
       </div>
       <p className="mt-1 text-[13px] text-mute">Friends can view, add photos and apply the same look. No app needed to join.</p>
 
@@ -397,6 +397,38 @@ function ProfileToday() {
       <p className="mt-3 text-[13px] text-mute">Results are saved to your camera roll. There's nothing here to come back to.</p>
       <PillWhite className="mt-5" onClick={closeSheet}>
         Close
+      </PillWhite>
+    </div>
+  );
+}
+
+function StudioIntro() {
+  const { closeSheet } = useStore();
+  const rows: [JSX.Element, string, string][] = [
+    [<I.Photos key="i" />, 'Identities', 'You, trained once. Every tool and every trend reuses it, with no re-uploads.'],
+    [<I.Studio key="p" />, 'Projects', 'Bigger things you finish over time: a profile refresh, a family archive, a trip.'],
+    [<I.Heart key="l" />, 'Looks', 'Everything you make is kept, and good setups become reusable recipes.'],
+    [<I.Users key="s" />, 'Shared albums', 'Create with friends: everyone adds photos and asks Remini for group looks.'],
+    [<I.Enhance key="c" />, 'Remini chat', 'Describe an idea or an improvement, and Remini makes it with your identity.'],
+  ];
+  return (
+    <div data-demo="studio-intro" className="px-5 pt-1">
+      <span className="rounded-full bg-brand px-2.5 py-1 text-[11px] font-bold">NEW</span>
+      <h3 className="mt-3 text-[26px] font-bold leading-tight tracking-tight">Welcome to your Studio</h3>
+      <p className="mt-1.5 text-[14px] leading-snug text-white/65">Your personal creative space in Remini. Nothing you make is lost, and there is always something to continue.</p>
+      <div className="mt-5 space-y-3.5">
+        {rows.map(([icon, t, d]) => (
+          <div key={t} className="flex gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.07] text-[#FF6A8E]">{icon}</span>
+            <div>
+              <div className="text-[15px] font-semibold">{t}</div>
+              <div className="text-[13px] leading-snug text-mute">{d}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <PillWhite className="mt-6" onClick={closeSheet}>
+        Open my Studio
       </PillWhite>
     </div>
   );

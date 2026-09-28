@@ -2,7 +2,7 @@ export type Mode = 'today' | 'studio';
 export type Lever = 't' | 'c' | 'w' | 'I';
 export type Tab = 'studio' | 'enhance' | 'aiphotos' | 'filters' | 'videos' | 'retouch';
 
-export type TemplateId = 'profile' | 'archive' | 'trip' | 'couple';
+export type TemplateId = 'profile' | 'archive' | 'trip' | 'couple' | 'freestyle';
 
 export interface Identity {
   id: string;
@@ -44,6 +44,15 @@ export interface FeedItem {
   when: string;
 }
 
+export interface ChatMsg {
+  id: string;
+  /** 'me', 'remini', or a collaborator's name in a shared album. */
+  from: string;
+  text: string;
+  images?: string[];
+  action?: 'paywall' | 'animate' | 'enhanced';
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -57,6 +66,7 @@ export interface Project {
   nextStep: string;
   shared?: { owner: string; collaborators: string[]; link: string; feed: FeedItem[] };
   animated?: string[];
+  chat?: ChatMsg[];
 }
 
 export interface SavedLook {
@@ -85,6 +95,7 @@ export type Route =
   | { name: 'newProject'; fromPhoto?: string; template?: TemplateId; prefill?: boolean }
   | { name: 'project'; id: string; tab?: 'photos' | 'looks' | 'setup' }
   | { name: 'photo'; projectId: string; photoId: string }
+  | { name: 'chat'; projectId: string }
   | { name: 'lock' }
   | { name: 'recipient' }
   | { name: 'about' }
@@ -98,7 +109,8 @@ export type Sheet =
   | { type: 'createWith'; identityId: string }
   | { type: 'privacy' }
   | { type: 'newIdentity' }
-  | { type: 'profileToday' };
+  | { type: 'profileToday' }
+  | { type: 'studioIntro' };
 
 export interface Generating {
   steps: string[];

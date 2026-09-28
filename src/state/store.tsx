@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
+import { chatReply, seedSummerChat } from './chat';
 import { A, IDENTITIES, LINKEDIN_SETUP, LOOKS, SAVED_LOOKS, linkedInPhotos, photo, seedProjects } from './data';
 import type {
+  ChatMsg,
   Generating,
   Identity,
   Lever,
@@ -64,13 +66,27 @@ const SETUPS: Record<TemplateId, Setup> = {
     outfit: 'Coordinated neutrals',
     prompt: 'Two friends laughing, candid editorial shot, 50mm',
   },
+  freestyle: {
+    name: 'Freestyle',
+    style: 'Defined by your chat',
+    background: 'Anything',
+    outfit: 'Anything',
+    prompt: 'Built up message by message with Remini chat',
+  },
 };
+
+function seedAll(): Project[] {
+  return seedProjects().map((p) => (p.id === 'summer' ? { ...p, chat: seedSummerChat() } : p));
+}
+
+let chatSeq = 0;
 
 const NEXT_STEP: Record<TemplateId, string> = {
   profile: 'Add a headshot with natural light for a better match',
   archive: 'Animate a memory from the album',
   trip: 'Apply one look to the whole set',
-  couple: 'Add the second identity',
+  couple: 'Add a friend to the scene',
+  freestyle: 'Describe an idea to Remini and iterate',
 };
 
 function useStoreValue() {
@@ -85,7 +101,10 @@ function useStoreValue() {
   const [events, setEvents] = useState<LogEvent[]>([]);
   const [identities, setIdentities] = useSyncState<Identity[]>(IDENTITIES);
   const [looks, setLooks] = useSyncState<Look[]>(LOOKS);
-  const [projects, setProjects, projectsRef] = useSyncState<Project[]>(seedProjects);
+  const [projects, setProjects, projectsRef] = useSyncState<Project[]>(seedAll);
+  const [chatTyping, setChatTyping] = useState<string | null>(null);
+  const [introSeen, setIntroSeen] = useState(false);
+  const [lastDemoDone, setLastDemoDone] = useState(false);
   const [savedLooks] = useState<SavedLook[]>(SAVED_LOOKS);
   const [freeUsed, setFreeUsed] = useState(4);
   const [isPro, setIsPro] = useState(false);
@@ -407,6 +426,56 @@ function useStoreValue() {
     [updateProject],
   );
 
+  const sendChat = useCallback(
+    (projectId: string, text: string) => {
+      const p = projectsRef.current.find((x) => x.id === projectId);
+      if (!p || !text.trim()) return;
+      const mine: ChatMsg = { id: `m${++chatSeq}`, from: 'me', text: text.trim() };
+      updateProject(projectId, (pr) => ({ ...pr, chat: [...(pr.chat ?? []), mine], lastEdit: 'Just now' }));
+      track('chat_prompt_sent', 'w');
+      setChatTyping(projectId);
+      const r = chatReply(text, p);
+      later(() => {
+        setChatTyping(null);
+        const needsPro = r.action === 'enhanced' && !isPro && p.photos.some((ph) => ph.status === 'original');
+        const msg: ChatMsg = needsPro
+          ? { id: `m${++chatSeq}`, from: 'remini', text: 'That would enhance every photo in the project, which is more than your free enhancements. Start the free trial and I will finish it now.', action: 'paywall' }
+          : { id: `m${++chatSeq}`, from: 'remini', text: r.text, images: r.images, action: r.action };
+        updateProject(projectId, (pr) => ({
+          ...pr,
+          chat: [...(pr.chat ?? []), msg],
+          looks: msg.images && msg.action !== 'animate' ? [...msg.images.map((src) => newLook(src, r.title, 'casual', pr.identityId)), ...pr.looks] : pr.looks,
+        }));
+        if (msg.images && msg.action !== 'animate') track('chat_result_added', 'c');
+        if (r.action === 'enhanced' && !needsPro) processProject(projectId);
+        if (needsPro) track('paywall_offered_in_chat', 't');
+      }, 1900);
+    },
+    [isPro, later, processProject, projectsRef, track, updateProject],
+  );
+
+  const createFreestyle = useCallback(() => {
+    const empty = projectsRef.current.find((x) => x.template === 'freestyle' && (x.chat ?? []).every((m) => m.from === 'remini'));
+    if (empty) return empty.id;
+    const id = `f${Date.now().toString(36)}`;
+    const p: Project = {
+      id,
+      title: 'Freestyle',
+      template: 'freestyle',
+      identityId: 'me',
+      cover: A.creative(1),
+      photos: [],
+      looks: [],
+      setup: SETUPS.freestyle,
+      lastEdit: 'Just now',
+      nextStep: NEXT_STEP.freestyle,
+      chat: [{ id: `m${++chatSeq}`, from: 'remini', text: 'Hi! I know what you look like from your identity "Me". Describe anything and I will make it, then we iterate together.' }],
+    };
+    setProjects((ps) => [p, ...ps]);
+    track('freestyle_started', 'w');
+    return id;
+  }, [projectsRef, setProjects, track]);
+
   const setFlags = useCallback((f: { isPro?: boolean; freeUsed?: number }) => {
     if (f.isPro !== undefined) setIsPro(f.isPro);
     if (f.freeUsed !== undefined) setFreeUsed(f.freeUsed);
@@ -423,7 +492,10 @@ function useStoreValue() {
     setEvents([]);
     setIdentities(IDENTITIES);
     setLooks(LOOKS);
-    setProjects(seedProjects());
+    setProjects(seedAll());
+    setChatTyping(null);
+    setIntroSeen(false);
+    setLastDemoDone(false);
     setFreeUsed(4);
     setIsPro(false);
     setProcessing(null);
@@ -440,7 +512,7 @@ function useStoreValue() {
     showLevers, setShowLevers, events, track, clearEvents: useCallback(() => setEvents([]), []),
     identities, looks, projects, projectsRef, savedLooks, freeUsed, isPro, processing,
     demo, setDemo, splash, setSplash,
-    createProject, ensureLinkedIn, completeProject, enhanceAll, processProject, startTrial, generateLooks, rerunSetup,
+    createProject, ensureLinkedIn, completeProject, sendChat, createFreestyle, chatTyping, introSeen, setIntroSeen, lastDemoDone, setLastDemoDone, enhanceAll, processProject, startTrial, generateLooks, rerunSetup,
     saveLookToStudio, addPhotoToProject, joinShared, improveIdentity, addIdentity, markAnimated,
     setFlags, resetAll, clearTimers, useFreeEnhancement, updateProject,
   };

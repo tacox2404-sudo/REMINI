@@ -6,6 +6,7 @@ import { BEATS } from './state/demo';
 import { useStore } from './state/store';
 import type { Route } from './state/types';
 import { AboutScreen, AnimateScreen, GridScreen, PickerScreen, ResultScreen, Splash, TrendScreen } from './screens/Flows';
+import { ChatScreen } from './screens/Chat';
 import { IdentityScreen, NewProjectScreen } from './screens/Identity';
 import { LockScreen, RecipientScreen } from './screens/Outside';
 import { PhotoScreen, ProjectScreen } from './screens/Project';
@@ -30,6 +31,8 @@ function renderRoute(r: Route) {
       return <ProjectScreen id={r.id} tab={r.tab} />;
     case 'photo':
       return <PhotoScreen projectId={r.projectId} photoId={r.photoId} />;
+    case 'chat':
+      return <ChatScreen projectId={r.projectId} />;
     case 'lock':
       return <LockScreen />;
     case 'recipient':

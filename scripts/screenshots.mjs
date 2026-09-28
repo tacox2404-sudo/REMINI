@@ -28,11 +28,11 @@ await page.waitForTimeout(1800);
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
 
 async function run(levers) {
-  if (levers) await page.getByRole('button', { name: 'Show levers' }).click();
+  if (levers) await page.click('[data-ctl="levers-toggle"]');
   await page.click('[data-ctl="start-demo"]');
   for (let i = 0; ; i++) {
     const title = await page.locator('[data-ctl="demo-title"]').textContent();
-    const wait = /Back into the project/.test(title) ? 3600 : 1500;
+    const wait = /back into the project|chat/i.test(title) ? 3600 : 1500;
     await page.waitForTimeout(wait);
     const name = `${String(i + 1).padStart(2, '0')}-${slug(title)}.png`;
     if (levers) await page.screenshot({ path: resolve(out, 'full', name) });
@@ -47,6 +47,14 @@ async function run(levers) {
 
 await run(false);
 await run(true);
+
+// The levers explanation on its own, after the demo, as a presenter would open it.
+await page.click('[data-ctl="levers-toggle"]');
+await page.waitForTimeout(300);
+await page.click('[data-ctl="levers-toggle"]');
+await page.waitForTimeout(900);
+await page.screenshot({ path: resolve(out, 'full', '00-why-it-matters.png') });
+console.log('full/00-why-it-matters.png');
 await browser.close();
 
 if (errors.length) {
