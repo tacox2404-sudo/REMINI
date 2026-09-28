@@ -14,6 +14,7 @@ export interface Beat {
 /** Put the app in a known state so every beat works regardless of what was clicked before. */
 function scene(s: Store, mode: Mode, tab: Tab, routes: Route[] = []) {
   s.clearTimers();
+  s.clearToast();
   s.closeSheet();
   s.setClosing(false);
   if (s.mode !== mode) s.setMode(mode);

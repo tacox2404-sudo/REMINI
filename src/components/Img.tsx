@@ -3,6 +3,11 @@ import { useState, type CSSProperties } from 'react';
 const BASE = import.meta.env.BASE_URL;
 const failed = new Set<string>();
 
+/** The standalone build embeds every photo as a data URI in window.__ASSETS. */
+const INLINE: Record<string, string> | undefined = (window as unknown as { __ASSETS?: Record<string, string> }).__ASSETS;
+const urlFor = (name: string) => INLINE?.[name] ?? `${BASE}assets/${name}`;
+const isMissing = (name: string) => failed.has(name) || (INLINE !== undefined && !(name in INLINE));
+
 function hash(s: string) {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
@@ -82,14 +87,14 @@ interface Props {
 export function Img({ src, alt = '', className = '', style, degrade, label = true, imgClassName = '' }: Props) {
   const candidates = src.split('|').filter(Boolean);
   const [bump, setBump] = useState(0);
-  const current = candidates.find((c) => !failed.has(c));
+  const current = candidates.find((c) => !isMissing(c));
   const filter = degrade ? { filter: DEGRADE } : undefined;
   return (
     <div className={`${/\b(absolute|fixed)\b/.test(className) ? '' : 'relative'} overflow-hidden bg-card2 ${className}`} style={style}>
       {current ? (
         <img
           key={current}
-          src={`${BASE}assets/${current}`}
+          src={urlFor(current)}
           alt={alt}
           draggable={false}
           onError={() => {

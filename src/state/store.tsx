@@ -365,7 +365,7 @@ function useStoreValue() {
 
   return {
     mode, setMode, tab, goTab, stack, stackRef, navDir, push, pop, replaceTop, resetStack,
-    sheet, openSheet, closeSheet, generating, runGenerating, toast, showToast,
+    sheet, openSheet, closeSheet, generating, runGenerating, toast, showToast, clearToast: useCallback(() => setToast(null), []),
     showLevers, setShowLevers, events, track, clearEvents: useCallback(() => setEvents([]), []),
     identities, creations, creationsRef, styles, segment, onboarded, setOnboarded, freeUsed, isPro, processing,
     demo, setDemo, splash, setSplash, lastDemoDone, setLastDemoDone, closing, setClosing, chatTyping,
