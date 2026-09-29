@@ -14,7 +14,7 @@ export function SheetHost() {
   return (
     <AnimatePresence>
       {sheet && (
-        <SheetFrame key={sheet.type} onClose={closeSheet} tall={sheet.type === 'paywall' || sheet.type === 'paywallGeneric'}>
+        <SheetFrame key={`${sheet.type}-${sheet.type === 'withFriend' ? sheet.via ?? '' : ''}`} onClose={closeSheet} tall={sheet.type === 'paywall' || sheet.type === 'paywallGeneric'}>
           <SheetBody sheet={sheet} />
         </SheetFrame>
       )}
@@ -31,7 +31,7 @@ function SheetBody({ sheet }: { sheet: Sheet }) {
     case 'paywallGeneric':
       return <PaywallGeneric image={sheet.image} reason={sheet.reason} />;
     case 'withFriend':
-      return <WithFriend title={sheet.title} image={sheet.image} link={sheet.link} challenge={sheet.challenge} />;
+      return <WithFriend title={sheet.title} image={sheet.image} link={sheet.link} challenge={sheet.challenge} via={sheet.via} />;
     case 'publish':
       return <Publish image={sheet.image} from={sheet.from} />;
     case 'privacy':
@@ -195,40 +195,104 @@ function PaywallGeneric({ image, reason }: { image?: string; reason: 'onboarding
   );
 }
 
-function WithFriend({ title, image, link, challenge }: { title: string; image: string; link: string; challenge?: boolean }) {
+const APPS: { name: string; color: string; glyph: string }[] = [
+  { name: 'WhatsApp', color: '#25D366', glyph: 'W' },
+  { name: 'Messages', color: '#34C759', glyph: 'M' },
+  { name: 'Instagram', color: '#E1306C', glyph: 'I' },
+  { name: 'TikTok', color: '#111', glyph: 'T' },
+];
+
+/**
+ * Sharing reaches two kinds of people: friends outside Remini (a message with a
+ * join link, through any messaging or social app) and friends already on Remini.
+ */
+function WithFriend({ title, image, challenge, via: initialVia }: { title: string; image: string; link: string; challenge?: boolean; via?: string }) {
   const { closeSheet, track, showToast, friend, unlocked, shareWithFriend, resetStack } = useStore();
-  const send = () => {
+  const [via, setVia] = useState<string | null>(initialVia ?? null);
+  const joinLink = 'remini.app/join/you-3f9';
+
+  const sendOutside = () => {
     closeSheet();
+    track(`invite_sent_${(via ?? 'link').toLowerCase()}`, 'I');
     if (!unlocked.friend) {
-      // The first share: the friend joins from the link and shares her own style back.
+      // The first invite: the friend installs Remini from the link and becomes a Remini friend.
       shareWithFriend();
-      showToast(`${friend} joined Remini and sent you her style`);
-      window.setTimeout(() => resetStack([{ name: 'studio' }]), 900);
-      return;
-    }
-    track(challenge ? 'challenge_sent' : 'invite_sent', 'I');
-    showToast(`Sent to ${friend}`);
+      showToast(`${friend} joined Remini from your ${via} invite`);
+      window.setTimeout(() => resetStack([{ name: 'studio' }]), 1000);
+    } else showToast(`Sent via ${via}`);
   };
-  return (
-    <div className="px-5 pt-1">
-      <h3 className="text-[20px] font-bold">{challenge ? 'Challenge a friend' : `Share with ${friend}`}</h3>
-      <p className="mt-1 text-[13px] text-mute">{challenge ? 'They make their version with their own locked profile.' : 'The link opens in Remini. Friends can make their own version with their own profile.'}</p>
-      <div data-demo="invite-preview" className="mt-4 rounded-[22px] bg-[#1c1c1e] p-3">
-        <div className="text-center text-[11px] text-white/40">iMessage · to {friend}</div>
-        <div className="ml-auto mt-2 w-[240px] overflow-hidden rounded-[18px] bg-[#2c2c2e]">
-          <Img src={image} className="h-[150px] w-full" label={false} />
-          <div className="p-2.5">
-            <div className="text-[13px] font-semibold leading-snug">{challenge ? `I did “${title}”. Your turn 👀` : `My new ${title} 👔 made with Remini`}</div>
-            <div className="mt-0.5 text-[11px] text-white/50">{link}</div>
+
+  // Step 2: the message as it appears in the chosen app.
+  if (via)
+    return (
+      <div className="px-5 pt-1">
+        <button onClick={() => setVia(null)} className="text-[13px] font-semibold text-white/60">‹ Back</button>
+        <h3 className="mt-1 text-[20px] font-bold">Invite via {via}</h3>
+        <p className="mt-1 text-[13px] text-mute">{friend} isn’t on Remini yet. She gets your photo and a link; joining takes one tap.</p>
+        <div data-demo="invite-preview" className="mt-4 rounded-[22px] bg-[#0b141a] p-3">
+          <div className="text-center text-[11px] text-white/40">{via} · {friend}</div>
+          <div className="ml-auto mt-2 w-[240px] overflow-hidden rounded-[14px] bg-[#005c4b]">
+            <Img src={image} className="h-[150px] w-full" label={false} />
+            <div className="p-2.5">
+              <div className="text-[13px] font-semibold leading-snug">{challenge ? `I did “${title}”. Your turn 👀` : `My new ${title}, made with Remini`}</div>
+              <div className="mt-1 rounded-lg bg-black/20 p-2 text-[11.5px]">
+                <div className="font-semibold">Join me on Remini</div>
+                <div className="text-white/60">{joinLink}</div>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="ml-auto mt-1.5 w-fit rounded-[16px] bg-[#0A84FF] px-3 py-1.5 text-[13px]">{challenge ? 'bet you can’t beat this' : 'what do you think?'}</div>
+        <PillBrand demo="send-friend" className="mt-4" onClick={sendOutside}>
+          Send to {friend}
+          <LeverTag l="I" />
+        </PillBrand>
       </div>
-      <PillBrand demo="send-friend" className="mt-4" onClick={send}>
-        Send to {friend}
+    );
+
+  return (
+    <div className="px-5 pt-1">
+      <h3 className="text-[20px] font-bold">{challenge ? 'Challenge a friend' : 'Share'}</h3>
+
+      <div data-demo="share-apps" className="relative mt-3">
         <LeverTag l="I" />
-      </PillBrand>
-      <button onClick={() => { track('invite_link_copied', 'I'); showToast('Link copied'); }} className="mt-1 h-10 w-full text-[13px] font-semibold text-white/60">Copy link</button>
+        <div className="text-[12px] font-semibold uppercase tracking-wider text-mute">Send outside Remini</div>
+        <div className="mt-2.5 flex justify-between">
+          {APPS.map((a) => (
+            <button key={a.name} data-demo={`app-${a.name.toLowerCase()}`} onClick={() => setVia(a.name)} className="flex flex-col items-center gap-1.5 text-[11px] text-white/75">
+              <span className="grid h-[52px] w-[52px] place-items-center rounded-2xl text-[18px] font-extrabold text-white" style={{ background: a.color }}>
+                {a.glyph}
+              </span>
+              {a.name}
+            </button>
+          ))}
+          <button onClick={() => { track('invite_link_copied', 'I'); showToast('Link copied'); }} className="flex flex-col items-center gap-1.5 text-[11px] text-white/75">
+            <span className="grid h-[52px] w-[52px] place-items-center rounded-2xl bg-white/10"><I.Link size={22} /></span>
+            Copy link
+          </button>
+        </div>
+        <p className="mt-2.5 text-[12px] leading-snug text-mute">Friends without Remini get the photo and a link to join. Once they join, they’re your Remini friends and you can create together.</p>
+      </div>
+
+      <div className="mt-5 text-[12px] font-semibold uppercase tracking-wider text-mute">Friends on Remini</div>
+      {unlocked.friend ? (
+        <button
+          onClick={() => {
+            closeSheet();
+            track('shared_in_remini', 'I');
+            showToast(`Sent to ${friend} in Remini`);
+          }}
+          className="mt-2 flex w-full items-center gap-3 rounded-2xl bg-white/[0.05] p-2.5 text-left"
+        >
+          <Img src={A.friend} className="h-10 w-10 rounded-full" label={false} />
+          <span className="flex-1">
+            <span className="block text-[15px] font-semibold">{friend}</span>
+            <span className="block text-[12px] text-mute">On Remini · joined from your invite</span>
+          </span>
+          <span className="rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-black">Send</span>
+        </button>
+      ) : (
+        <div className="mt-2 rounded-2xl border border-dashed border-white/15 p-3 text-[12.5px] text-mute">No friends on Remini yet. Invite someone from another app above.</div>
+      )}
     </div>
   );
 }

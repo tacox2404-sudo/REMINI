@@ -124,9 +124,9 @@ export const BEATS: Beat[] = [
   // ---------- One friend ----------
   {
     step: 5,
-    title: 'Share with one friend',
-    caption: 'You send your new headshot to Paola. She opens it in Remini.',
-    target: 'send-friend',
+    title: 'Share outside Remini',
+    caption: 'Share works as usual: WhatsApp, Messages, Instagram, TikTok or a link. Friends without Remini get the photo and a link to join; friends already on Remini are listed below.',
+    target: 'share-apps',
     enter: (s) => {
       scene(s, 'studio', 1.5, [set]);
       s.openSheet({ type: 'withFriend', title: 'LinkedIn photo', image: A.linkedin(1), link: 'remini.app/s/linkedin-set' });
@@ -134,8 +134,28 @@ export const BEATS: Beat[] = [
   },
   {
     step: 5,
+    title: 'An invite on WhatsApp',
+    caption: 'Paola isn’t on Remini yet. She gets your headshot with “Join me on Remini” and a link.',
+    target: 'send-friend',
+    enter: (s) => {
+      scene(s, 'studio', 1.5, [set]);
+      s.openSheet({ type: 'withFriend', title: 'LinkedIn photo', image: A.linkedin(1), link: 'remini.app/s/linkedin-set', via: 'WhatsApp' });
+    },
+  },
+  {
+    step: 5,
+    title: 'Paola joined Remini',
+    caption: 'She installs from the link and is now your Remini friend. From here on you create together inside Remini.',
+    target: 'friend-joined',
+    enter: (s) => {
+      scene(s, 'studio', 1.5, [{ name: 'studio' }]);
+      s.shareWithFriend();
+    },
+  },
+  {
+    step: 5,
     title: 'Paola shares her style back',
-    caption: 'Paola joined and shared her 80s film style. “Make your version” applies it to you.',
+    caption: 'As a Remini friend, Paola shares her 80s film style with you. “Make your version” applies it to you.',
     target: 'make-your-version',
     enter: (s) => {
       scene(s, 'studio', 1.5, [{ name: 'studio' }]);

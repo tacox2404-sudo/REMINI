@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { progressOf } from '../state/data';
+import { A, FRIEND, progressOf } from '../state/data';
 import { useStore } from '../state/store';
 import type { CommunityStyle, Creation } from '../state/types';
 import { I } from '../components/Icons';
@@ -205,6 +205,16 @@ export function StudioScreen() {
 
       <SectionHeader title={<span className="relative">Together<LeverTag l="I" className="-right-5 -top-1" /></span>} sub="Made with friends, then with the whole group" />
       <div className="space-y-2.5 px-4">
+        {unlocked.friend && (
+          <div data-demo="friend-joined" className="flex items-center gap-3 rounded-[18px] bg-card p-3">
+            <Img src={A.friend} className="h-11 w-11 rounded-full" label={false} />
+            <div className="min-w-0 flex-1">
+              <div className="text-[14.5px] font-semibold">{FRIEND} joined Remini</div>
+              <div className="text-[12px] text-mute">From your WhatsApp invite · now a Remini friend</div>
+            </div>
+            <span className="rounded-full bg-[#2ED47A]/15 px-2.5 py-1 text-[11px] font-bold text-[#2ED47A]">Friend</span>
+          </div>
+        )}
         {unlocked.friend && friendStyle && !paola && <StyleCard st={friendStyle} />}
         {paola && <CreationCard c={paola} wide />}
         {album && <CreationCard c={album} wide />}

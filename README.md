@@ -49,7 +49,7 @@ The photos live in `public/assets/` (web-sized JPGs); the full-size originals ar
 
 **Today (3 steps):** home and bottom tools, AI Photos with a 4-selfie profile, Remini Chat.
 
-**With Studio:** why are you here (Profile or work photos; Restore old photos also works) → first creation, a LinkedIn photo (Remini examples only) → "Is this you?" lock-in → Save, Share or Keep this → kept in Studio → Me: locked in, adapted per creation → AI Filters on your profile (80s) → one style, one creation → Remini chat presets → Remix and Chats in Studio → share with Paola → she shares her 80s style back → your version (Everyday) → you and Paola together → the whole group: Friends trip → presets for everyone → finish it with Pro (5 of 17, trial) → coming back (notification) → welcome back → Why it pays (NPV sliders).
+**With Studio:** why are you here (Profile or work photos; Restore old photos also works) → first creation, a LinkedIn photo (Remini examples only) → "Is this you?" lock-in → Save, Share or Keep this → kept in Studio → Me: locked in, adapted per creation → AI Filters on your profile (80s) → one style, one creation → Remini chat presets → Remix and Chats in Studio → share outside Remini (WhatsApp invite with a join link) → Paola joins Remini → she shares her 80s style back → your version (Everyday) → you and Paola together → the whole group: Friends trip → presets for everyone → finish it with Pro (5 of 17, trial) → coming back (notification) → welcome back → Why it pays (NPV sliders).
 
 ### Screenshots
 

@@ -120,7 +120,7 @@ export type Sheet =
   | { type: 'keepThis'; photo: string; title: string }
   | { type: 'paywall'; creationId: string; stage: 'offer' | 'success' }
   | { type: 'paywallGeneric'; image?: string; reason: 'onboarding' | 'result' }
-  | { type: 'withFriend'; title: string; image: string; link: string; challenge?: boolean }
+  | { type: 'withFriend'; title: string; image: string; link: string; challenge?: boolean; via?: string }
   | { type: 'publish'; image: string; from: string }
   | { type: 'privacy' }
   | { type: 'rememberMe' }
