@@ -98,7 +98,7 @@ export function MeCard() {
           <div className="flex items-center gap-1.5 text-[17px] font-bold">
             {me.name} <I.Lock size={14} className="text-[#2ED47A]" />
           </div>
-          <div className="text-[12.5px] text-mute">{me.subtitle} · used in {creations.length} creation{creations.length === 1 ? '' : 's'}</div>
+          <div className="text-[12.5px] text-mute">{me.subtitle} · used in {creations.filter((c) => !c.chatOnly).length} creations</div>
         </div>
         <I.Chevron size={18} className="text-mute" />
       </div>
@@ -119,8 +119,13 @@ export function MeCard() {
 /** Studio: only your own and shared work. Everything else stays on Remini's usual pages. */
 export function StudioScreen() {
   const { creations, styles, unlocked, returning, push, pop, identities } = useStore();
-  const open = creations.filter((c) => progressOf(c).done < progressOf(c).total);
+  const works = creations.filter((c) => !c.chatOnly);
+  const open = works.filter((c) => progressOf(c).done < progressOf(c).total);
   const friendStyle = styles.find((s) => s.friend);
+  // Remix: your versions of styles (one creation per style), and styles friends shared.
+  const remixes = works.filter((c) => c.id.startsWith('style-'));
+  // Chats: every conversation with Remini, reopenable.
+  const chats = creations.filter((c) => (c.chat ?? []).some((m) => m.from !== 'remini') || c.chatOnly);
   const album = creations.find((c) => c.id === 'trip');
   const paola = creations.find((c) => c.id === 'paola');
 
@@ -149,9 +154,9 @@ export function StudioScreen() {
       )}
 
       <SectionHeader demo="keep-going" title={<span className="relative">Keep going<LeverTag l="w" className="-right-5 -top-1" /></span>} sub="Everything you kept saves itself" />
-      {creations.length ? (
+      {works.length ? (
         <HScroll>
-          {creations.map((c) => (
+          {works.filter((c) => !c.id.startsWith('style-')).map((c) => (
             <CreationCard key={c.id} c={c} />
           ))}
           <button data-demo="what-creating" onClick={() => push({ name: 'create' })} className="relative flex w-[150px] shrink-0 flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-white/20 p-3 text-center">
@@ -165,6 +170,38 @@ export function StudioScreen() {
       ) : (
         <div className="mx-4 rounded-[20px] border border-dashed border-white/15 p-5 text-center text-[13px] text-mute">Nothing kept yet. Create anything in Remini and tap “Keep this”.</div>
       )}
+
+      <SectionHeader demo="remix" title={<span className="relative">Remix<LeverTag l="w" className="-right-5 -top-1" /></span>} sub="Styles and filters on your profile, one creation per style" />
+      {remixes.length ? (
+        <HScroll>
+          {remixes.map((c) => (
+            <CreationCard key={c.id} c={c} />
+          ))}
+        </HScroll>
+      ) : (
+        <div className="mx-4 rounded-[20px] border border-dashed border-white/15 p-4 text-[13px] text-mute">Try a filter like 80s Vibes, or a preset in Remini chat, on your profile. Each style is kept here.</div>
+      )}
+
+      <SectionHeader demo="chats" title="Chats" sub="Your conversations with Remini, kept to reopen" />
+      <div className="space-y-2 px-4">
+        {chats.length ? (
+          chats.map((c) => {
+            const last = [...(c.chat ?? [])].reverse()[0];
+            return (
+              <button key={c.id} data-demo={`chat-${c.id}`} onClick={() => push({ name: 'chat', creationId: c.id })} className="flex w-full items-center gap-3 rounded-[18px] bg-card p-3 text-left">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand"><I.Enhance size={18} /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14.5px] font-semibold">{c.chatOnly ? 'Remini chat' : `${c.title} · chat`}</span>
+                  <span className="block truncate text-[12.5px] text-mute">{last ? `${last.from === 'me' ? 'You' : last.from === 'remini' ? 'Remini' : last.from}: ${last.text}` : 'No messages yet'}</span>
+                </span>
+                <I.Chevron size={16} className="text-mute" />
+              </button>
+            );
+          })
+        ) : (
+          <div className="rounded-[20px] border border-dashed border-white/15 p-4 text-[13px] text-mute">Open Remini chat from the bubble on the home. Every chat is kept here.</div>
+        )}
+      </div>
 
       <SectionHeader title={<span className="relative">Together<LeverTag l="I" className="-right-5 -top-1" /></span>} sub="Made with friends, then with the whole group" />
       <div className="space-y-2.5 px-4">
@@ -187,7 +224,8 @@ export function StudioScreen() {
 
 /** Entry on Remini's home once something is kept. */
 export function StudioEntryCard() {
-  const { creations, push } = useStore();
+  const { creations: all, push } = useStore();
+  const creations = all.filter((c) => !c.chatOnly);
   if (!creations.length) return null;
   const c = creations.find((x) => progressOf(x).done < progressOf(x).total) ?? creations[0];
   const pr = progressOf(c);

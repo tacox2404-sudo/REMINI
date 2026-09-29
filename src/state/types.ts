@@ -69,6 +69,8 @@ export interface Creation {
   shared?: { members: string[]; style: string; feed: { who: string; text: string; when: string }[] };
   /** One look applied across the whole creation. */
   style?: string;
+  /** A chat thread with Remini that isn't a creation itself (its results go to style creations). */
+  chatOnly?: boolean;
 }
 
 export interface CommunityStyle {
@@ -94,12 +96,12 @@ export interface Trend {
   hot?: boolean;
 }
 
-export type ResultKind = 'trend' | 'enhance' | 'look' | 'remix' | 'set' | 'together' | 'preset';
+export type ResultKind = 'trend' | 'enhance' | 'look' | 'remix' | 'set' | 'together' | 'preset' | 'restore';
 
 export type Route =
   | { name: 'onboarding'; step?: 'question' }
   | { name: 'today'; screen: 'photos' | 'filters' | 'videos' | 'chat' | 'profile' }
-  | { name: 'first'; step: 'intro' | 'confirm' }
+  | { name: 'first'; step: 'intro' | 'confirm'; path?: 'profile' | 'restore' }
   | { name: 'studio' }
   | { name: 'trend'; trendId: string }
   | { name: 'result'; kind: ResultKind; image: string; title: string; trendId?: string; styleId?: string; before?: string; images?: string[] }

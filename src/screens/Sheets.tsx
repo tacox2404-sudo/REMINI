@@ -235,7 +235,7 @@ function WithFriend({ title, image, link, challenge }: { title: string; image: s
 
 function Publish({ image, from }: { image: string; from: string }) {
   const { publishStyle, closeSheet, goTab, resetStack, showToast } = useStore();
-  const [name, setName] = useState('90s yearbook, my way');
+  const [name, setName] = useState('80s film, my way');
   return (
     <div className="px-5 pt-1">
       <h3 className="text-[20px] font-bold">Publish as a style</h3>

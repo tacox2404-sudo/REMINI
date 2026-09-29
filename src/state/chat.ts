@@ -27,7 +27,7 @@ const PROFILE: Preset[] = [
   { label: 'Office background', image: A.linkedin(6), title: 'Office' },
 ];
 const LOOKS: Preset[] = [
-  { label: '90s film', image: A.remix90s, title: '90s film' },
+  { label: '80s film', image: A.remix90s, title: '80s film' },
   { label: 'Y2K Yearbook', image: A.y2kMe, title: 'Y2K Yearbook' },
   { label: 'Studio headshot', image: A.linkedin(4), title: 'Studio headshot' },
 ];
@@ -49,7 +49,7 @@ const KEYWORDS: [RegExp, string][] = [
   [/fix|light|enhance|sharp|blur/, 'Fix the light'],
   [/grey|gray|backdrop|studio/, 'Studio'],
   [/office|background/, 'Office'],
-  [/90|retro|80/, '90s'],
+  [/80|retro|90/, '80s'],
   [/y2k|2000|yearbook/, 'Y2K'],
 ];
 

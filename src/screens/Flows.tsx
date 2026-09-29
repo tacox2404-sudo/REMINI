@@ -11,7 +11,7 @@ import { Img } from '../components/Img';
 import { LeverTag, NavHeader, PillGhost, PillWhite } from '../components/ui';
 
 export function ResultScreen({ kind, image, images, title, trendId, styleId, before }: { kind: ResultKind; image: string; images?: string[]; title: string; trendId?: string; styleId?: string; before?: string }) {
-  const { mode, pop, showToast, track, resetStack, openSheet, keepLook, keepSet, runGenerating, replaceTop, styles, makeTogether, startGroup, friend } = useStore();
+  const { mode, pop, showToast, track, resetStack, openSheet, keepLook, keepSet, keepRestore, runGenerating, replaceTop, styles, makeTogether, startGroup, friend } = useStore();
   const studio = mode === 'studio';
   const [saved, setSaved] = useState(false);
   const trend = TRENDS.find((t) => t.id === trendId);
@@ -46,10 +46,10 @@ export function ResultScreen({ kind, image, images, title, trendId, styleId, bef
             <Img src={image} className="absolute inset-0" />
           </motion.div>
         )}
-        {studio && kind !== 'enhance' && kind !== 'trend' && (
+        {studio && kind !== 'enhance' && kind !== 'trend' && kind !== 'restore' && (
           <span className="absolute left-7 top-3 flex items-center gap-1.5 rounded-full bg-black/55 py-1 pl-1 pr-2.5 text-[12px] font-semibold backdrop-blur">
             <Img src={A.ref(1)} className="h-5 w-5 rounded-full" label={false} />
-            {kind === 'set' ? 'Me · Work' : kind === 'together' ? `Me + ${friend}` : 'Me · Everyday'}
+            {kind === 'set' ? 'Me · Work' : kind === 'together' ? `Me + ${friend}` : kind === 'preset' && image.startsWith('linkedin') ? 'Me · Work' : 'Me · Everyday'}
           </span>
         )}
       </div>
@@ -82,6 +82,20 @@ export function ResultScreen({ kind, image, images, title, trendId, styleId, bef
           </>
         )}
 
+        {/* Restore path: the usual Save and Share, plus Keep this. */}
+        {studio && kind === 'restore' && (
+          <>
+            <PillWhite demo="keep-this" onClick={() => toStudio(keepRestore())}>
+              <I.Studio size={18} /> Keep this · continue the album
+              <LeverTag l="w" />
+            </PillWhite>
+            <div className="flex gap-2.5">
+              <PillGhost onClick={saveToGallery}><I.Download size={17} /> {saved ? 'Saved' : 'Save'}</PillGhost>
+              <PillGhost onClick={() => showToast('Sharing comes right after your first creation')}><I.Share size={17} /> Share</PillGhost>
+            </div>
+          </>
+        )}
+
         {/* One friend: your version of their style. */}
         {studio && kind === 'remix' && (
           <>
@@ -100,7 +114,7 @@ export function ResultScreen({ kind, image, images, title, trendId, styleId, bef
         {/* Together: keep it, then bring the whole group. */}
         {studio && kind === 'together' && (
           <>
-            <PillWhite demo="keep-this" onClick={() => { keepLook(A.remix90s, '90s film · your version'); toStudio(keepLook(image, title)); }}>
+            <PillWhite demo="keep-this" onClick={() => { keepLook(A.remix90s, '80s film · your version'); toStudio(keepLook(image, title)); }}>
               <I.Studio size={18} /> Keep this
               <LeverTag l="w" />
             </PillWhite>

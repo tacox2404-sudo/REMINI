@@ -150,9 +150,9 @@ export function ChatBubble() {
   /** With a locked profile, Remini Chat works on "My looks" with presets and filters. */
   const openChat = () => {
     if (mode !== 'studio' || !identities.length) return push({ name: 'today', screen: 'chat' });
-    if (!creationsRef.current.some((c) => c.id === 'looks'))
-      upsertCreation({ id: 'looks', title: 'My looks', intent: 'looks', cover: identities[0].cover, photos: [], looks: [], goal: 6, lastEdit: 'Just now', chat: [{ id: 'hello', from: 'remini', text: 'Hi! Pick a preset or filter and I’ll apply it to your locked profile. Results are kept in “My looks”.' }] });
-    push({ name: 'chat', creationId: 'looks' });
+    if (!creationsRef.current.some((c) => c.id === 'chat'))
+      upsertCreation({ id: 'chat', title: 'Remini chat', intent: 'other', chatOnly: true, cover: identities[0].cover, photos: [], looks: [], goal: 0, lastEdit: 'Just now', chat: [{ id: 'hello', from: 'remini', text: 'Hi! Pick a preset and I’ll apply it to your locked profile. Each style is kept in its own creation in Studio.' }] });
+    push({ name: 'chat', creationId: 'chat' });
   };
   return (
     <button
@@ -173,7 +173,9 @@ export function ChatBubble() {
 }
 
 export function TodayScreen({ screen }: { screen: 'photos' | 'filters' | 'videos' | 'chat' | 'profile' }) {
-  const { pop, push, runGenerating, showToast, track } = useStore();
+  const { pop, push, runGenerating, showToast, track, mode, identities } = useStore();
+  const [variation, setVariation] = useState('80s Vibes');
+  const canTry = mode === 'studio' && identities.length > 0 && variation === '80s Vibes';
   const [chatPhoto, setChatPhoto] = useState<string | null>(null);
   const [reply, setReply] = useState<string | null>(null);
   const [prompt, setPrompt] = useState('');
@@ -229,17 +231,32 @@ export function TodayScreen({ screen }: { screen: 'photos' | 'filters' | 'videos
             <span className="absolute right-0 top-2 h-[118px] w-[92px] rotate-6 rounded-2xl bg-card2" />
           </div>
           <p className="mt-6 text-[16px] leading-snug">Pick a photo and turn it into a work of art 🎨</p>
-          <PillWhite className="mt-5 !w-[240px]" onClick={() => showToast('Opens your gallery')}>Pick a Photo <I.Plus size={18} /></PillWhite>
+          {canTry ? (
+            <PillWhite
+              demo="filter-try"
+              className="mt-5 !w-[260px]"
+              onClick={() =>
+                runGenerating({ steps: ['80s Vibes', 'Using your locked profile · Everyday'], duration: 1800, preview: A.remix90s }, () => {
+                  track('filter_on_profile', 'w');
+                  push({ name: 'result', kind: 'preset', image: A.remix90s, title: '80s film' });
+                })
+              }
+            >
+              Try on my profile
+            </PillWhite>
+          ) : (
+            <PillWhite className="mt-5 !w-[240px]" onClick={() => showToast(mode === 'studio' ? 'Display only in this prototype: try 80s Vibes' : 'Opens your gallery')}>Pick a Photo <I.Plus size={18} /></PillWhite>
+          )}
         </div>
         <div className="mt-auto rounded-t-[26px] bg-card px-4 pb-6 pt-3">
           <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20" />
           <div className="mb-3 text-[15px] font-semibold text-white/70">Variations</div>
           <div className="grid grid-cols-4 gap-2">
             {['80s Vibes', '80s Glam', 'Viral Flash', 'Reality Glitch', 'Memory lane', 'Muscle', 'Clumsy sketch', 'Starter Pack'].map((v, i) => (
-              <div key={v} className={`overflow-hidden rounded-xl bg-card2 ${i === 0 ? 'ring-2 ring-white' : ''}`}>
+              <button key={v} onClick={() => setVariation(v)} className={`overflow-hidden rounded-xl bg-card2 text-left ${variation === v ? 'ring-2 ring-white' : ''}`}>
                 <Img src={G(50 + i)} className="aspect-[5/4]" label={false} />
                 <div className="truncate px-1 py-1 text-center text-[10.5px] font-semibold">{v}</div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

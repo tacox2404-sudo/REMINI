@@ -6,6 +6,9 @@ import { Wordmark } from '../components/Chrome';
 import { Img } from '../components/Img';
 import { LeverTag, PillWhite } from '../components/ui';
 
+/** Entry paths built in the prototype. */
+const OPEN = ['profile', 'restore'];
+
 /** Photo permission, then Remini's "What brings you to Remini?" question. */
 export function OnboardingScreen({ start }: { start?: 'question' }) {
   const { answerSegment, track, mode, showToast } = useStore();
@@ -60,8 +63,8 @@ export function OnboardingScreen({ start }: { start?: 'question' }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            onClick={() => (mode === 'studio' && s.id !== 'profile' ? showToast('In this prototype, Studio starts from “Profile or work photos”') : answerSegment(s.id))}
-            className={`flex h-[54px] w-full items-center gap-3 rounded-2xl bg-card px-4 text-left text-[15px] font-semibold active:bg-card2 ${mode === 'studio' && s.id !== 'profile' ? 'opacity-45' : ''}`}
+            onClick={() => (mode === 'studio' && !OPEN.includes(s.id) ? showToast(s.id === 'exploring' ? 'Sharing comes right after your first creation' : 'In this prototype: Profile or work photos, or Restore old photos') : answerSegment(s.id))}
+            className={`flex h-[54px] w-full items-center gap-3 rounded-2xl bg-card px-4 text-left text-[15px] font-semibold active:bg-card2 ${mode === 'studio' && !OPEN.includes(s.id) ? 'opacity-45' : ''}`}
           >
             <span className="text-[20px]">{s.emoji}</span> {s.label}
           </motion.button>

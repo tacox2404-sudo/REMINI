@@ -22,7 +22,7 @@ function renderRoute(r: Route) {
     case 'today':
       return <TodayScreen screen={r.screen} />;
     case 'first':
-      return <FirstCreationScreen step={r.step} />;
+      return <FirstCreationScreen step={r.step} path={r.path} />;
     case 'studio':
       return <StudioScreen />;
     case 'onboarding':

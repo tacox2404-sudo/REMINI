@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { spurs } from '../state/chat';
+import { STYLE_SETS, styleOf } from '../state/data';
 import { useStore } from '../state/store';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
@@ -55,7 +56,7 @@ export function ChatScreen({ creationId }: { creationId: string }) {
               ))}
             </div>
           ) : (
-            <Img src={identity.cover} className="mr-2 h-7 w-7 rounded-full" label={false} />
+            identity ? <Img src={identity.cover} className="mr-2 h-7 w-7 rounded-full" label={false} /> : null
           )
         }
       />
@@ -64,7 +65,7 @@ export function ChatScreen({ creationId }: { creationId: string }) {
         <div className="mx-auto max-w-[280px] rounded-2xl bg-white/[0.04] p-3 text-center text-[12px] leading-relaxed text-mute">
           {p.shared
             ? `Anyone in “${p.title}” can apply a preset or filter. It changes every photo in the album, for all of you.`
-            : `Presets and filters on your locked profile “${identity?.name ?? 'Me'}”. Results are kept in “${p.title}”.`}
+            : p.chatOnly ? `Presets on your locked profile “${identity?.name ?? 'Me'}”. Each style is kept in its own creation in Studio.` : `Presets and filters on your locked profile “${identity?.name ?? 'Me'}”. Results stay in “${p.title}”, same style.`}
         </div>
         {msgs.map((m) => {
           const mine = m.from === 'me';
@@ -99,7 +100,7 @@ export function ChatScreen({ creationId }: { creationId: string }) {
                     ))}
                   </div>
                 )}
-                {bot && m.images && m.action !== 'animate' && <span className="text-[11px] text-[#2ED47A]">✓ Kept in {p.title}</span>}
+                {bot && m.images && m.action !== 'animate' && <span className="text-[11px] text-[#2ED47A]">✓ Kept in {STYLE_SETS[styleOf(m.images[0]) ?? '']?.title ?? p.title}</span>}
               </div>
             </motion.div>
           );

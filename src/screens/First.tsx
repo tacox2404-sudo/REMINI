@@ -9,8 +9,47 @@ import { LeverTag, NavHeader, PillWhite } from '../components/ui';
  * generation. Before it runs the app shows only Remini's sample imagery; the
  * user's face appears from the lock-in onwards.
  */
-export function FirstCreationScreen({ step }: { step: 'intro' | 'confirm' }) {
+export function FirstCreationScreen({ step, path = 'profile' }: { step: 'intro' | 'confirm'; path?: 'profile' | 'restore' }) {
   const { pop, push, replaceTop, lockIdentity, runGenerating, resetStack } = useStore();
+
+  // Restore path: no profile needed, just the family's old photos.
+  if (path === 'restore')
+    return (
+      <div className="flex h-full flex-col">
+        <NavHeader title="" onBack={() => resetStack([], -1)} />
+        <div className="px-4">
+          <div className="text-[13px] font-semibold text-[#FF6A8E]">Suggested for you · Restore old photos</div>
+          <h1 className="mt-1 text-[28px] font-bold leading-tight tracking-tight">Bring your family photos back</h1>
+          <p className="mt-1.5 text-[14px] text-white/65">Enhance restores faces, scratches and colour. Pick a few old photos to start.</p>
+        </div>
+        <div className="mx-4 mt-5 grid place-items-center rounded-[24px] bg-card py-10">
+          <span className="grid h-16 w-16 place-items-center rounded-2xl bg-brand"><I.Enhance size={30} /></span>
+          <span className="mt-3 text-[14px] text-white/70">Faces · scratches · colour</span>
+        </div>
+        <div className="mt-auto px-4 pb-6">
+          <PillWhite
+            demo="pick-old"
+            onClick={() =>
+              push({
+                name: 'picker',
+                title: 'Pick old photos',
+                min: 1,
+                max: 4,
+                preselect: 4,
+                pool: [1, 2, 3, 4].map(A.old),
+                cta: 'Restore',
+                onDone: () =>
+                  runGenerating({ steps: ['Uploading', 'Restoring faces', 'Repairing scratches'], duration: 2000, preview: A.old(1) }, () =>
+                    replaceTop({ name: 'result', kind: 'restore', image: A.restored(1), images: [A.restored(1), A.restored(2), A.restored(3)], title: 'Restored' }),
+                  ),
+              })
+            }
+          >
+            <I.Photos size={18} /> Pick old photos
+          </PillWhite>
+        </div>
+      </div>
+    );
 
   if (step === 'intro')
     return (

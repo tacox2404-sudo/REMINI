@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { chatReply } from './chat';
-import { A, EVERYDAY, FRIEND, INTENTS, ME, SEGMENTS, friendsTrip, linkedinSet, look, photo, seedStyles, tripAlbum, withPaola } from './data';
+import { A, EVERYDAY, FRIEND, INTENTS, ME, SEGMENTS, STYLE_SETS, chatThread, familyArchive, friendsTrip, linkedinSet, look, photo, seedStyles, styleCreation, styleOf, tripAlbum, withPaola } from './data';
 import type { ChatMsg, CommunityStyle, Creation, Generating, Identity, Intent, Lever, LogEvent, Mode, Route, Segment, Sheet, Tab } from './types';
 
 export const FREE_LIMIT = 5;
@@ -21,7 +21,7 @@ function useSyncState<T>(initial: T | (() => T)) {
  * Where a user is in the journey. Each stage includes everything before it:
  * 0 new · 1 first creation kept · 2 made something with one friend · 3 group album · 4 came back.
  */
-export type Stage = 0 | 1 | 2 | 3 | 4;
+export type Stage = 0 | 1 | 1.5 | 2 | 3 | 4;
 
 let chatSeq = 0;
 
@@ -139,9 +139,10 @@ function useStoreValue() {
 
   /** Build the state of a stage directly (used by the guided demo). */
   const setStage = useCallback((st: Stage) => {
-    setIdentities(st >= 1 ? [{ ...ME, variants: st >= 2 ? [...ME.variants, EVERYDAY] : ME.variants }] : []);
+    setIdentities(st >= 1 ? [{ ...ME, variants: st >= 1.5 ? [...ME.variants, EVERYDAY] : ME.variants }] : []);
     const cs: Creation[] = [];
     if (st >= 1) cs.push(linkedinSet(3));
+    if (st >= 1.5) cs.push(styleCreation('eighties', [A.remix90s]), styleCreation('y2k', [A.y2kMe]), chatThread());
     if (st >= 2) cs.unshift(withPaola());
     if (st >= 3) cs.unshift(friendsTrip(st >= 4 ? 17 : 5));
     if (st >= 4) cs.forEach((c) => (c.lastEdit = c.id === 'trip' ? '2 days ago' : '4 days ago'));
@@ -159,7 +160,7 @@ function useStoreValue() {
     track(`segment: ${label}`, 't');
     setOnboarded((o) => ({ ...o, studio: true }));
     setNavDir(1);
-    setStack([{ name: 'first', step: 'intro' }]);
+    setStack([{ name: 'first', step: 'intro', path: seg === 'restore' ? 'restore' : 'profile' }]);
   }, [setStack, track]);
 
   /** "Is this you?": the profile is locked in once, with a Work version for this creation. */
@@ -175,21 +176,33 @@ function useStoreValue() {
     return 'linkedin';
   }, [track, upsertCreation]);
 
+  /** Keep a result: it joins the creation of its own style (never a mixed one). */
   const keepLook = useCallback((src: string, title: string, into?: string) => {
-    let id = into ?? (src === A.remix90s || src === A.together90s ? 'paola' : 'looks');
-    if (!creationsRef.current.some((c) => c.id === id)) {
-      if (id === 'paola') upsertCreation({ ...withPaola(), looks: [] });
-      else upsertCreation({ id, title: 'My looks', intent: 'looks', cover: src, photos: [], looks: [], goal: 6, lastEdit: 'Just now' });
+    if (src === A.together90s) {
+      if (!creationsRef.current.some((c) => c.id === 'paola')) upsertCreation(withPaola());
+      track('kept_in_studio', 'w');
+      return 'paola';
     }
-    setCreations((cs) => {
-      const c = cs.find((x) => x.id === id);
-      if (!c) return cs;
-      const updated = { ...c, cover: src, lastEdit: 'Just now', looks: c.looks.some((l) => l.src === src) ? c.looks : [look(src, title, true), ...c.looks] };
-      return [updated, ...cs.filter((x) => x.id !== id)];
-    });
+    const key = styleOf(src);
+    const id = into ?? (key ? STYLE_SETS[key].id : 'looks');
+    const existing = creationsRef.current.find((c) => c.id === id);
+    if (!existing) upsertCreation(key === 'headshot' ? { ...linkedinSet(0), looks: [look(src, title, true)] } : key ? styleCreation(key, [src]) : { id, title: 'My looks', intent: 'looks', cover: src, photos: [], looks: [look(src, title, true)], goal: 1, lastEdit: 'Just now' });
+    else
+      setCreations((cs) => {
+        const c = cs.find((x) => x.id === id)!;
+        const updated = { ...c, lastEdit: 'Just now', looks: c.looks.some((l) => l.src === src) ? c.looks : [...c.looks, look(src, title, true)] };
+        return [updated, ...cs.filter((x) => x.id !== id)];
+      });
     track('kept_in_studio', 'w');
     return id;
   }, [creationsRef, setCreations, track, upsertCreation]);
+
+  /** Restore path: the restored photos become the Family archive. */
+  const keepRestore = useCallback(() => {
+    upsertCreation(familyArchive(4));
+    track('kept_in_studio', 'w');
+    return 'family';
+  }, [track, upsertCreation]);
 
   /** Sharing with one friend: they join from the link (an install) and their style comes back. */
   const shareWithFriend = useCallback(() => {
@@ -210,7 +223,7 @@ function useStoreValue() {
   }, [runGenerating, setIdentities, setStyles, styles, track]);
 
   const makeTogether = useCallback((onResult: (r: Route) => void) => {
-    runGenerating({ steps: [`You and ${FRIEND}, each with your own profile`, 'Same 90s film style', 'Final touches'], duration: 2000, preview: A.together90s }, () => {
+    runGenerating({ steps: [`You and ${FRIEND}, each with your own profile`, 'Same 80s film style', 'Final touches'], duration: 2000, preview: A.together90s }, () => {
       track('made_together', 'I');
       onResult({ name: 'result', kind: 'together', image: A.together90s, title: `You & ${FRIEND}` });
     });
@@ -279,17 +292,19 @@ function useStoreValue() {
     });
   }, [creationsRef, processPhotos, showToast, track]);
 
-  /** Continue a look-based creation (LinkedIn set) up to its goal. */
+  /** Continue a creation with more of the same style; stop when the set is complete. */
   const continueCreation = useCallback((id: string) => {
     const c = creationsRef.current.find((x) => x.id === id);
     if (!c) return;
-    const missing = Math.max(0, c.goal - c.looks.length);
-    if (!missing) return showToast('This one is complete');
+    const set = Object.values(STYLE_SETS).find((v) => v.id === id);
+    const have = new Set(c.looks.map((l) => l.src));
+    const next = (set?.srcs ?? []).filter((s) => !have.has(s)).slice(0, Math.max(0, c.goal - c.looks.length));
+    if (!next.length) return showToast('That’s the whole set in this style');
     track('creation_continued', 'w');
-    runGenerating({ steps: ['Using your locked profile · Work', `Making ${missing} more`, 'Matching the set'], duration: 1900, preview: A.linkedin(4) }, () => {
-      updateCreation(id, (x) => ({ ...x, lastEdit: 'Just now', looks: [...x.looks, ...Array.from({ length: missing }, (_, i) => look(A.linkedin(x.looks.length + i + 1), ['Window light', 'Studio grey'][i % 2], true))] }));
+    runGenerating({ steps: [`Same style: ${c.style ?? c.title}`, 'Using your locked profile', `Making ${next.length} more`], duration: 1900, preview: next[0] }, () => {
+      updateCreation(id, (x) => ({ ...x, lastEdit: 'Just now', looks: [...x.looks, ...next.map((s) => look(s, x.style ?? x.title, true))] }));
       track('creation_completed', 'c');
-      showToast(`${c.title}: ${c.goal} of ${c.goal} done`);
+      showToast(`${c.title}: ${Math.min(c.goal, c.looks.length + next.length)} of ${c.goal} done`);
     });
   }, [creationsRef, runGenerating, showToast, track, updateCreation]);
 
@@ -318,7 +333,8 @@ function useStoreValue() {
       setChatTyping(null);
       const p = r.preset;
       const msg: ChatMsg = { id: `m${++chatSeq}`, from: 'remini', text: r.text, images: p?.image ? [p.image] : undefined, action: p?.restyle ? 'restyled' : p?.enhance ? 'enhanced' : undefined };
-      updateCreation(creationId, (x) => ({ ...x, chat: [...(x.chat ?? []), msg], looks: p?.image && !x.photos.length ? [look(p.image, p.title ?? 'Preset', true), ...x.looks.filter((l) => l.src !== p.image)] : x.looks }));
+      updateCreation(creationId, (x) => ({ ...x, chat: [...(x.chat ?? []), msg] }));
+      if (p?.image) keepLook(p.image, p.title ?? 'Preset');
       if (p?.restyle) restyleAll(creationId, p.restyle);
       if (p?.enhance) {
         const todo = creationsRef.current.find((x) => x.id === creationId)?.photos.filter((ph) => ph.status === 'original').map((ph) => ph.id) ?? [];
@@ -326,7 +342,7 @@ function useStoreValue() {
         else if (todo.length) later(() => setSheet({ type: 'paywall', creationId, stage: 'offer' }), 600);
       }
     }, 1700);
-  }, [creationsRef, isPro, later, processPhotos, restyleAll, track, updateCreation]);
+  }, [creationsRef, isPro, keepLook, later, processPhotos, restyleAll, track, updateCreation]);
 
   // The friend's style keeps travelling: its remix counter ticks up while you watch.
   useEffect(() => {
@@ -385,7 +401,7 @@ function useStoreValue() {
     showLevers, setShowLevers, events, track, clearEvents: useCallback(() => setEvents([]), []),
     identities, identitiesRef, creations, creationsRef, styles, unlocked, returning, segment, onboarded, setOnboarded,
     freeUsed, isPro, processing, demo, setDemo, splash, setSplash, lastDemoDone, setLastDemoDone, closing, setClosing, chatTyping,
-    setStage, answerSegment, lockIdentity, keepSet, keepLook, shareWithFriend, remixStyle, makeTogether, startGroup,
+    setStage, answerSegment, lockIdentity, keepSet, keepLook, keepRestore, shareWithFriend, remixStyle, makeTogether, startGroup,
     processPhotos, restyleAll, enhanceAll, startTrial, finishAfterTrial, continueCreation, createFromIntent, sendChat,
     publishStyle, improveIdentity, rememberMe, updateCreation, upsertCreation, setFlags, resetAll, clearTimers, friend: FRIEND,
   };

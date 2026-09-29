@@ -31,7 +31,7 @@ export function LockScreen() {
   const notes = [
     { k: 'linkedin' as const, title: 'Your LinkedIn set is 3 of 5 done', body: 'Two more and it is ready. Continue?', when: 'now', img: A.linkedin(2) },
     { k: 'trip' as const, title: 'Luca added 6 photos to Friends trip', body: 'They already have the album’s Golden hour style', when: '1h ago', img: A.trip(3) },
-    { k: 'friend' as const, title: `${FRIEND}’s 90s film style passed 12k remixes`, body: 'Your version is one of them', when: '9:00', img: A.together90s },
+    { k: 'friend' as const, title: `${FRIEND}’s 80s film style passed 12k remixes`, body: 'Your version is one of them', when: '9:00', img: A.together90s },
   ];
 
   return (

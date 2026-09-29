@@ -50,7 +50,7 @@ let lid = 0;
 export const look = (src: string, title: string, isNew = false): Look => ({ id: `lk${++lid}`, src, title, isNew });
 
 export function seedStyles(): CommunityStyle[] {
-  return [{ id: 'st-90s', title: '90s film', creator: FRIEND, cover: A.friend90s, result: A.remix90s, remixes: 12400, friend: true }];
+  return [{ id: 'st-90s', title: '80s film', creator: FRIEND, cover: A.friend90s, result: A.remix90s, remixes: 12400, friend: true }];
 }
 
 export const CAMERA_ROLL: string[] = [...[1, 2, 3, 4, 5, 6].map(A.trip), ...[1, 2, 3, 4].map(A.ref), A.enhanceBefore, A.enhance2Before, ...[1, 2, 3, 4].map(A.old), A.friend];
@@ -83,6 +83,31 @@ export const SEGMENTS: { id: Segment; label: string; emoji: string }[] = [
   { id: 'exploring', label: 'Share with friends', emoji: '👯' },
 ];
 
+/**
+ * Every style has a fixed set of results. A creation holds one style only, and
+ * "make more" adds from the same set, so nothing ever looks mixed or random.
+ */
+export const STYLE_SETS: Record<string, { id: string; title: string; srcs: string[] }> = {
+  headshot: { id: 'linkedin', title: 'LinkedIn set', srcs: [1, 2, 3, 4, 5, 6].map((n) => `linkedin_${n}.jpg`) },
+  y2k: { id: 'style-y2k', title: 'Y2K Yearbook', srcs: [A.y2kMe, A.y2kMe2] },
+  eighties: { id: 'style-80s', title: '80s film', srcs: [A.remix90s] },
+};
+export const styleOf = (src: string) => Object.entries(STYLE_SETS).find(([, v]) => v.srcs.includes(src))?.[0];
+
+export function styleCreation(key: string, srcs: string[]): Creation {
+  const set = STYLE_SETS[key];
+  return { id: set.id, title: set.title, intent: 'looks', cover: srcs[0], photos: [], looks: srcs.map((s) => look(s, set.title, true)), goal: set.srcs.length, lastEdit: 'Just now', style: set.title };
+}
+
+/** The family archive from the restore path: the photos you picked, restored, plus the rest of the album waiting. */
+export function familyArchive(restored = 4): Creation {
+  const photos = [
+    ...[1, 2, 3, 4].map((n, i) => photo(A.old(n), i < restored ? 'enhanced' : 'original', A.restored(n))),
+    ...cycle([1, 2, 3, 4], 8).map((n) => photo(A.old(n), 'original', A.restored(n))),
+  ];
+  return { id: 'family', title: 'Family archive', intent: 'family', cover: `${A.restored(3)}|${A.old(3)}`, photos, looks: [], goal: 12, lastEdit: 'Just now', style: 'Faithful restore' };
+}
+
 /** The first creation: kept from the LinkedIn headshots (3 of 5). */
 export function linkedinSet(n = 3): Creation {
   return {
@@ -106,11 +131,11 @@ export function withPaola(): Creation {
     intent: 'social',
     cover: A.together90s,
     photos: [],
-    looks: [look(A.together90s, 'You & Paola · 90s film', true), look(A.remix90s, 'Your 90s film')],
-    goal: 2,
+    looks: [look(A.together90s, 'You & Paola · 80s film', true)],
+    goal: 1,
     lastEdit: 'Just now',
-    style: '90s film',
-    shared: { members: ['You', FRIEND], style: '90s film', feed: [{ who: FRIEND, text: 'joined from your link', when: 'now' }] },
+    style: '80s film',
+    shared: { members: ['You', FRIEND], style: '80s film', feed: [{ who: FRIEND, text: 'joined from your link', when: 'now' }] },
   };
 }
 
@@ -157,4 +182,28 @@ export function tripAlbum(picked: string[]): Creation {
   const all = [...picked, ...TRIPS.filter((s) => !picked.includes(s))].slice(0, 6);
   const photos = cycle(all, 17).map((src) => photo(src, 'original'));
   return { id: `trip-${Date.now().toString(36)}`, title: 'New trip album', intent: 'trip', cover: all[0] ?? A.trip(1), photos, looks: [], goal: 17, lastEdit: 'Just now', style: 'Golden hour' };
+}
+
+/** The Remini chat thread from the home bubble: presets on your profile, results kept per style. */
+export function chatThread(withMessages = true): Creation {
+  return {
+    id: 'chat',
+    title: 'Remini chat',
+    intent: 'other',
+    chatOnly: true,
+    cover: A.ref(1),
+    photos: [],
+    looks: [],
+    goal: 0,
+    lastEdit: 'Just now',
+    chat: [
+      { id: 'ch0', from: 'remini', text: 'Hi! Pick a preset and I’ll apply it to your locked profile. Each style is kept in its own creation in Studio.' },
+      ...(withMessages
+        ? [
+            { id: 'ch1', from: 'me', text: 'Y2K Yearbook' },
+            { id: 'ch2', from: 'remini', text: 'Here is “Y2K Yearbook”, made with your locked profile.', images: [A.y2kMe] },
+          ]
+        : []),
+    ],
+  };
 }

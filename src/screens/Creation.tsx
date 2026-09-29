@@ -67,7 +67,7 @@ export function CreationScreen({ id }: { id: string }) {
           <div className="min-w-0 flex-1">
             <div data-demo="creation-progress" className="text-[20px] font-bold leading-tight">{pr.label}</div>
             <div className="mt-0.5 flex items-center gap-1.5 text-[12px] text-mute">
-              <Img src={me.cover} className="h-4 w-4 rounded-full" label={false} /> {c.style ? `“${c.style}” on every photo` : `Made with ${me.name}`} · saves automatically
+              {me && <Img src={me.cover} className="h-4 w-4 rounded-full" label={false} />} {c.style ? `“${c.style}” on every photo` : `Made with ${me?.name ?? 'Remini'}`} · saves automatically
             </div>
           </div>
         </div>

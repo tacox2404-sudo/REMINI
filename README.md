@@ -5,7 +5,8 @@
 - **Me**: the profile Remini already has, confirmed once ("Is this you?") and adapted to each creation through versions (Work for the LinkedIn set, Everyday for a friend's style).
 - **Keep going**: kept results become creations that save themselves.
 - **Together**: one friend first, then a group album where one style applies to everyone's photos.
-- **Remini chat**: presets and filters on your profile or on the whole album.
+- **Remix**: filters and presets on your profile, kept as one creation per style (80s film, Y2K Yearbook, LinkedIn set). More results always match the style.
+- **Chats**: every Remini chat is kept in Studio to reopen; the chat works with presets and filters.
 
 Trends, filters and effects stay on Remini's usual pages; Studio only holds your own and shared work. Personal photos appear only after the first generation. "Today" mode is a short, limited replica of the current app. AI steps are simulated with prepared images.
 
@@ -48,7 +49,7 @@ The photos live in `public/assets/` (web-sized JPGs); the full-size originals ar
 
 **Today (3 steps):** home and bottom tools, AI Photos with a 4-selfie profile, Remini Chat.
 
-**With Studio:** why are you here (Profile or work photos) → first creation, a LinkedIn photo (Remini examples only) → "Is this you?" lock-in → Save, Share or Keep this → kept in Studio → Me: locked in, adapted per creation → share with Paola → she shares her 90s style back → your version (Everyday) → you and Paola together → the whole group: Friends trip → presets for everyone → finish it with Pro (5 of 17, trial) → coming back (notification) → welcome back → Why it pays (NPV sliders).
+**With Studio:** why are you here (Profile or work photos; Restore old photos also works) → first creation, a LinkedIn photo (Remini examples only) → "Is this you?" lock-in → Save, Share or Keep this → kept in Studio → Me: locked in, adapted per creation → AI Filters on your profile (80s) → one style, one creation → Remini chat presets → Remix and Chats in Studio → share with Paola → she shares her 80s style back → your version (Everyday) → you and Paola together → the whole group: Friends trip → presets for everyone → finish it with Pro (5 of 17, trial) → coming back (notification) → welcome back → Why it pays (NPV sliders).
 
 ### Screenshots
 
