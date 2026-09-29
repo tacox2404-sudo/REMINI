@@ -1,13 +1,13 @@
 # Remini Studio · clickable concept prototype
 
-**Studio** is a new space in Remini to come back to your own photo and video creations, on your own or with friends, with gen AI along the way.
+**Studio** adds what happens after a normal Remini creation: you can keep it, continue it, and make it with others.
 
-- **My Creations**: projects that keep one style and save themselves ("Family archive, 4 of 12 restored").
-- **Together**: albums with friends that change together, with a shared Remini chat that makes recap videos and posters from the group's photos.
-- **Remix**: this week's trends already applied to your saved Me, and styles from the community you can remix and publish.
-- **Me**: saved identities, several profiles, private.
+- **Me**: the profile Remini already has, confirmed once ("Is this you?") and adapted to each creation through versions (Work for the LinkedIn set, Everyday for a friend's style).
+- **Keep going**: kept results become creations that save themselves.
+- **Together**: one friend first, then a group album where one style applies to everyone's photos.
+- **Remini chat**: presets and filters on your profile or on the whole album.
 
-"Today" mode is a short, deliberately limited replica of the current app for comparison. AI steps are simulated with prepared images.
+Trends, filters and effects stay on Remini's usual pages; Studio only holds your own and shared work. Personal photos appear only after the first generation. "Today" mode is a short, limited replica of the current app. AI steps are simulated with prepared images.
 
 ## Run it
 
@@ -46,9 +46,9 @@ The photos live in `public/assets/` (web-sized JPGs); the full-size originals ar
 
 ### Guided demo path
 
-**Today (3 steps):** the home and bottom tools, AI Photos with a 4-selfie profile, Remini Chat.
+**Today (3 steps):** home and bottom tools, AI Photos with a 4-selfie profile, Remini Chat.
 
-**With Studio:** Welcome to Studio (value proposition) → set up around you → your Studio → Keep going → Together: the Friends trip (Philippines) → change the style for everyone → the album chat (poster, recap video) → your turn → finish the album (5 of 17, trial) → New for you → Keep this → Styles from the community → Make your version → Publish as a style → Challenge a friend → Create with Remini chat → Me: saved identities → Why it pays (interactive NPV model).
+**With Studio:** why are you here (Profile or work photos) → first creation, a LinkedIn photo (Remini examples only) → "Is this you?" lock-in → Save, Share or Keep this → kept in Studio → Me: locked in, adapted per creation → share with Paola → she shares her 90s style back → your version (Everyday) → you and Paola together → the whole group: Friends trip → presets for everyone → finish it with Pro (5 of 17, trial) → coming back (notification) → welcome back → Why it pays (NPV sliders).
 
 ### Screenshots
 

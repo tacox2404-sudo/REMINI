@@ -7,12 +7,21 @@ export type Intent = 'profile' | 'trip' | 'family' | 'social' | 'looks' | 'other
 
 export type Segment = 'restore' | 'lookgreat' | 'profile' | 'social' | 'trends' | 'exploring';
 
+export interface IdentityVariant {
+  name: string;
+  cover: string;
+  /** Which creation or use this version of you is for. */
+  usedFor: string;
+}
+
+/** A profile locked in once from selfies, adapted per creation through variants. */
 export interface Identity {
   id: string;
   name: string;
   subtitle: string;
   cover: string;
   refs: string[];
+  variants: IdentityVariant[];
 }
 
 export interface Look {
@@ -85,23 +94,21 @@ export interface Trend {
   hot?: boolean;
 }
 
-export type ResultKind = 'trend' | 'enhance' | 'look' | 'remix';
+export type ResultKind = 'trend' | 'enhance' | 'look' | 'remix' | 'set' | 'together' | 'preset';
 
 export type Route =
   | { name: 'onboarding'; step?: 'question' }
-  | { name: 'studioIntro' }
   | { name: 'today'; screen: 'photos' | 'filters' | 'videos' | 'chat' | 'profile' }
-  | { name: 'video'; srcs: string[]; title: string }
+  | { name: 'first'; step: 'intro' | 'confirm' }
+  | { name: 'studio' }
   | { name: 'trend'; trendId: string }
-  | { name: 'result'; kind: ResultKind; image: string; title: string; trendId?: string; styleId?: string; before?: string }
+  | { name: 'result'; kind: ResultKind; image: string; title: string; trendId?: string; styleId?: string; before?: string; images?: string[] }
   | { name: 'picker'; title: string; min?: number; max: number; preselect?: number; pool?: string[]; cta: string; onDone: (picked: string[]) => void }
   | { name: 'identity'; id: string }
   | { name: 'create' }
   | { name: 'creation'; id: string }
   | { name: 'photo'; creationId: string; photoId: string }
   | { name: 'chat'; creationId: string }
-  | { name: 'section'; section: 'me' | 'creations' | 'remix' }
-  | { name: 'comingNext' }
   | { name: 'lock' }
   | { name: 'about' }
   | { name: 'animate'; src: string; creationId: string }

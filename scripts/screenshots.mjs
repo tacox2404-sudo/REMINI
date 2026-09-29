@@ -32,7 +32,7 @@ async function run(levers) {
   await page.click('[data-ctl="start-demo"]');
   for (let i = 0; ; i++) {
     const title = await page.locator('[data-ctl="demo-title"]').textContent();
-    const wait = /make your version|your turn|remini chat|change it/i.test(title) ? 3300 : 1800;
+    const wait = /presets|finish/i.test(title) ? 2600 : 1800;
     await page.waitForTimeout(wait);
     const name = `${String(i + 1).padStart(2, '0')}-${slug(title)}.png`;
     const closing = await page.locator('[data-ctl="closing-card"]').count();

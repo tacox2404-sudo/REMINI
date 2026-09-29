@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { A, FRIEND, returningCreations } from '../state/data';
+import { A, FRIEND, friendsTrip, linkedinSet } from '../state/data';
 import { useStore } from '../state/store';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
@@ -18,25 +18,20 @@ export function LockScreen() {
   const s = useStore();
   const { track, resetStack, setMode, mode, goTab, creationsRef, upsertCreation, friend } = s;
 
-  const open = (which: 'linkedin' | 'friend' | 'y2k') => {
+  const open = (which: 'linkedin' | 'friend' | 'trip') => {
     track(`notification_opened_${which}`, 'w');
     if (mode !== 'studio') setMode('studio');
     goTab('studio');
-    if (which === 'linkedin') {
-      if (!creationsRef.current.some((c) => c.id === 'linkedin')) upsertCreation(returningCreations()[0]);
-      resetStack([{ name: 'creation', id: 'linkedin' }]);
-    } else if (which === 'friend') {
-      resetStack([{ name: 'section', section: 'remix' }]);
-    } else {
-      resetStack([{ name: 'trend', trendId: 'y2k' }]);
-    }
+    if (which === 'linkedin' && !creationsRef.current.some((c) => c.id === 'linkedin')) upsertCreation(linkedinSet(3));
+    if (which === 'trip' && !creationsRef.current.some((c) => c.id === 'trip')) upsertCreation(friendsTrip(17));
+    resetStack(which === 'friend' ? [{ name: 'studio' }] : [{ name: 'studio' }, { name: 'creation', id: which }]);
   };
   void friend;
 
   const notes = [
     { k: 'linkedin' as const, title: 'Your LinkedIn set is 3 of 5 done', body: 'Two more and it is ready. Continue?', when: 'now', img: A.linkedin(2) },
-    { k: 'friend' as const, title: `${FRIEND} remixed your style`, body: '“90s yearbook” just passed 12k remixes', when: '1h ago', img: A.friend90s },
-    { k: 'y2k' as const, title: 'Y2K Yearbook is trending', body: 'Try yours with your saved Me. No new selfies.', when: '9:00', img: A.y2kMe },
+    { k: 'trip' as const, title: 'Luca added 6 photos to Friends trip', body: 'They already have the album’s Golden hour style', when: '1h ago', img: A.trip(3) },
+    { k: 'friend' as const, title: `${FRIEND}’s 90s film style passed 12k remixes`, body: 'Your version is one of them', when: '9:00', img: A.together90s },
   ];
 
   return (

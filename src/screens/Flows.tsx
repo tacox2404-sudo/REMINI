@@ -10,20 +10,21 @@ import { I } from '../components/Icons';
 import { Img } from '../components/Img';
 import { LeverTag, NavHeader, PillGhost, PillWhite } from '../components/ui';
 
-export function ResultScreen({ kind, image, title, trendId, styleId, before }: { kind: ResultKind; image: string; title: string; trendId?: string; styleId?: string; before?: string }) {
-  const { mode, pop, showToast, track, resetStack, openSheet, keepLook, goTab, runGenerating, replaceTop, styles } = useStore();
+export function ResultScreen({ kind, image, images, title, trendId, styleId, before }: { kind: ResultKind; image: string; images?: string[]; title: string; trendId?: string; styleId?: string; before?: string }) {
+  const { mode, pop, showToast, track, resetStack, openSheet, keepLook, keepSet, runGenerating, replaceTop, styles, makeTogether, startGroup, friend } = useStore();
   const studio = mode === 'studio';
   const [saved, setSaved] = useState(false);
   const trend = TRENDS.find((t) => t.id === trendId);
   const style = styles.find((s) => s.id === styleId);
 
-  const keep = () => {
-    const id = keepLook(image, title);
-    showToast('Kept in My Creations');
-    window.setTimeout(() => {
-      goTab('studio');
-      resetStack([{ name: 'creation', id }]);
-    }, 650);
+  const toStudio = (id: string) => {
+    showToast('Kept in Studio');
+    window.setTimeout(() => resetStack([{ name: 'studio' }, { name: 'creation', id }]), 600);
+  };
+  const saveToGallery = () => {
+    track('saved_to_gallery');
+    setSaved(true);
+    showToast('Saved to Gallery');
   };
 
   return (
@@ -32,108 +33,108 @@ export function ResultScreen({ kind, image, title, trendId, styleId, before }: {
       <div className="relative min-h-0 flex-1 px-4">
         {kind === 'enhance' ? (
           <BeforeAfter after={image} before={before} className="h-full min-h-[380px] rounded-[24px]" />
+        ) : images && images.length > 1 ? (
+          <div className="grid h-full min-h-[380px] grid-cols-2 grid-rows-2 gap-1.5">
+            {images.map((src, i) => (
+              <motion.div key={src} initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.15 }} className={`relative overflow-hidden rounded-[20px] ${i === 0 ? 'row-span-2' : ''}`}>
+                <Img src={src} className="absolute inset-0" />
+              </motion.div>
+            ))}
+          </div>
         ) : (
           <motion.div initial={{ scale: 1.04, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }} className="relative h-full min-h-[380px] overflow-hidden rounded-[24px]">
             <Img src={image} className="absolute inset-0" />
-            {studio && (
-              <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/55 py-1 pl-1 pr-2.5 text-[12px] font-semibold backdrop-blur">
-                <Img src={A.ref(1)} className="h-5 w-5 rounded-full" label={false} /> Made with your saved Me
-              </span>
-            )}
           </motion.div>
         )}
-      </div>
-      <div className="space-y-2.5 px-4 pb-6 pt-4">
-        {!studio && kind === 'trend' && (
-          <>
-            <PillWhite
-              demo="today-download"
-              onClick={() => {
-                track('paywall_after_result');
-                openSheet({ type: 'paywallGeneric', image, reason: 'result' });
-              }}
-            >
-              <I.Download size={18} /> Download HD
-            </PillWhite>
-            <p className="text-center text-[12px] text-mute">1 of 20 photos. The rest are locked.</p>
-          </>
+        {studio && kind !== 'enhance' && kind !== 'trend' && (
+          <span className="absolute left-7 top-3 flex items-center gap-1.5 rounded-full bg-black/55 py-1 pl-1 pr-2.5 text-[12px] font-semibold backdrop-blur">
+            <Img src={A.ref(1)} className="h-5 w-5 rounded-full" label={false} />
+            {kind === 'set' ? 'Me · Work' : kind === 'together' ? `Me + ${friend}` : 'Me · Everyday'}
+          </span>
         )}
-        {!studio && kind !== 'trend' && (
+      </div>
+
+      <div className="space-y-2.5 px-4 pb-6 pt-4">
+        {/* Today: the usual exits only. */}
+        {!studio && (
           <>
-            <PillWhite
-              demo="save-gallery"
-              disabled={saved}
-              onClick={() => {
-                track('saved_to_gallery');
-                setSaved(true);
-                showToast('Saved to Gallery');
-                window.setTimeout(() => resetStack([], -1), 1000);
-              }}
-            >
+            <PillWhite demo="save-gallery" disabled={saved} onClick={() => { saveToGallery(); window.setTimeout(() => resetStack([], -1), 1000); }}>
               <I.Download size={18} /> {saved ? 'Saved' : 'Save to Gallery'}
             </PillWhite>
-            <p className="text-center text-[12px] text-mute">Result goes to your camera roll. Nothing is kept in the app.</p>
+            <p className="text-center text-[12px] text-mute">Saved to your camera roll.</p>
           </>
         )}
-        {studio && kind === 'trend' && (
+
+        {/* First creation: the usual Save and Share, plus Keep this. */}
+        {studio && kind === 'set' && (
           <>
-            <PillWhite demo="keep-this" onClick={keep}>
-              <I.Studio size={18} /> Keep this
+            <PillWhite demo="keep-this" onClick={() => toStudio(keepSet())}>
+              <I.Studio size={18} /> Keep this · continue the set
               <LeverTag l="w" />
             </PillWhite>
             <div className="flex gap-2.5">
-              <PillGhost
-                demo="try-another"
-                onClick={() =>
-                  runGenerating({ steps: ['Same trend, another photo of you', 'Using your saved Me'], duration: 1600, preview: trend?.result2 ?? image }, () => {
-                    track('trend_try_another', 'w');
-                    replaceTop({ name: 'result', kind: 'trend', image: image === trend?.result ? trend?.result2 ?? image : trend?.result ?? image, title, trendId });
-                  })
-                }
-              >
-                <I.Refresh size={17} /> Try another photo
-              </PillGhost>
-              <PillGhost demo="with-friend" onClick={() => openSheet({ type: 'withFriend', title, image, link: `remini.app/t/${trendId ?? 'trend'}` })}>
-                <I.Users size={17} /> With a friend
+              <PillGhost onClick={saveToGallery}><I.Download size={17} /> {saved ? 'Saved' : 'Save'}</PillGhost>
+              <PillGhost demo="share" onClick={() => openSheet({ type: 'withFriend', title, image, link: 'remini.app/s/linkedin-set' })}>
+                <I.Share size={17} /> Share
                 <LeverTag l="I" />
               </PillGhost>
             </div>
           </>
         )}
+
+        {/* One friend: your version of their style. */}
         {studio && kind === 'remix' && (
           <>
+            <PillWhite demo="make-together" onClick={() => makeTogether((r) => replaceTop(r))}>
+              <I.Users size={18} /> Make it together with {style?.creator ?? friend}
+              <LeverTag l="I" />
+            </PillWhite>
             <div className="flex gap-2.5">
-              <PillWhite demo="keep-this" onClick={() => { keepLook(image, title); showToast('Kept in My Creations'); }}>
-                <I.Studio size={18} /> Keep this
-                <LeverTag l="w" />
-              </PillWhite>
-              <PillGhost className="!h-[52px] !w-[120px] shrink-0" onClick={() => { track('remix_shared', 'I'); showToast('Shared'); }}>
-                <I.Share size={17} /> Share
-              </PillGhost>
+              <PillGhost demo="keep-this" onClick={() => toStudio(keepLook(image, title))}><I.Studio size={17} /> Keep this</PillGhost>
+              <PillGhost onClick={() => { track('remix_shared', 'I'); showToast('Shared'); }}><I.Share size={17} /> Share</PillGhost>
             </div>
-            <div className="flex gap-2.5">
-              <PillGhost demo="challenge" onClick={() => openSheet({ type: 'withFriend', title: style?.title ?? title, image, link: `remini.app/r/${(style?.title ?? 'style').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`, challenge: true })}>
-                <I.Users size={17} /> Challenge a friend
-                <LeverTag l="I" />
-              </PillGhost>
-              <PillGhost demo="publish" onClick={() => openSheet({ type: 'publish', image, from: style?.creator ?? '' })}>
-                <I.Enhance size={17} /> Publish as a style
-                <LeverTag l="I" />
-              </PillGhost>
-            </div>
-            <p className="text-center text-[12px] text-mute">Remixes always use your own saved identity.</p>
+            <p className="text-center text-[12px] text-mute">Remixes always use your own locked profile.</p>
           </>
         )}
-        {studio && (kind === 'look' || kind === 'enhance') && (
+
+        {/* Together: keep it, then bring the whole group. */}
+        {studio && kind === 'together' && (
           <>
-            <PillWhite demo="keep-this" onClick={() => (kind === 'enhance' ? openSheet({ type: 'keepThis', photo: image, title }) : keep())}>
+            <PillWhite demo="keep-this" onClick={() => { keepLook(A.remix90s, '90s film · your version'); toStudio(keepLook(image, title)); }}>
               <I.Studio size={18} /> Keep this
               <LeverTag l="w" />
             </PillWhite>
-            <PillGhost onClick={() => { track('saved_to_gallery'); showToast('Saved to Gallery'); }}>
-              <I.Download size={17} /> Save to Gallery
+            <PillGhost demo="start-group" onClick={() => { const id = startGroup(); showToast('Album created · Luca and Marco joined'); resetStack([{ name: 'studio' }, { name: 'creation', id }]); }}>
+              <I.Users size={17} /> Bring the whole group: start an album
+              <LeverTag l="I" />
             </PillGhost>
           </>
+        )}
+
+        {/* Presets from Remini chat, or a trend. */}
+        {studio && (kind === 'preset' || kind === 'look' || kind === 'trend') && (
+          <>
+            <PillWhite demo="keep-this" onClick={() => toStudio(keepLook(image, title))}>
+              <I.Studio size={18} /> Keep this
+              <LeverTag l="w" />
+            </PillWhite>
+            <div className="flex gap-2.5">
+              {kind === 'trend' && trend?.result2 && (
+                <PillGhost onClick={() => runGenerating({ steps: ['Same trend, another photo of you'], duration: 1400, preview: trend.result2 }, () => replaceTop({ name: 'result', kind: 'trend', image: image === trend.result ? trend.result2! : trend.result, title, trendId }))}>
+                  <I.Refresh size={17} /> Try another
+                </PillGhost>
+              )}
+              <PillGhost onClick={saveToGallery}><I.Download size={17} /> Save</PillGhost>
+              <PillGhost onClick={() => openSheet({ type: 'withFriend', title, image, link: 'remini.app/s/look' })}><I.Share size={17} /> Share</PillGhost>
+            </div>
+          </>
+        )}
+
+        {studio && kind === 'enhance' && (
+          <div className="flex gap-2.5">
+            <PillWhite onClick={() => openSheet({ type: 'keepThis', photo: image, title })}><I.Studio size={18} /> Keep this</PillWhite>
+            <PillGhost onClick={saveToGallery}><I.Download size={17} /> Save</PillGhost>
+          </div>
         )}
       </div>
     </div>

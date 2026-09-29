@@ -113,14 +113,14 @@ export function TodayHome() {
 
 /** Remini's bottom tool row. With Studio adds a Studio button first. */
 export function ToolBar() {
-  const { mode, push, resetStack, stack } = useStore();
+  const { mode, push } = useStore();
   const { openGallery } = useTodayActions();
   const studio = mode === 'studio';
   const tools: { key: string; label: string; icon: keyof typeof I; onClick: () => void; badge?: boolean; active?: boolean }[] = [
-    ...(studio ? [{ key: 'studio', label: 'Studio', icon: 'Studio' as const, onClick: () => resetStack([], -1), badge: true, active: stack.length === 0 }] : []),
+    ...(studio ? [{ key: 'studio', label: 'Studio', icon: 'Studio' as const, onClick: () => push({ name: 'studio' }), badge: true }] : []),
     { key: 'enhance', label: 'Enhance', icon: 'Enhance', onClick: () => openGallery('Enhance') },
-    { key: 'photos', label: 'AI Photos', icon: 'Photos', onClick: () => (studio ? push({ name: 'section', section: 'me' }) : push({ name: 'today', screen: 'photos' })) },
-    { key: 'filters', label: 'AI Filters', icon: 'Filters', onClick: () => (studio ? push({ name: 'section', section: 'remix' }) : push({ name: 'today', screen: 'filters' })) },
+    { key: 'photos', label: 'AI Photos', icon: 'Photos', onClick: () => push({ name: 'today', screen: 'photos' }) },
+    { key: 'filters', label: 'AI Filters', icon: 'Filters', onClick: () => push({ name: 'today', screen: 'filters' }) },
     { key: 'videos', label: 'AI Videos', icon: 'Videos', onClick: () => push({ name: 'today', screen: 'videos' }) },
     ...(!studio ? [{ key: 'retouch', label: 'Retouch', icon: 'Retouch' as const, onClick: () => openGallery('Retouch'), badge: true }] : []),
   ];
@@ -146,11 +146,18 @@ export function ToolBar() {
 
 /** The floating chat bubble (bottom right), as in Remini. */
 export function ChatBubble() {
-  const { mode, push, createFreestyle } = useStore();
+  const { mode, push, identities, creationsRef, upsertCreation } = useStore();
+  /** With a locked profile, Remini Chat works on "My looks" with presets and filters. */
+  const openChat = () => {
+    if (mode !== 'studio' || !identities.length) return push({ name: 'today', screen: 'chat' });
+    if (!creationsRef.current.some((c) => c.id === 'looks'))
+      upsertCreation({ id: 'looks', title: 'My looks', intent: 'looks', cover: identities[0].cover, photos: [], looks: [], goal: 6, lastEdit: 'Just now', chat: [{ id: 'hello', from: 'remini', text: 'Hi! Pick a preset or filter and I’ll apply it to your locked profile. Results are kept in “My looks”.' }] });
+    push({ name: 'chat', creationId: 'looks' });
+  };
   return (
     <button
       data-demo="chat-bubble"
-      onClick={() => (mode === 'studio' ? push({ name: 'chat', creationId: createFreestyle() }) : push({ name: 'today', screen: 'chat' }))}
+      onClick={openChat}
       className="absolute bottom-[112px] right-4 z-30 grid h-[62px] w-[62px] place-items-center rounded-full bg-ink p-[3px] shadow-2xl"
       style={{ background: 'conic-gradient(from 200deg, #FF5A4E, #FF2E7E, #B57CFF, #FFB020, #FF5A4E)' }}
       aria-label="Remini Chat"

@@ -16,19 +16,19 @@ function LeverPill({ l }: { l: Lever }) {
 const LEVER_DETAIL: Record<Lever, { why: string; where: string }> = {
   t: {
     why: 'The trial is offered on unfinished work the user already cares about ("Finish your Barcelona trip with Pro"), after they have seen free results, instead of a generic paywall before any use. Onboarding answers and "What are you creating?" tell us the job to be done.',
-    where: 'Onboarding question, What are you creating?, Enhance all, the unfinished-work paywall, Trending from Remini.',
+    where: 'Onboarding question, What are you creating?, Enhance all, the unfinished-work paywall.',
   },
   c: {
     why: 'During the 7 days, value builds up in the Studio: a remembered identity, creations that are half done, results that are kept. Cancelling means walking away from work in progress, not from one image.',
-    where: 'Starter creation, Remember me, Improve likeness, the unfinished-work paywall.',
+    where: '“Is this you?” lock-in, profile versions, Improve likeness, the unfinished-work paywall.',
   },
   w: {
     why: 'Reasons to open the app every week: a creation waiting at "3 of 5", trends that run on your saved Me in seconds, community styles to remix, results that are kept automatically.',
-    where: 'Welcome back card, Keep going, Try mine, Keep this, Make your version, notifications.',
+    where: 'Keep this, Keep going, Studio entry on the home, Make your version, album presets, Welcome back, notifications.',
   },
   I: {
     why: 'Every remix, challenge and published style is an invitation. A friend gets a link to make their own version with their own identity, and published styles travel like Instagram filters.',
-    where: 'Styles from the community, Challenge a friend, Publish as a style, Make this with a friend.',
+    where: 'Share with a friend, Make it together, Bring the whole group, the album.',
   },
 };
 
@@ -48,13 +48,14 @@ export function Controls({ compact = false }: { compact?: boolean }) {
       {!compact && (
         <div className="rounded-xl bg-white/[0.04] p-3.5 text-[12.5px] leading-relaxed text-white/60">
           <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-white/40">The idea</div>
-          <b className="text-white/85">Studio</b> is a new space in Remini to come back to your own photo and video creations, on your own or with friends, with gen AI along the way.
+          <b className="text-white/85">Studio</b> adds what happens after a normal Remini creation: you can keep it, continue it, and make it with others.
           <ul className="mt-2 space-y-1">
-            <li><b className="text-white/85">My Creations</b>: projects that keep one style and save themselves</li>
-            <li><b className="text-white/85">Together</b>: albums with friends that change together, with a shared Remini chat</li>
-            <li><b className="text-white/85">Remix</b>: trends already on your saved Me, and styles from the community</li>
-            <li><b className="text-white/85">Me</b>: saved identities, several profiles, private</li>
+            <li><b className="text-white/85">Me</b>: the profile you already have, confirmed once and adapted to each creation</li>
+            <li><b className="text-white/85">Keep going</b>: kept results become creations that save themselves</li>
+            <li><b className="text-white/85">Together</b>: one friend first, then a group album with one style for all</li>
+            <li><b className="text-white/85">Remini chat</b>: presets and filters on your profile or the whole album</li>
           </ul>
+          <p className="mt-2">Trends, filters and effects stay on Remini’s usual pages.</p>
         </div>
       )}
       <div>

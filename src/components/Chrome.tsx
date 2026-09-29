@@ -36,10 +36,10 @@ export function TopBar() {
         <button
           aria-label="Profile"
           data-demo="avatar"
-          onClick={() => (mode === 'studio' ? push({ name: 'section', section: 'me' }) : push({ name: 'today', screen: 'profile' }))}
+          onClick={() => (mode === 'studio' && identities.length ? push({ name: 'identity', id: identities[0].id }) : push({ name: 'today', screen: 'profile' }))}
           className="relative h-10 w-10 rounded-full ring-1 ring-white/20"
         >
-          {mode === 'studio' ? <Img src={identities[0].cover} className="h-full w-full rounded-full" label={false} /> : <span className="grid h-full w-full place-items-center rounded-full bg-white/10"><I.Photos size={18} /></span>}
+          {mode === 'studio' && identities.length ? <Img src={identities[0].cover} className="h-full w-full rounded-full" label={false} /> : <span className="grid h-full w-full place-items-center rounded-full bg-white/10"><I.Photos size={18} /></span>}
           <span className="absolute -bottom-0.5 -right-0.5 grid h-4 w-4 place-items-center rounded-full bg-white text-black"><I.Retouch size={10} /></span>
         </button>
       </div>

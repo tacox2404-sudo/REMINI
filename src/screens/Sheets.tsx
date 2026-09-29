@@ -196,29 +196,35 @@ function PaywallGeneric({ image, reason }: { image?: string; reason: 'onboarding
 }
 
 function WithFriend({ title, image, link, challenge }: { title: string; image: string; link: string; challenge?: boolean }) {
-  const { closeSheet, track, showToast, friend } = useStore();
+  const { closeSheet, track, showToast, friend, unlocked, shareWithFriend, resetStack } = useStore();
   const send = () => {
+    closeSheet();
+    if (!unlocked.friend) {
+      // The first share: the friend joins from the link and shares her own style back.
+      shareWithFriend();
+      showToast(`${friend} joined Remini and sent you her style`);
+      window.setTimeout(() => resetStack([{ name: 'studio' }]), 900);
+      return;
+    }
     track(challenge ? 'challenge_sent' : 'invite_sent', 'I');
     showToast(`Sent to ${friend}`);
-    closeSheet();
   };
   return (
     <div className="px-5 pt-1">
-      <h3 className="text-[20px] font-bold">{challenge ? 'Challenge a friend' : 'Make this with a friend'}</h3>
-      <p className="mt-1 text-[13px] text-mute">{challenge ? 'They make their version with their own saved identity. Best one wins.' : 'They join with their own saved identity; you both appear in it.'}</p>
-      {/* Message preview, as it appears in the chat app */}
+      <h3 className="text-[20px] font-bold">{challenge ? 'Challenge a friend' : `Share with ${friend}`}</h3>
+      <p className="mt-1 text-[13px] text-mute">{challenge ? 'They make their version with their own locked profile.' : 'The link opens in Remini. Friends can make their own version with their own profile.'}</p>
       <div data-demo="invite-preview" className="mt-4 rounded-[22px] bg-[#1c1c1e] p-3">
         <div className="text-center text-[11px] text-white/40">iMessage · to {friend}</div>
         <div className="ml-auto mt-2 w-[240px] overflow-hidden rounded-[18px] bg-[#2c2c2e]">
           <Img src={image} className="h-[150px] w-full" label={false} />
           <div className="p-2.5">
-            <div className="text-[13px] font-semibold leading-snug">{challenge ? `I did “${title}”. Your turn 👀` : `Make “${title}” with me`}</div>
+            <div className="text-[13px] font-semibold leading-snug">{challenge ? `I did “${title}”. Your turn 👀` : `My new ${title} 👔 made with Remini`}</div>
             <div className="mt-0.5 text-[11px] text-white/50">{link}</div>
           </div>
         </div>
-        <div className="ml-auto mt-1.5 w-fit rounded-[16px] bg-[#0A84FF] px-3 py-1.5 text-[13px]">{challenge ? 'bet you can’t beat this' : 'join me?'}</div>
+        <div className="ml-auto mt-1.5 w-fit rounded-[16px] bg-[#0A84FF] px-3 py-1.5 text-[13px]">{challenge ? 'bet you can’t beat this' : 'what do you think?'}</div>
       </div>
-      <PillBrand className="mt-4" onClick={send}>
+      <PillBrand demo="send-friend" className="mt-4" onClick={send}>
         Send to {friend}
         <LeverTag l="I" />
       </PillBrand>
@@ -250,7 +256,7 @@ function Publish({ image, from }: { image: string; from: string }) {
           closeSheet();
           showToast('Published to Styles from the community');
           goTab('studio');
-          resetStack([{ name: 'section', section: 'remix' }]);
+          resetStack([{ name: 'studio' }]);
         }}
       >
         Publish

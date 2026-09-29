@@ -8,7 +8,7 @@ import { LeverTag, PillWhite } from '../components/ui';
 
 /** Photo permission, then Remini's "What brings you to Remini?" question. */
 export function OnboardingScreen({ start }: { start?: 'question' }) {
-  const { answerSegment, track, mode } = useStore();
+  const { answerSegment, track, mode, showToast } = useStore();
   const [step, setStep] = useState<'permission' | 'question'>(start ?? 'permission');
 
   if (step === 'permission')
@@ -50,7 +50,7 @@ export function OnboardingScreen({ start }: { start?: 'question' }) {
     <div className="flex h-full flex-col px-5 pt-6">
       <Wordmark className="text-[22px]" />
       <h1 className="mt-6 text-[28px] font-bold leading-tight tracking-tight">What brings you to Remini?</h1>
-      <p className="mt-1.5 text-[14px] text-mute">{mode === 'studio' ? 'We will set up your first creation around it.' : 'We will tailor your experience.'}</p>
+      <p className="mt-1.5 text-[14px] text-mute">{mode === 'studio' ? 'We’ll suggest your first creation around it.' : 'We will tailor your experience.'}</p>
       <div data-demo="segments" className="relative mt-5 space-y-2">
         <LeverTag l="t" className="-right-1 -top-2" />
         {SEGMENTS.map((s, i) => (
@@ -60,15 +60,15 @@ export function OnboardingScreen({ start }: { start?: 'question' }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            onClick={() => answerSegment(s.id)}
-            className="flex h-[54px] w-full items-center gap-3 rounded-2xl bg-card px-4 text-left text-[15px] font-semibold active:bg-card2"
+            onClick={() => (mode === 'studio' && s.id !== 'profile' ? showToast('In this prototype, Studio starts from “Profile or work photos”') : answerSegment(s.id))}
+            className={`flex h-[54px] w-full items-center gap-3 rounded-2xl bg-card px-4 text-left text-[15px] font-semibold active:bg-card2 ${mode === 'studio' && s.id !== 'profile' ? 'opacity-45' : ''}`}
           >
             <span className="text-[20px]">{s.emoji}</span> {s.label}
           </motion.button>
         ))}
       </div>
       <div className="mt-auto pb-8 pt-4">
-        <PillWhite className="!bg-transparent !text-white/50" onClick={() => answerSegment('exploring')}>Skip</PillWhite>
+        {mode !== 'studio' && <PillWhite className="!bg-transparent !text-white/50" onClick={() => answerSegment('exploring')}>Skip</PillWhite>}
       </div>
     </div>
   );

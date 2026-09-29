@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { StatusBar, TopBar } from './components/Chrome';
 import { ChatBubble, TodayHome, TodayScreen, ToolBar } from './screens/Today';
-import { StudioIntro, VideoScreen } from './screens/StudioIntro';
+import { FirstCreationScreen } from './screens/First';
 import { GeneratingOverlay, Spotlight, Toast } from './components/Overlays';
 import { BEATS } from './state/demo';
 import { useStore } from './state/store';
@@ -14,17 +14,17 @@ import { OnboardingScreen } from './screens/Onboarding';
 import { CreationScreen, PhotoScreen } from './screens/Creation';
 import { LockScreen } from './screens/Outside';
 import { SheetHost } from './screens/Sheets';
-import { ComingNextScreen, SectionScreen, StudioHome } from './screens/Studio';
+import { StudioEntryCard, StudioScreen } from './screens/Studio';
 import { Shell } from './shell/Shell';
 
 function renderRoute(r: Route) {
   switch (r.name) {
     case 'today':
       return <TodayScreen screen={r.screen} />;
-    case 'studioIntro':
-      return <StudioIntro />;
-    case 'video':
-      return <VideoScreen srcs={r.srcs} title={r.title} />;
+    case 'first':
+      return <FirstCreationScreen step={r.step} />;
+    case 'studio':
+      return <StudioScreen />;
     case 'onboarding':
       return <OnboardingScreen start={r.step} />;
     case 'trend':
@@ -43,10 +43,6 @@ function renderRoute(r: Route) {
       return <PhotoScreen creationId={r.creationId} photoId={r.photoId} />;
     case 'chat':
       return <ChatScreen creationId={r.creationId} />;
-    case 'section':
-      return <SectionScreen section={r.section} />;
-    case 'comingNext':
-      return <ComingNextScreen />;
     case 'lock':
       return <LockScreen />;
     case 'about':
@@ -58,12 +54,13 @@ function renderRoute(r: Route) {
   }
 }
 
+/** Both modes open on Remini's usual home; With Studio adds the entry to your kept work. */
 function TabRoot() {
   const { mode } = useStore();
-  if (mode === 'studio') return <StudioHome />;
   return (
     <>
       <TopBar />
+      {mode === 'studio' && <StudioEntryCard />}
       <TodayHome />
     </>
   );
@@ -96,10 +93,10 @@ function PhoneContent() {
     return () => clearTimeout(t);
   }, [setSplash]);
 
-  // The first time Studio opens, it introduces itself.
+  // With Studio starts like Remini: the onboarding question, then a suggested first creation.
   useEffect(() => {
     if (splash || demo !== null || mode !== 'studio' || onboarded.studio || stack.length) return;
-    resetStack([{ name: 'studioIntro' }]);
+    resetStack([{ name: 'onboarding', step: 'question' }]);
   }, [splash, demo, onboarded, mode, stack.length, resetStack]);
 
   return (

@@ -10,8 +10,9 @@ import { LeverTag, NavHeader, PillWhite } from '../components/ui';
 export function IdentityScreen({ id }: { id: string }) {
   const { identities, creations, pop, push, openSheet, improveIdentity, showToast } = useStore();
   const idn = identities.find((i) => i.id === id) ?? identities[0];
-  const made = creations.flatMap((c) => c.looks).slice(0, 9);
+  if (!idn) return <NavHeader title="Me" onBack={pop} />;
   const strong = idn.refs.length >= 6;
+  const forVariant = (v: string) => creations.filter((c) => (v === 'Work' ? c.intent === 'profile' : c.id === 'paola' || c.intent === 'looks'));
 
   return (
     <div className="relative min-h-full pb-10">
@@ -20,19 +21,48 @@ export function IdentityScreen({ id }: { id: string }) {
         <span className="rounded-full bg-brand p-[3px]">
           <Img src={idn.cover} className="h-24 w-24 rounded-full ring-4 ring-ink" label={false} />
         </span>
-        <h1 className="mt-3 text-[26px] font-bold tracking-tight">{idn.name}</h1>
-        <div className="mt-1 text-[13px] text-mute">
-          Remembered from {idn.refs.length} photos · <span className={strong ? 'text-[#2ED47A]' : 'text-[#FFB020]'}>{strong ? 'great likeness' : 'good likeness'}</span>
+        <h1 className="mt-3 flex items-center gap-2 text-[26px] font-bold tracking-tight">
+          {idn.name} <I.Lock size={18} className="text-[#2ED47A]" />
+        </h1>
+        <div className="mt-1 text-center text-[13px] text-mute">
+          Locked in from {idn.refs.length} photos · <span className={strong ? 'text-[#2ED47A]' : 'text-[#FFB020]'}>{strong ? 'great likeness' : 'good likeness'}</span>
         </div>
       </div>
 
+      <div className="px-4 pt-5">
+        <div className="rounded-2xl bg-white/[0.05] p-3.5 text-[13px] leading-relaxed text-white/75">
+          Your Remini profile, made special: confirmed once (“Is this you?”), kept private, and <b className="text-white">adapted to each creation</b> through versions, so a LinkedIn set and a 90s photo with a friend both look like you without new selfies.
+        </div>
+      </div>
+
+      <div data-demo="me-variants" className="space-y-2.5 px-4 pt-5">
+        <h2 className="text-[17px] font-bold">Versions</h2>
+        {idn.variants.map((v) => (
+          <div key={v.name} className="flex items-center gap-3 rounded-2xl bg-card p-3">
+            <Img src={v.cover} className="h-16 w-14 shrink-0 rounded-xl" label={false} />
+            <div className="min-w-0 flex-1">
+              <div className="text-[15px] font-bold">{v.name}</div>
+              <div className="text-[12.5px] text-mute">For {v.usedFor}</div>
+              <div className="mt-1.5 flex gap-1.5">
+                {forVariant(v.name).map((c) => (
+                  <button key={c.id} onClick={() => push({ name: 'creation', id: c.id })} className="rounded-full bg-white/[0.08] px-2.5 py-1 text-[11.5px] font-semibold">
+                    {c.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+        {idn.variants.length < 2 && <div className="rounded-2xl border border-dashed border-white/15 p-3 text-[12.5px] text-mute">More versions appear as you create: an Everyday version comes with your first style from a friend.</div>}
+      </div>
+
       <div data-demo="identity-refs" className="px-4 pt-6">
-        <div className="grid grid-cols-4 gap-2">
+        <h2 className="text-[17px] font-bold">Locked-in photos</h2>
+        <div className="mt-2.5 grid grid-cols-4 gap-2">
           {idn.refs.slice(0, 8).map((r, i) => (
             <Img key={r + i} src={r} className="aspect-square rounded-xl" label={false} />
           ))}
         </div>
-        <p className="mt-2 text-[12px] text-mute">Every trend, remix and creation uses these. You never upload selfies again.</p>
         {!strong && (
           <button
             onClick={() =>
@@ -42,36 +72,22 @@ export function IdentityScreen({ id }: { id: string }) {
                 min: 2,
                 max: 2,
                 pool: [A.ref(1), A.ref(2), A.ref(3), A.ref(4), A.enhance2Before],
-                cta: 'Remember these too',
+                cta: 'Add to my profile',
                 onDone: (picked) => {
                   pop();
                   improveIdentity(idn.id, picked);
-                  showToast('Likeness improved');
+                  showToast('Likeness improved for every version');
                 },
               })
             }
             className="relative mt-3 flex w-full items-center gap-3 rounded-2xl bg-[#FFB020]/10 p-3 text-left ring-1 ring-[#FFB020]/25"
           >
             <span className="grid h-8 w-8 place-items-center rounded-full bg-[#FFB020]/20 text-[#FFB020]"><I.Bolt size={16} /></span>
-            <span className="flex-1 text-[13px] leading-snug"><b>Improve likeness:</b> add 2 more photos with different light</span>
-            <I.Chevron size={18} className="text-mute" />
+            <span className="flex-1 text-[13px] leading-snug"><b>Improve likeness:</b> add 2 photos with different light. Every version gets better.</span>
             <LeverTag l="c" />
           </button>
         )}
       </div>
-
-      {made.length > 0 && (
-        <div className="px-4 pt-6">
-          <h2 className="text-[17px] font-bold">Made with {idn.name}</h2>
-          <div className="mt-3 grid grid-cols-3 gap-1.5">
-            {made.map((l) => (
-              <button key={l.id} onClick={() => push({ name: 'result', kind: 'look', image: l.src, title: l.title })} className="relative aspect-[3/4] overflow-hidden rounded-xl">
-                <Img src={l.src} className="absolute inset-0" label={false} />
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <button onClick={() => openSheet({ type: 'privacy' })} className="mx-4 mt-6 flex w-[calc(100%-2rem)] items-center gap-3 rounded-2xl bg-card p-3.5 text-left">
         <I.Lock size={18} className="text-mute" />

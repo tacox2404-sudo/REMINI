@@ -1,5 +1,5 @@
 import { A, friendsTrip } from './data';
-import type { Store } from './store';
+import type { Stage, Store } from './store';
 import type { Mode, Route } from './types';
 
 export interface Beat {
@@ -10,25 +10,21 @@ export interface Beat {
   enter: (s: Store) => void;
 }
 
-/** Put the app in a known state so every beat works regardless of what was clicked before. */
-function scene(s: Store, mode: Mode, routes: Route[] = []) {
+/** Put the app in a known state (journey stage, screens) so every beat works on its own. */
+function scene(s: Store, mode: Mode, stage: Stage, routes: Route[] = []) {
   s.clearTimers();
   s.clearToast();
   s.closeSheet();
   s.setClosing(false);
+  s.setStage(stage);
   if (s.mode !== mode) s.setMode(mode);
   s.goTab(mode === 'studio' ? 'studio' : 'enhance');
   s.resetStack(routes);
 }
 
-const y2k: Route = { name: 'result', kind: 'trend', image: A.y2kMe, title: 'Y2K Yearbook', trendId: 'y2k' };
-const remix: Route = { name: 'result', kind: 'remix', image: A.remix90s, title: '90s yearbook · your version', styleId: 'st-90s' };
-
-/** Fresh Friends trip album (5 of 17 enhanced) at the top of the Studio. */
-function trip(s: Store) {
-  s.upsertCreation(friendsTrip());
-  return 'trip';
-}
+const set: Route = { name: 'result', kind: 'set', image: A.linkedin(1), images: [A.linkedin(1), A.linkedin(2), A.linkedin(3)], title: 'Casual Headshot' };
+const remix: Route = { name: 'result', kind: 'remix', image: A.remix90s, title: '90s film · your version', styleId: 'st-90s' };
+const together: Route = { name: 'result', kind: 'together', image: A.together90s, title: 'You & Paola' };
 
 export const BEATS: Beat[] = [
   // ---------- Today: a quick reality check ----------
@@ -37,179 +33,156 @@ export const BEATS: Beat[] = [
     title: 'Remini today',
     caption: 'The app as it is: Retouch, Enhance and viral trends on the home; AI Photos, Filters and Videos in the bottom row; Remini Chat in the corner.',
     target: 'tools',
-    enter: (s) => scene(s, 'today'),
+    enter: (s) => scene(s, 'today', 0),
   },
   {
     step: 1,
     title: 'A profile with 4 selfies',
-    caption: 'AI Photos uses one profile made from 4 selfies. Results are listed by pack.',
+    caption: 'AI Photos already uses a profile made from 4 selfies. Results are listed by pack.',
     target: null,
-    enter: (s) => scene(s, 'today', [{ name: 'today', screen: 'photos' }]),
+    enter: (s) => scene(s, 'today', 0, [{ name: 'today', screen: 'photos' }]),
   },
   {
     step: 1,
     title: 'Remini Chat',
-    caption: 'Upload a photo, write what you want, and Remini edits it. Now let’s see what Studio adds.',
+    caption: 'Upload a photo, write what you want, and Remini edits it. Now the same app, with Studio.',
     target: 'chat-bubble',
-    enter: (s) => scene(s, 'today'),
+    enter: (s) => scene(s, 'today', 0),
   },
-  // ---------- With Studio ----------
+  // ---------- With Studio: normal use first ----------
   {
     step: 2,
-    title: 'Welcome to Studio',
-    caption: 'A new space in Remini to come back to your own photo and video creations: keep going, do it together, create with AI.',
-    target: null,
-    enter: (s) => scene(s, 'studio', [{ name: 'studioIntro' }]),
-  },
-  {
-    step: 2,
-    title: 'Set up around you',
-    caption: 'Remini’s usual question now shapes the Studio: the answer puts the matching creation first.',
+    title: 'Why are you here?',
+    caption: 'Same Remini, same question. The answer now picks your first creation. In this demo: “Profile or work photos”.',
     target: 'segment-profile',
-    enter: (s) => scene(s, 'studio', [{ name: 'onboarding', step: 'question' }]),
+    enter: (s) => scene(s, 'studio', 0, [{ name: 'onboarding', step: 'question' }]),
+  },
+  {
+    step: 2,
+    title: 'Your first creation',
+    caption: 'A normal Remini generation, suggested for you: a LinkedIn photo from the Casual Headshot pack. So far, only Remini’s own examples.',
+    target: 'add-selfies',
+    enter: (s) => scene(s, 'studio', 0, [{ name: 'first', step: 'intro' }]),
+  },
+  {
+    step: 2,
+    title: '“Is this you?”',
+    caption: 'The profile Remini already has, made special: you confirm it once and lock it in. It starts with a Work version for this set.',
+    target: 'lock-in',
+    enter: (s) => scene(s, 'studio', 0, [{ name: 'first', step: 'confirm' }]),
+  },
+  {
+    step: 2,
+    title: 'Save, share, or keep it',
+    caption: 'Your headshots. Save and Share work as always; “Keep this” is new and turns them into a LinkedIn set you can continue.',
+    target: 'keep-this',
+    enter: (s) => scene(s, 'studio', 1, [set]),
   },
   {
     step: 3,
-    title: 'Your Studio',
-    caption: 'Create with Remini chat at the top, then Keep going, Together, New for you, Styles from the community, and your saved Me.',
-    target: 'create-ai',
-    enter: (s) => scene(s, 'studio'),
-  },
-  {
-    step: 3,
-    title: 'Keep going',
-    caption: 'Work in progress saves itself, with progress rings: Family archive 4 of 12 restored, Friends trip 5 of 17 enhanced, LinkedIn set 3 of 5.',
+    title: 'Kept in Studio',
+    caption: 'Studio holds only what you made and what you make with others. Trends, filters and effects stay on Remini’s usual pages.',
     target: 'keep-going',
-    enter: (s) => scene(s, 'studio'),
+    enter: (s) => scene(s, 'studio', 1, [{ name: 'studio' }]),
+  },
+  {
+    step: 3,
+    title: 'Me: locked in, adapted per creation',
+    caption: 'One profile, confirmed once and private. It adapts to each creation through versions: Work for the LinkedIn set, more as you create.',
+    target: 'me-variants',
+    enter: (s) => scene(s, 'studio', 1, [{ name: 'studio' }, { name: 'identity', id: 'me' }]),
+  },
+  // ---------- One friend ----------
+  {
+    step: 4,
+    title: 'Share with one friend',
+    caption: 'You send your new headshot to Paola. She opens it in Remini.',
+    target: 'send-friend',
+    enter: (s) => {
+      scene(s, 'studio', 1, [set]);
+      s.openSheet({ type: 'withFriend', title: 'LinkedIn photo', image: A.linkedin(1), link: 'remini.app/s/linkedin-set' });
+    },
   },
   {
     step: 4,
-    title: 'Together: the Friends trip',
-    caption: 'An album from the Philippines with Paola, Luca and Marco. Everyone adds photos, and the album keeps one style for all of them.',
+    title: 'Paola shares her style back',
+    caption: 'Paola joined and shared her 90s film style. “Make your version” applies it to you.',
+    target: 'make-your-version',
+    enter: (s) => {
+      scene(s, 'studio', 1, [{ name: 'studio' }]);
+      s.shareWithFriend();
+    },
+  },
+  {
+    step: 4,
+    title: 'Your version, same profile',
+    caption: 'Your locked profile adapts: an Everyday version appears, with no new selfies. Now make one together.',
+    target: 'make-together',
+    enter: (s) => {
+      scene(s, 'studio', 1, [{ name: 'studio' }, remix]);
+      s.shareWithFriend();
+    },
+  },
+  {
+    step: 4,
+    title: 'You and Paola',
+    caption: 'One photo, each of you with your own profile. Keep it, or bring the whole group.',
+    target: 'start-group',
+    enter: (s) => {
+      scene(s, 'studio', 1, [{ name: 'studio' }, together]);
+      s.shareWithFriend();
+    },
+  },
+  // ---------- The whole group ----------
+  {
+    step: 5,
+    title: 'The whole group: Friends trip',
+    caption: 'An album from the Philippines with Paola, Luca and Marco. Everyone adds photos, and one style applies to all of them.',
     target: 'album-members',
-    enter: (s) => scene(s, 'studio', [{ name: 'creation', id: trip(s) }]),
-  },
-  {
-    step: 4,
-    title: 'Change it for everyone',
-    caption: 'Pick a new look once and every photo, from every friend, updates together.',
-    target: 'restyle-all',
-    enter: (s) => {
-      const id = trip(s);
-      scene(s, 'studio', [{ name: 'creation', id }]);
-      s.restyleAll(id, 'Warm 35mm film');
-    },
+    enter: (s) => scene(s, 'studio', 3, [{ name: 'studio' }, { name: 'creation', id: 'trip' }]),
   },
   {
     step: 5,
-    title: 'The album chat',
-    caption: 'Friends create from the album with Remini: Luca asked for a movie poster of everyone, Paola for a recap video of the trip.',
-    target: 'album-chat-thread',
-    enter: (s) => {
-      const id = trip(s);
-      scene(s, 'studio', [{ name: 'creation', id }, { name: 'chat', creationId: id }]);
-    },
-  },
-  {
-    step: 5,
-    title: 'Your turn',
-    caption: 'Ask for something new from the group’s photos. It lands in the album for everyone.',
+    title: 'Presets for everyone',
+    caption: 'The album chat works with presets and filters. Luca set Golden hour; one tap on another look changes every friend’s photos together.',
     target: 'chat-spurs',
-    enter: (s) => {
-      const id = trip(s);
-      scene(s, 'studio', [{ name: 'creation', id }, { name: 'chat', creationId: id }]);
-      s.sendChat(id, 'Make a 10-second reel of the boat day');
-    },
+    enter: (s) => scene(s, 'studio', 3, [{ name: 'studio' }, { name: 'creation', id: 'trip' }, { name: 'chat', creationId: 'trip' }]),
   },
+  // ---------- Free usage ends ----------
   {
     step: 6,
-    title: 'Finish the album',
-    caption: '5 of 17 are done. “Enhance all” finishes the rest with Pro, with the free trial right here.',
+    title: 'Finish it with Pro',
+    caption: 'By now you have shared, created with friends and used your free enhancements. “Enhance all” offers the trial on work you care about: 5 of 17 done.',
     target: 'paywall-unfinished',
     enter: (s) => {
+      scene(s, 'studio', 3, [{ name: 'studio' }, { name: 'creation', id: 'trip' }]);
       s.setFlags({ isPro: false, freeUsed: 5 });
-      const id = trip(s);
-      scene(s, 'studio', [{ name: 'creation', id }]);
-      s.openSheet({ type: 'paywall', creationId: id, stage: 'offer' });
+      s.upsertCreation(friendsTrip(5));
+      s.openSheet({ type: 'paywall', creationId: 'trip', stage: 'offer' });
     },
+  },
+  // ---------- Coming back ----------
+  {
+    step: 7,
+    title: 'Coming back',
+    caption: 'Days later a notification brings you back to your own work.',
+    target: 'notif-linkedin',
+    enter: (s) => scene(s, 'studio', 4, [{ name: 'lock' }]),
   },
   {
     step: 7,
-    title: 'New for you',
-    caption: 'This week’s trends arrive already applied to your saved Me. Tap to see yourself, no selfies needed.',
-    target: 'new-for-you',
-    enter: (s) => scene(s, 'studio'),
-  },
-  {
-    step: 7,
-    title: 'Keep this',
-    caption: 'Keep it and it goes into My Creations. Or try another photo, or make it with a friend.',
-    target: 'keep-this',
-    enter: (s) => scene(s, 'studio', [{ name: 'trend', trendId: 'y2k' }, y2k]),
+    title: 'Welcome back',
+    caption: 'Studio opens on what is waiting: the LinkedIn set at 3 of 5. The album with the group is finished and kept. Continue where you left off.',
+    target: 'welcome-card',
+    enter: (s) => scene(s, 'studio', 4, [{ name: 'studio' }]),
   },
   {
     step: 8,
-    title: 'Styles from the community',
-    caption: 'Paola’s “90s yearbook” has 12.4k remixes. “Make your version” applies her style to you, with your own saved identity.',
-    target: 'style-friend',
-    enter: (s) => scene(s, 'studio', [{ name: 'section', section: 'remix' }]),
-  },
-  {
-    step: 8,
-    title: 'Make your version',
-    caption: 'Your version of Paola’s style. Keep it, share it, publish your own recipe, or challenge a friend.',
-    target: 'publish',
-    enter: (s) => {
-      scene(s, 'studio', [{ name: 'section', section: 'remix' }]);
-      s.remixStyle('st-90s', (r) => s.push(r));
-    },
-  },
-  {
-    step: 8,
-    title: 'Publish as a style',
-    caption: 'Name your recipe and publish it. It shows up with your name, and the remix count starts climbing.',
-    target: 'style-mine',
-    enter: (s) => {
-      scene(s, 'studio', [{ name: 'section', section: 'remix' }]);
-      s.publishStyle('90s yearbook, my way', A.remix90s);
-    },
-  },
-  {
-    step: 8,
-    title: 'Challenge a friend',
-    caption: 'Send a link with a preview. Your friend makes their version with their own identity.',
-    target: 'invite-preview',
-    enter: (s) => {
-      scene(s, 'studio', [{ name: 'section', section: 'remix' }, remix]);
-      s.openSheet({ type: 'withFriend', title: '90s yearbook', image: A.remix90s, link: 'remini.app/r/90s-yearbook', challenge: true });
-    },
-  },
-  {
-    step: 9,
-    title: 'Create with Remini chat',
-    caption: 'Describe anything and Remini makes it with your saved Me, no upload. Every result is kept and can be taken further.',
-    target: 'chat-spurs',
-    enter: (s) => {
-      scene(s, 'studio');
-      const id = s.createFreestyle();
-      s.resetStack([{ name: 'chat', creationId: id }]);
-      s.sendChat(id, 'Me as an astronaut on a film set');
-    },
-  },
-  {
-    step: 9,
-    title: 'Me: saved identities',
-    caption: 'Several profiles (Me, Me · Work), saved once and private. Every trend, style and chat uses them.',
-    target: 'me-row',
-    enter: (s) => scene(s, 'studio'),
-  },
-  {
-    step: 10,
     title: 'Why it pays',
     caption: 'The business case: move the levers and see the NPV.',
     target: null,
     enter: (s) => {
-      scene(s, 'studio');
+      scene(s, 'studio', 4);
       s.setClosing(true);
     },
   },

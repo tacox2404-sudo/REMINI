@@ -5,7 +5,6 @@ import { BeforeAfter } from '../components/BeforeAfter';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
 import { Avatar, LeverTag, NavHeader, NewBadge, PillWhite, ProgressBar } from '../components/ui';
-import { Poster, VideoTile } from './StudioIntro';
 import { ProgressRing } from './Studio';
 
 /** How each album style looks on the photos (a stand-in for the real re-render). */
@@ -46,7 +45,6 @@ export function CreationScreen({ id }: { id: string }) {
   const seen = new Set<string>();
   const shown = c.photos.filter((p) => (seen.has(p.original) ? false : (seen.add(p.original), true))).slice(0, 8);
   const extra = c.photos.length - shown.length;
-  const lastAi = [...(c.chat ?? [])].reverse().find((m) => m.video || m.poster || m.images);
   const me = identities[0];
   const friendLink = `remini.app/c/${c.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
@@ -110,17 +108,11 @@ export function CreationScreen({ id }: { id: string }) {
       <button data-demo="album-chat" onClick={() => push({ name: 'chat', creationId: c.id })} className="relative mx-4 mt-3 block w-[calc(100%-2rem)] rounded-[20px] p-[1.5px] text-left" style={{ background: 'linear-gradient(135deg,#FF7A45,#FF2E7E,#B57CFF)' }}>
         <LeverTag l="w" />
         <span className="flex items-center gap-3 rounded-[19px] bg-[#141419] p-3">
-          {lastAi?.video ? (
-            <VideoTile srcs={lastAi.video} className="h-[72px] w-[58px] shrink-0 rounded-xl" />
-          ) : lastAi?.poster ? (
-            <Poster src={lastAi.poster.src} title={lastAi.poster.title} className="h-[72px] w-[54px] shrink-0 rounded-xl" />
-          ) : (
-            <span className="grid h-[58px] w-[58px] shrink-0 place-items-center rounded-xl bg-brand"><I.Enhance size={22} /></span>
-          )}
+          <span className="grid h-[58px] w-[58px] shrink-0 place-items-center rounded-xl bg-brand"><I.Enhance size={22} /></span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[15px] font-bold">{c.shared ? 'Album chat with Remini' : 'Create with Remini chat'}</span>
+            <span className="block text-[15px] font-bold">{c.shared ? 'Album chat · presets for everyone' : 'Remini chat · presets and filters'}</span>
             <span className="block text-[12.5px] leading-snug text-white/65">
-              {c.shared ? 'Everyone can ask for a recap video, a poster, a new style for all.' : 'Change, extend or remix this creation by writing what you want.'}
+              {c.shared ? 'Anyone in the album can apply a style or filter to all the photos at once.' : 'Apply a preset or filter to this creation with your locked profile.'}
             </span>
           </span>
           <I.Chevron size={18} className="text-mute" />
