@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{doctitle}}</title>
+<style>{{css}}</style>
+</head>
+<body>
+<div class="bar"><span><b>{{bartitle}}</b> · P or the button to present, ← → to move, Esc to leave, double-click a slide to present from it</span><button onclick="present(0)">Present</button></div>
+<div class="deck">
+
+<!-- ================= EXECUTIVE SUMMARY ================= -->
+
+<div class="frame" data-part="exec"><section class="slide dark">
+  <div class="glow" style="right:-220px; top:-260px"></div>
+  <div class="pad">
+    <div class="tracker">A proposal for Bending Spoons</div>
+    <div style="flex:1; display:flex; align-items:center; gap:80px">
+      <div style="flex:1">
+        <div style="font: 400 150px/0.92 var(--serif); letter-spacing:-.03em">Remini<br><span class="grad-text" style="font-style:italic">Studio</span></div>
+        <div style="margin-top:36px; font: 400 34px/1.25 var(--sans); color: rgba(255,255,255,.82); max-width: 800px">From a single result to projects that keep going, alone or with friends</div>
+        <div style="margin-top:28px; font: 400 19px var(--sans); color: rgba(255,255,255,.45)">A new Remini feature for at least $5M of NPV over 2 years</div>
+      </div>
+      <img class="phone" src="{{img:back}}" style="width: 330px; transform: rotate(4deg); margin-right: 30px">
+    </div>
+    <div class="foot"><span>Concept, analysis and prototype by the candidate · fictitious case data</span><span class="brand"><b>Remini Studio</b></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="exec"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Executive summary</div>
+    <div class="title">Agenda</div>
+    <div class="body" style="display:grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items:start">
+      <div>
+        <div class="li" style="font-size:30px; padding:24px 0"><span style="color:var(--coral); margin-right:22px; font-weight:600">01</span>The idea and the impact</div>
+        <div class="li" style="font-size:30px; padding:24px 0"><span style="color:var(--coral); margin-right:22px; font-weight:600">02</span>Why now: the market, Remini today and its users</div>
+        <div class="li" style="font-size:30px; padding:24px 0"><span style="color:var(--coral); margin-right:22px; font-weight:600">03</span>Why Studio works</div>
+        <div class="li" style="font-size:30px; padding:24px 0"><span style="color:var(--coral); margin-right:22px; font-weight:600">04</span>Economics</div>
+        <div class="li" style="font-size:30px; padding:24px 0; border-bottom:0"><span style="color:var(--coral); margin-right:22px; font-weight:600">05</span>Feasibility, test and launch</div>
+      </div>
+      <div class="note" style="font-size:22px; line-height:1.5; color:var(--ink2); padding-top:14px">The analysis, the reasoning and the model behind each point are in the full story and the appendix</div>
+    </div>
+    <div class="foot"><span></span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="exec"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Executive summary · The idea</div>
+    <div class="title">Remini Studio is a personal space to create, keep and grow work, alone or with friends</div>
+    <div class="body">
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 20px">
+        <div class="card"><div class="k">01</div><h3>Projects</h3><p>A job that keeps going: a family archive, a trip, a set of looks. Progress and Enhance all</p></div>
+        <div class="card"><div class="k">02</div><h3>Profiles</h3><p>Me, the face profile Remini already makes, kept and improving. Friends add their own</p></div>
+        <div class="card"><div class="k">03</div><h3>Together</h3><p>Invite friends into a project, group and duo shoots, friends' styles with your own face</p></div>
+        <div class="card"><div class="k">04</div><h3>AI across it</h3><p>Remini chat inside every project, shared with the people in it</p></div>
+      </div>
+      <div style="display:flex; gap:14px; margin-top:34px; flex-wrap:wrap">
+        <span class="chip">Free limits stay the same</span><span class="chip">People choose what to keep</span><span class="chip">Only you add your face</span><span class="chip">Studio is private, not a feed</span>
+      </div>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "Remini Studio"</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="exec"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Executive summary · The impact</div>
+    <div class="title">The free limit lands inside a job people care about, and Studio clears the $5M target in Balanced</div>
+    <div class="body" style="display:flex; gap:80px; align-items:center">
+      <div style="position:relative; width:420px; height:100%; overflow:hidden; border-radius: 30px; background: var(--night)">
+        <div class="glow" style="left:-300px; top:-300px; opacity:.8"></div>
+        <img class="phone" src="{{img:paywall}}" style="position:absolute; left:50%; top:34px; width:270px; transform:translateX(-50%)">
+      </div>
+      <div style="flex:1">
+        <div class="lbl">NPV over 2 years · Balanced</div>
+        <div style="display:flex; align-items:baseline; gap:24px; margin-top:12px">
+          <div class="kpi">$5.3M</div><div class="kpi-s" style="color:var(--coral)">1.06x the target</div>
+        </div>
+        <div class="note" style="margin-top:14px">Range across the three scenarios: $4.7M to $6.3M</div>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); margin-top: 48px; border-top: 2px solid var(--ink)">
+          <div style="padding:18px 20px 0 0"><div class="lbl">Trial start</div><div class="kpi-s" style="margin-top:10px">+10%</div><div class="note" style="margin-top:6px">Half of the AI Photos lift</div></div>
+          <div style="padding:18px 20px 0; border-left:1px solid var(--rule)"><div class="lbl">Conversion</div><div class="kpi-s" style="margin-top:10px">Held</div><div class="note" style="margin-top:6px">As with AI Photos</div></div>
+          <div style="padding:18px 0 0 20px; border-left:1px solid var(--rule)"><div class="lbl">Paid weeks</div><div class="kpi-s" style="margin-top:10px">+6%</div><div class="note" style="margin-top:6px">About 1.7 more paid days</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Source: Remini_Studio_Impact.xlsx, Summary · prototype screen: Family archive at 5 of 12</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="exec"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Executive summary · Why now</div>
+    <div class="title">One-off edits are easier to find than ever, and Remini's next step is value that carries on after the first result</div>
+    <div class="body cols" style="grid-template-columns: 1fr 1fr 1fr; gap: 40px">
+      <div>
+        <div class="col-h">The market</div>
+        <div class="li">One-off AI edits are becoming a commodity</div>
+        <div class="li">Viral moments are powerful but short</div>
+        <div class="li">New users are harder to win</div>
+        <div class="li">Keeping revenue over time is the opportunity: net revenue retention averaged 87%</div>
+      </div>
+      <div>
+        <div class="col-h">Remini today</div>
+        <div class="li">5% of installs start a trial: large room to grow</div>
+        <div class="li">About 98% of daily users installed earlier: a large, engaged base</div>
+        <div class="li">Subscribers stay about 4 weeks</div>
+      </div>
+      <div>
+        <div class="col-h c">The users</div>
+        <div class="li" style="border-bottom:0">Two kinds of users, one need: <b>Fixers</b> (at least 70% of installs) bring big jobs, <b>Creators</b> (up to 20%) small ones</div>
+        <div class="so" style="margin-top:6px">Both need something that carries on after the first result</div>
+      </div>
+    </div>
+    <div class="foot"><span>Sources: Bending Spoons prospectus (2026), Q2 2026 earnings call, case brief, Remini team</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="exec"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Executive summary · Why Studio works</div>
+    <div class="title">Studio answers each finding with something that carries on after the first result</div>
+    <div class="body">
+      <table class="t s">
+        <tr><th style="width:33%">What we found</th><th style="width:43%">How Studio answers</th><th>Lever</th></tr>
+        <tr><td>Fixers have big jobs and stop at the free limit</td><td>Projects make the job bigger than the allowance, and the limit lands inside it</td><td><span class="chip"><i style="background:var(--t)"></i>Trial start</span></td></tr>
+        <tr><td>Creators have small jobs that end with the trial</td><td>Together unlocks in the trial: invites, group shoots, remix</td><td><span class="chip"><i style="background:var(--c)"></i>Conversion</span></td></tr>
+        <tr><td>Subscribers stop once the task is done</td><td>Unfinished projects, new looks, friends' additions</td><td><span class="chip"><i style="background:var(--w)"></i>Paid weeks</span></td></tr>
+        <tr><td>Most daily users installed earlier and use Remini for free</td><td>A project worth a trial, from their next result</td><td><span class="chip"><i style="background:var(--t)"></i>Trial start (returning users)</span></td></tr>
+        <tr><td>Buying installs is costly and ads are worth cents</td><td>Studio does not chase installs: invited friends arrive organically, into a project with work waiting</td><td><span class="chip"><i style="background:var(--i)"></i>Organic installs</span></td></tr>
+        <tr><td style="border-bottom:0">Single edits are easy to copy</td><td style="border-bottom:0">A history of your work and your people</td><td style="border-bottom:0"><span class="chip">All (switching cost)</span></td></tr>
+      </table>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "The users", "The levers" and "What each part is meant to trigger"</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="exec"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Executive summary · Economics</div>
+    <div class="title">Studio needs about 16% more revenue per install, and Balanced delivers 16.9%</div>
+    <div class="body" style="display:grid; grid-template-columns: 1.15fr 1fr; gap: 64px">
+      <table class="t s" style="font-size:20px">
+        <tr><th></th><th class="n">Trial rush</th><th class="n hl">Balanced</th><th class="n">Engaged</th></tr>
+        <tr><td>Trial start</td><td class="n">+20%</td><td class="n hl">+10%</td><td class="n">+7%</td></tr>
+        <tr><td>Conversion</td><td class="n">−5%</td><td class="n hl">0%</td><td class="n">+3%</td></tr>
+        <tr><td>Paid weeks</td><td class="n">0%</td><td class="n hl">+6%</td><td class="n">+10%</td></tr>
+        <tr><td>Revenue per install (invites included)</td><td class="n">+14.4%</td><td class="n hl">+16.9%</td><td class="n">+21.8%</td></tr>
+        <tr><td style="font-weight:600; border-bottom:0">NPV, 2 years</td><td class="n" style="font:400 36px var(--serif); border-bottom:0">$4.7M</td><td class="n hl" style="font:400 36px var(--serif); color:var(--coral); border-bottom:0">$5.3M</td><td class="n" style="font:400 36px var(--serif); border-bottom:0">$6.3M</td></tr>
+      </table>
+      <div style="display:flex; flex-direction:column; gap:24px">
+        <div><div class="lbl" style="color:var(--coral)">Conversion is the pivot, not trial volume</div><div class="note" style="margin-top:6px">Trial rush doubles the trial lift yet earns less per install: +14% vs +17%</div></div>
+        <div><div class="lbl" style="color:var(--coral)">The real cost is margin, not headcount</div><div class="note" style="margin-top:6px">89% to 86% after AI cost, worth −$1.5M</div></div>
+        <div><div class="lbl" style="color:var(--coral)">Returning users add $0.8M</div><div class="note" style="margin-top:6px">The least evidenced input, and Balanced needs it</div></div>
+        <div><div class="lbl" style="color:var(--coral)">Anchored in evidence</div><div class="note" style="margin-top:6px">AI Photos lifted trial start by 20% and the lift lasted; Balanced assumes half</div></div>
+      </div>
+    </div>
+    <div class="foot"><span>Target: $5M NPV over 2 years · bar at Balanced margin: +16.0% revenue per install · Source: Remini_Studio_Impact.xlsx, Summary and Hurdle</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="exec"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Executive summary · Feasibility and risks</div>
+    <div class="title">Studio is mostly built on what Remini already runs, and each new risk has a clear rule</div>
+    <div class="body cols" style="grid-template-columns: 1fr 1.25fr; gap: 64px">
+      <div>
+        <div class="col-h">Already in Remini</div>
+        <div class="li">Face profiles, several per account</div>
+        <div class="li">Enhance, AI photos, video, retouch</div>
+        <div class="li">Trend packs and duo photoshoots</div>
+        <div class="li">AI chat</div>
+        <div class="col-h c" style="margin-top:26px">New</div>
+        <div class="li" style="border-bottom:0">The Studio area and storage per account, Enhance all, invites and shared projects</div>
+      </div>
+      <table class="t s" style="font-size:21px">
+        <tr><th style="width:32%">Risk</th><th>Rule</th></tr>
+        <tr><td>Other people's faces</td><td>Only a person adds their own face, is notified when it is used and can remove it</td></tr>
+        <tr><td>Privacy of saved faces</td><td>Same consent and deletion rules as AI Photos</td></tr>
+        <tr><td>Inappropriate content</td><td>Projects are private to their members</td></tr>
+        <tr><td style="border-bottom:0">Compute and storage cost</td><td style="border-bottom:0">Free limits stay and the trial lasts 7 days, so usage is bounded</td></tr>
+      </table>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "Feasibility"</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="exec"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Executive summary · Test and launch</div>
+    <div class="title">A random test on new installs settles it within weeks</div>
+    <div class="body">
+      <div class="timeline">
+        <div style="background:var(--wash)">Months 1 and 2<small>Build</small></div>
+        <div style="background:rgba(255,46,126,.12)">Month 3<small>Test on 10% of new installs</small></div>
+        <div style="background:rgba(255,46,126,.3)">Month 4<small>50% of new installs</small></div>
+        <div style="background:var(--grad); color:#fff">Month 5 onwards<small>Everyone</small></div>
+      </div>
+      <div class="cols" style="grid-template-columns: repeat(3, 1fr); gap:40px; margin-top:44px">
+        <div><div class="col-h">Roll out</div><div class="note" style="margin-top:12px">If revenue per install after costs clears the bar</div></div>
+        <div><div class="col-h">Improve</div><div class="note" style="margin-top:12px">If people use Studio but money does not move</div></div>
+        <div><div class="col-h">Stop</div><div class="note" style="margin-top:12px">If neither trials nor repeat use move</div></div>
+      </div>
+      <div class="so" style="margin-top:40px">Trial start shows within days, conversion and paid weeks within weeks. Next: the live demo</div>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "Test and launch"; timing as in Remini_Studio_Impact.xlsx, Inputs</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<!-- ================= FULL STORY ================= -->
+
+<div class="frame" data-part="full"><section class="slide dark">
+  <div class="glow" style="left:-300px; bottom:-420px"></div>
+  <div class="pad">
+    <div class="tracker">Part 2</div>
+    <div style="flex:1; display:grid; grid-template-columns: 1fr 1fr; align-items:center; gap: 80px">
+      <div style="font: 400 140px/0.95 var(--serif); letter-spacing:-.03em">Full<br><span class="grad-text" style="font-style:italic">story</span></div>
+      <ol style="list-style:none; font: 400 25px/1.25 var(--sans); color: rgba(255,255,255,.82); display:grid; gap: 14px">
+        <li><span style="color:rgba(255,255,255,.35); margin-right:18px">01</span>Market and Remini today</li>
+        <li><span style="color:rgba(255,255,255,.35); margin-right:18px">02</span>Users and levers</li>
+        <li><span style="color:rgba(255,255,255,.35); margin-right:18px">03</span>The problem, options and choice</li>
+        <li><span style="color:rgba(255,255,255,.35); margin-right:18px">04</span>Remini Studio and why it works</li>
+        <li><span style="color:rgba(255,255,255,.35); margin-right:18px">05</span>The prototype</li>
+        <li><span style="color:rgba(255,255,255,.35); margin-right:18px">06</span>Launch</li>
+        <li><span style="color:rgba(255,255,255,.35); margin-right:18px">07</span>Impact</li>
+        <li><span style="color:rgba(255,255,255,.35); margin-right:18px">08</span>Feasibility and risks</li>
+      </ol>
+    </div>
+    <div class="foot"><span></span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Market</div>
+    <div class="title">Four forces make one-off edits and viral waves a weaker base for growth</div>
+    <div class="body">
+      <table class="t s">
+        <tr><th style="width:22%">Force</th><th style="width:44%">What I found</th><th>What it means for Remini</th></tr>
+        <tr><td><b>One-off AI edits are becoming a commodity</b></td><td>ChatGPT's image tool added about 1M users in one hour (Mar 2025); Nano Banana brought 10M+ new Gemini users and 200M+ edits in about a week (Aug 2025)</td><td>A single effect or edit is easy to copy and increasingly free elsewhere</td></tr>
+        <tr><td><b>Viral moments are powerful but short</b></td><td>Bending Spoons created six viral spikes for Remini after 2023, each large and short-lived</td><td>Remini knows how to win attention, but each wave fades</td></tr>
+        <tr><td><b>New users are harder to win</b></td><td>Q2 2026: new users are harder to acquire while existing users behave as before</td><td>Growth that relies on more installs gets more expensive</td></tr>
+        <tr><td style="border-bottom:0"><b>Keeping revenue over time is the opportunity</b></td><td style="border-bottom:0">Remini's net revenue retention averaged 87% from Q1 2023 to Q1 2026</td><td style="border-bottom:0">Revenue from each group of users shrinks over time</td></tr>
+      </table>
+      <div class="so">The value has to come from giving people more reasons to use Remini and to keep paying for it</div>
+    </div>
+    <div class="foot"><span>Sources: Business Today (Apr 2025), 9to5Google (Sep 2025), Bending Spoons prospectus (2026), Q2 2026 earnings call</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Remini today</div>
+    <div class="title">Of 350,000 installs a day, 95% never start a trial</div>
+    <div class="exhibit">New installs in one day, by the furthest step reached, number of people</div>
+    <div class="body" style="display:grid; grid-template-columns: 1fr 360px; gap: 64px; align-items:center">
+      <svg viewBox="0 0 900 470" width="100%" font-family="Instrument Sans, Arial" style="overflow:visible">
+        <g font-size="21" fill="#3A3A42">
+          <text x="0" y="46">Install</text><text x="0" y="140">Enhance a photo</text><text x="0" y="234">Generate an AI image</text><text x="0" y="328">Start a free trial</text><text x="0" y="422">Pay</text>
+        </g>
+        <rect x="250" y="16" width="560" height="46" rx="4" fill="#0B0B0F"/>
+        <rect x="250" y="110" width="504" height="46" rx="4" fill="#B9B9C1"/>
+        <rect x="250" y="204" width="112" height="46" rx="4" fill="#B9B9C1"/>
+        <rect x="250" y="298" width="28" height="46" rx="4" fill="url(#gf)"/>
+        <rect x="250" y="392" width="6" height="46" rx="3" fill="url(#gf)"/>
+        <defs><linearGradient id="gf" x1="0" x2="1"><stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#FF2E7E"/></linearGradient></defs>
+        <g font-size="21" font-weight="600" fill="#0B0B0F">
+          <text x="824" y="46">350,000</text><text x="768" y="140">315,000 · 90%</text><text x="376" y="234">70,000 · 20%</text><text x="292" y="328" fill="#FF2E7E">17,500 · 5%</text><text x="270" y="422" fill="#FF2E7E">3,500 · 1%</text>
+        </g>
+      </svg>
+      <div style="border-left: 2px solid var(--ink); padding-left: 28px">
+        <div class="kpi" style="font-size:88px">95%</div>
+        <div class="note" style="margin-top:10px">of installs never start a trial: 332,500 people a day</div>
+        <div class="note" style="margin-top:22px; color: var(--mute)">60% of trials start at onboarding, 40% after using the app. Payers stay about 4 weeks</div>
+      </div>
+    </div>
+    <div class="foot"><span>Source: case brief · trial and pay shares are of all installs</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Remini today</div>
+    <div class="title">New users bring $70,000 a day in subscriptions and ads add about $6,300, while most daily users installed earlier</div>
+    <div class="body cols" style="grid-template-columns: 1fr 1fr; gap: 72px">
+      <div>
+        <div class="col-h">Money from new users, per day</div>
+        <div class="li"><b>Subscriptions:</b> 350,000 installs × 5% trial × 20% conversion × 4 weeks × $5 = <b>$70,000</b>, about $25.6M a year</div>
+        <div class="li"><b>Ads:</b> 332,500 free users × 3.8 ads × $0.005 = <b>about $6,300</b>, 8% of revenue from new users</div>
+        <div class="li" style="border-bottom:0">A free user is worth cents in ads; a trial is worth about $4 (20% × $20)</div>
+      </div>
+      <div>
+        <div class="col-h">Daily users</div>
+        <div style="display:flex; height:64px; border-radius:8px; overflow:hidden; margin-top:24px">
+          <div style="width:2.3%; background:#0B0B0F"></div>
+          <div style="width:0.65%; background:var(--coral)"></div>
+          <div style="flex:1; background:#D9D9DE"></div>
+        </div>
+        <div style="display:grid; gap:12px; margin-top:22px; font: 400 20px var(--sans)">
+          <div><span style="display:inline-block; width:14px; height:14px; background:#0B0B0F; border-radius:3px; margin-right:10px"></span><b>350,000</b> new installs a day (2.3% of 15M)</div>
+          <div><span style="display:inline-block; width:14px; height:14px; background:var(--coral); border-radius:3px; margin-right:10px"></span><b>About 98,000</b> paying at any moment (0.65%)</div>
+          <div><span style="display:inline-block; width:14px; height:14px; background:#D9D9DE; border-radius:3px; margin-right:10px"></span><b>About 98%</b> installed earlier; most use Remini for free</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Source: case brief (15M daily users, 350,000 installs, $0.005 per ad) · paying users: 3,500 a day × 28 paid days</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Users</div>
+    <div class="title">Fixers and Creators have opposite strengths, and both need something that carries on after the first result</div>
+    <div class="body">
+      <table class="t s">
+        <tr><th style="width:20%"></th><th style="width:40%">Fixers</th><th>Creators</th></tr>
+        <tr><td><b>Why they come</b></td><td>To improve their photos: old family pictures, blurry shots, a backlog</td><td>To create: AI looks, trends, themselves in new styles</td></tr>
+        <tr><td><b>How many</b></td><td>The large majority: at least 70% of installs enhance and never generate</td><td>Up to 20% of installs</td></tr>
+        <tr><td><b>Average use</b></td><td>6 enhancements</td><td>1 AI image</td></tr>
+        <tr><td><b>Strength</b></td><td>Stay subscribed longer</td><td>Start trials more often</td></tr>
+        <tr><td><b>Weakness</b></td><td>Start trials less often</td><td>Leave at the end of the trial or soon after paying</td></tr>
+        <tr><td style="border-bottom:0"><b>What free users need</b></td><td style="border-bottom:0">A reason to finish a big job</td><td style="border-bottom:0">Jobs that grow: more photos, more people, more ideas</td></tr>
+      </table>
+    </div>
+    <div class="foot"><span>Evidence: usage splits in two (brief); onboarding answers match usage and the two groups behave differently with money (Remini team)</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Levers</div>
+    <div class="title">Each 1% on any lever is worth the same $700 a day, and trial start, conversion and paid weeks are the easiest to move</div>
+    <div class="exhibit">Subscriptions = installs × trial start × conversion × paid weeks × weekly price</div>
+    <div class="body" style="margin-top:22px">
+      <table class="t s" style="font-size:20px">
+        <tr><th style="width:15%">Lever</th><th style="width:14%">Today</th><th style="width:25%">Room to grow</th><th>Ease of moving it</th></tr>
+        <tr><td><b>Trial start</b></td><td>5%</td><td>Large: 95% never try</td><td>Proven: AI Photos lifted it by 20%, and the lift lasted</td></tr>
+        <tr><td><b>Conversion</b></td><td>20% of trials</td><td>Medium: 24.3% median in comparable apps</td><td>Moderate: people need to see ongoing value within 7 days</td></tr>
+        <tr><td><b>Paid weeks</b></td><td>4</td><td>Medium</td><td>Hardest: people need a reason to keep coming back</td></tr>
+        <tr><td><b>Installs</b></td><td>350,000 a day</td><td>Large</td><td>Costly: new users are harder to win, and an extra install is worth about 22 cents. Studio grows them only through invites</td></tr>
+        <tr><td><b>Price and paywall</b></td><td>$5 a week</td><td>Small</td><td>Easy to change, but moves money among people who already want Remini</td></tr>
+        <tr><td style="border-bottom:0"><b>Ads</b></td><td style="border-bottom:0">8% of new-user revenue</td><td style="border-bottom:0">Very small</td><td style="border-bottom:0">Capped by the free allowance</td></tr>
+      </table>
+    </div>
+    <div class="foot"><span>Sources: case brief, Remini team, RevenueCat State of Subscription Apps 2026 · 1% of $70,000 = $700 a day</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Levers</div>
+    <div class="title">The levers move together, so the change has to come from behaviour, not from forcing one number</div>
+    <div class="body">
+      <div style="display:grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: 14px; align-items:center">
+        <div class="card" style="text-align:center"><h3 style="margin:0">Installs</h3></div><div class="arrow">→</div>
+        <div class="card" style="text-align:center"><h3 style="margin:0">Trials</h3></div><div class="arrow">→</div>
+        <div class="card" style="text-align:center"><h3 style="margin:0">Subscribers</h3></div><div class="arrow">→</div>
+        <div class="card" style="text-align:center"><h3 style="margin:0">Paid weeks</h3></div>
+      </div>
+      <div style="margin-top:40px">
+        <div class="li">More installs without a change in the experience mean mathematically lower conversion, with no real gain</div>
+        <div class="li">The model shows the same with trials: Trial rush lifts trials by 20%, converts worse and earns less per install than Balanced</div>
+        <div class="li" style="border-bottom:0">So Studio acts on the whole experience: trial start, conversion, paid weeks and invites together</div>
+      </div>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "Attention on correlation"; Remini_Studio_Impact.xlsx, Summary</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">The problem, and why now</div>
+    <div class="title">Remini delivers great results for a single task, but offers little that carries on after it</div>
+    <div class="body cols" style="grid-template-columns: 1fr 1fr; gap: 64px">
+      <div>
+        <div class="col-h c">Where value can grow</div>
+        <div class="li">Most people use Remini and leave before a trial</div>
+        <div class="li">Trial users often finish their task before deciding whether it is worth paying</div>
+        <div class="li">Subscribers stop once the task is done</div>
+      </div>
+      <div>
+        <div class="col-h">Why it matters now</div>
+        <div class="li">The single task is becoming a commodity</div>
+        <div class="li">Viral waves fade</div>
+        <div class="li">New users cost more to win, and revenue from each group of users shrinks over time</div>
+      </div>
+    </div>
+    <div class="so" style="margin: 0 0 24px">Raising the value of each user, today about 22 cents per install, is the growth path that does not depend on more installs or the next viral wave</div>
+    <div class="foot"><span>Source: Truth doc, "The problem, and why it matters now"</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">What others do</div>
+    <div class="title">Remixing and creating together work when tied to your own face, your friends and a purpose; feeds alone do not hold people</div>
+    <div class="body" style="margin-top:26px">
+      <table class="t s" style="font-size:20px">
+        <tr><th style="width:17%">Product</th><th style="width:36%">What it does</th><th>What I take from it</th></tr>
+        <tr><td><b>CapCut templates</b></td><td>Anyone taps "Use template" and drops in their own clips</td><td>People love reusing others' creations with their own content</td></tr>
+        <tr><td><b>Picsart Replay</b></td><td>Apply the exact edits another user made to your own photo</td><td>User-made recipes for photos have lasted for years</td></tr>
+        <tr><td><b>Remix (Facemix)</b></td><td>Puts your face into any image</td><td>Your face on others' creations exists, as a niche social network</td></tr>
+        <tr><td><b>Sora cameos</b></td><td>Verify your face; friends use it with your approval</td><td>1M downloads in under 5 days, then falling month after month: a feed alone does not hold people</td></tr>
+        <tr><td><b>Meta AI Vibes</b></td><td>A feed of AI videos to remix and share</td><td>Cold reception: remixing strangers' content without a personal purpose is weak</td></tr>
+        <tr><td style="border-bottom:0"><b>ChatGPT group chats</b></td><td style="border-bottom:0">Up to 20 people creating in one chat, with profile photos</td><td style="border-bottom:0">Creating together through chat is becoming normal</td></tr>
+      </table>
+    </div>
+    <div class="foot"><span>Sources: CapCut help centre, Picsart blog, Remix blog (Feb 2024), Axios (Sep 2025), CNBC (Oct 2025), Sherwood News (2026), TechCrunch (Sep 2025), OpenAI (Nov 2025)</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Options and choice</div>
+    <div class="title">A personal space moves the most levers, and the right ones, for both kinds of user</div>
+    <div class="body">
+      <table class="t s">
+        <tr><th style="width:30%">Option</th><th style="width:26%">Levers it moves</th><th style="width:11%">Serves</th><th>Comment</th></tr>
+        <tr><td>A new viral trend or AI effect</td><td>Installs, trial start</td><td>Creators</td><td>Waves fade and effects are copied</td></tr>
+        <tr><td>Price, plan or paywall changes</td><td>Trial start, conversion</td><td>Both</td><td>Optimises current results instead of the deeper problem</td></tr>
+        <tr><td>A public feed of AI content</td><td>Installs, paid weeks</td><td>Creators</td><td>Similar feeds had a cold reception</td></tr>
+        <tr class="hl"><td style="border-bottom:0"><b>A personal space to create, alone and with friends</b></td><td style="border-bottom:0"><b>Trial start, conversion, paid weeks, installs from invites</b></td><td style="border-bottom:0"><b>Both</b></td><td style="border-bottom:0"><b>What each person builds grows over time</b></td></tr>
+      </table>
+      <div class="so">It moves the most levers and the right ones (trials and conversion), serves both users and builds switching cost. The other options chase installs or only tune the paywall</div>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "Options, and my choice"</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">The solution</div>
+    <div class="title">Remini Studio: projects that keep going, profiles that improve, and friends to create with</div>
+    <div class="body">
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 20px">
+        <div class="card"><div class="k">01</div><h3>Projects</h3><p>A job that keeps going, with visible progress ("5 of 12 restored") and Enhance all for batches</p><p style="color:var(--mute); font-size:16px">New: the Studio area and storage</p></div>
+        <div class="card"><div class="k">02</div><h3>Profiles</h3><p>Saved faces: yours, and friends' and family's, added by them. The base for new creations inside projects</p><p style="color:var(--mute); font-size:16px">Built on AI Photos face profiles</p></div>
+        <div class="card"><div class="k">03</div><h3>Together</h3><p>Invite friends into a project, create group and duo shoots, remix creations shared with you with your own face</p><p style="color:var(--mute); font-size:16px">Built on duo photoshoots and trend packs</p></div>
+        <div class="card"><div class="k">04</div><h3>AI across it</h3><p>Remini chat works inside a project and, in shared projects, for everyone in it</p><p style="color:var(--mute); font-size:16px">Built on Remini's AI chat</p></div>
+      </div>
+      <div class="note" style="margin-top:30px">In order of importance. Everything made anywhere in Remini can flow into Studio, and everything in it can use the rest of Remini</div>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "Remini Studio"</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">How people use it</div>
+    <div class="title">After each result, people choose what to keep, and Studio shows what has moved since</div>
+    <div class="body cols" style="grid-template-columns: 1.6fr 1fr; gap: 56px">
+      <div>
+        <div style="display:grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; align-items:stretch">
+          <div class="card"><h3 style="margin:0">Any result</h3><p>Save, Share, or Keep in Studio</p></div><div class="arrow">→</div>
+          <div class="card"><h3 style="margin:0">A project</h3><p>Photos that belong together become a project</p></div><div class="arrow">→</div>
+          <div class="card"><h3 style="margin:0">Studio</h3><p>Progress, new looks on your profiles, what friends added</p></div>
+        </div>
+      </div>
+      <div>
+        <div class="col-h">Design rules</div>
+        <div class="li">People choose what to keep and share</div>
+        <div class="li">The free limits stay as they are</div>
+        <div class="li">Only a person can add their own face, and remove it at any time</div>
+        <div class="li">Nothing is held back after cancelling</div>
+        <div class="li" style="border-bottom:0">Studio is a personal space, not a public feed</div>
+      </div>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "How people use it" and "Design rules"</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Why it works</div>
+    <div class="title">Each moment of the journey is designed to move one lever</div>
+    <div class="body">
+      <table class="t s" style="font-size:20px">
+        <tr><th style="width:17%">Moment</th><th style="width:47%">What the user sees</th><th>What it triggers</th></tr>
+        <tr><td><b>First results</b></td><td>"Keep in Studio", then a project suggestion when photos belong together</td><td><span class="chip">A job starts, bigger than one edit</span></td></tr>
+        <tr><td><b>Free limit</b></td><td>"5 of 12 done, finish your archive", with creating together in Pro</td><td><span class="chip"><i style="background:var(--t)"></i>Trial start</span></td></tr>
+        <tr><td><b>Trial week</b></td><td>Together unlocked: invites, group shoots, the shared AI chat, remix</td><td><span class="chip"><i style="background:var(--c)"></i>Conversion for all the new features</span> <span class="chip" style="margin-top:6px"><i style="background:var(--i)"></i>Installs from invited friends</span></td></tr>
+        <tr><td><b>Paid weeks</b></td><td>Unfinished projects, new looks on saved profiles, friends' additions, new trends to remix</td><td><span class="chip"><i style="background:var(--w)"></i>Paid weeks</span></td></tr>
+        <tr><td style="border-bottom:0"><b>After cancelling</b></td><td style="border-bottom:0">Projects stay viewable and downloadable</td><td style="border-bottom:0"><span class="chip">A reason to come back later</span></td></tr>
+      </table>
+      <div class="note" style="margin-top:20px">Studio and Together are showcased to free users from onboarding</div>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "What each part is meant to trigger"; wording from the prototype</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide dark">
+  <div class="glow" style="right:-360px; bottom:-460px"></div>
+  <div class="pad">
+    <div class="tracker">The prototype · Keep</div>
+    <div class="title">Keep turns a single result into the start of a project</div>
+    <div class="body" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 40px; justify-items:center; margin-top:28px">
+      <figure style="width:330px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:keep}}" style="width:220px"><figcaption style="margin-top:24px; text-align:center"><div class="lbl" style="color:var(--coral)">1 · Keep in Studio</div><div class="note" style="margin-top:4px">Save and Share as always, plus one new button</div></figcaption></figure>
+      <figure style="width:330px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:welcome}}" style="width:220px"><figcaption style="margin-top:24px; text-align:center"><div class="lbl" style="color:var(--coral)">2 · Welcome to Studio</div><div class="note" style="margin-top:4px">The first Keep explains Studio in one screen</div></figcaption></figure>
+      <figure style="width:330px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:suggest}}" style="width:220px"><figcaption style="margin-top:24px; text-align:center"><div class="lbl" style="color:var(--coral)">3 · A project takes shape</div><div class="note" style="margin-top:4px">A second old photo suggests a Family archive</div></figcaption></figure>
+    </div>
+    <div class="foot"><span>Screens from the clickable prototype · personal photos used with permission</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide dark">
+  <div class="glow" style="left:-360px; bottom:-460px"></div>
+  <div class="pad">
+    <div class="tracker">The prototype · Projects</div>
+    <div class="title">The free limit lands inside the project, with creating together as the reason to try Pro</div>
+    <div class="body" style="display:grid; grid-template-columns: 1fr 1fr; gap: 40px; justify-items:center; margin-top:28px">
+      <figure style="width:360px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:project}}" style="width:196px"><figcaption style="margin-top:22px; text-align:center"><div class="lbl" style="color:var(--coral)">1 · A job that keeps going</div><div class="note" style="margin-top:4px">The album added: 12 photos, 2 restored, Restore all</div></figcaption></figure>
+      <figure style="width:360px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:paywall}}" style="width:196px"><figcaption style="margin-top:22px; text-align:center"><div class="lbl" style="color:var(--coral)">2 · The limit, inside it</div><div class="note" style="margin-top:4px">5 of 12 restored: Pro finishes it and adds Together</div></figcaption></figure>
+    </div>
+    <div class="foot"><span>Screens from the clickable prototype</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide dark">
+  <div class="glow" style="right:-360px; top:-460px"></div>
+  <div class="pad">
+    <div class="tracker">The prototype · Profiles</div>
+    <div class="title">Me is saved once, and every new look needs no upload</div>
+    <div class="body" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 40px; justify-items:center; margin-top:28px">
+      <figure style="width:330px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:trend}}" style="width:220px"><figcaption style="margin-top:24px; text-align:center"><div class="lbl" style="color:var(--coral)">1 · A trend with your face</div><div class="note" style="margin-top:4px">The first time, Me is saved from 4 selfies</div></figcaption></figure>
+      <figure style="width:330px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:y2kset}}" style="width:220px"><figcaption style="margin-top:24px; text-align:center"><div class="lbl" style="color:var(--coral)">2 · One more, same style</div><div class="note" style="margin-top:4px">A set that stays in one style, straight from Me</div></figcaption></figure>
+      <figure style="width:330px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:me}}" style="width:220px"><figcaption style="margin-top:24px; text-align:center"><div class="lbl" style="color:var(--coral)">3 · Me, kept</div><div class="note" style="margin-top:4px">More photos of you, better likeness everywhere</div></figcaption></figure>
+    </div>
+    <div class="foot"><span>Screens from the clickable prototype</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide dark">
+  <div class="glow" style="left:-360px; top:-460px"></div>
+  <div class="pad">
+    <div class="tracker">The prototype · Together</div>
+    <div class="title">Friends join a project for free and bring their photos and their own styles</div>
+    <div class="body" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 40px; justify-items:center; margin-top:28px">
+      <figure style="width:330px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:invite}}" style="width:220px"><figcaption style="margin-top:24px; text-align:center"><div class="lbl" style="color:var(--coral)">1 · An invite on WhatsApp</div><div class="note" style="margin-top:4px">A link straight into the trip; joining is free</div></figcaption></figure>
+      <figure style="width:330px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:joined}}" style="width:220px"><figcaption style="margin-top:24px; text-align:center"><div class="lbl" style="color:var(--coral)">2 · Paola joins</div><div class="note" style="margin-top:4px">Everyone's photos already there; she adds hers</div></figcaption></figure>
+      <figure style="width:330px; display:flex; flex-direction:column; align-items:center"><img class="phone" src="{{img:duo}}" style="width:220px"><figcaption style="margin-top:24px; text-align:center"><div class="lbl" style="color:var(--coral)">3 · Her style, a duo shoot</div><div class="note" style="margin-top:4px">Her 80s look with your face, then the two of you</div></figcaption></figure>
+    </div>
+    <div class="foot"><span>Screens from the clickable prototype · Paola's photos used with permission</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Launch</div>
+    <div class="title">Launch as a random test on new installs, with a clear rule to roll out, improve or stop</div>
+    <div class="body">
+      <div class="cols" style="grid-template-columns: repeat(3, 1fr); gap: 40px">
+        <div><div class="col-h">Design</div>
+          <div class="li">New installs split at random: Studio or Remini as it is today, everything else identical</div>
+          <div class="li">Results split by onboarding answer: Fixers vs Creators</div>
+          <div class="li" style="border-bottom:0">A small group keeps the old version for longer, to check the effect lasts</div></div>
+        <div><div class="col-h">Measure</div>
+          <div class="li">Trial start, conversion, paid weeks, invites, revenue per install after costs</div>
+          <div class="li" style="border-bottom:0">Trial start shows within days; conversion and paid weeks within a few weeks</div></div>
+        <div><div class="col-h c">Decide</div>
+          <div class="li"><b>Roll out</b> if revenue per install after costs clears the bar</div>
+          <div class="li"><b>Improve</b> the design if people use Studio but money does not move</div>
+          <div class="li" style="border-bottom:0"><b>Stop</b> if neither trials nor repeat use move</div></div>
+      </div>
+      <div class="timeline" style="margin-top:30px">
+        <div style="background:var(--wash)">Months 1 and 2<small>Build</small></div>
+        <div style="background:rgba(255,46,126,.12)">Month 3<small>Test on 10%</small></div>
+        <div style="background:rgba(255,46,126,.3)">Month 4<small>50%</small></div>
+        <div style="background:var(--grad); color:#fff">Month 5 onwards<small>Everyone</small></div>
+      </div>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "Test and launch"; timing as in Remini_Studio_Impact.xlsx, Inputs</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Impact · The bar</div>
+    <div class="title">$5M is about 10% of two years of new-user subscriptions, but timing and cost raise the bar to about 16%</div>
+    <div class="exhibit">From the $5M target to the change in revenue per install needed, at Balanced margin</div>
+    <div class="body" style="display:grid; grid-template-columns: 520px 1fr; gap: 72px; align-items:center">
+      <svg viewBox="0 0 520 400" width="100%" font-family="Instrument Sans, Arial">
+        <line x1="0" y1="340" x2="520" y2="340" stroke="#0B0B0F" stroke-width="2"/>
+        <rect x="20" y="40" width="120" height="300" fill="#0B0B0F"/>
+        <rect x="200" y="40" width="120" height="48.6" fill="#B9B9C1"/>
+        <rect x="380" y="88.6" width="120" height="251.4" fill="url(#gb)"/>
+        <line x1="140" y1="40" x2="200" y2="40" stroke="#B9B9C1" stroke-dasharray="4 4"/><line x1="320" y1="88.6" x2="380" y2="88.6" stroke="#B9B9C1" stroke-dasharray="4 4"/>
+        <defs><linearGradient id="gb" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#FF2E7E"/></linearGradient></defs>
+        <g font-size="30" font-family="Instrument Serif, Georgia" text-anchor="middle"><text x="80" y="28">$5.0M</text><text x="260" y="28">−$0.8M</text><text x="440" y="76" fill="#FF2E7E">$4.2M</text></g>
+        <g font-size="17" fill="#3A3A42" text-anchor="middle"><text x="80" y="370">Target</text><text x="260" y="370">Returning users</text><text x="440" y="370">Needed from new users</text></g>
+      </svg>
+      <div>
+        <div style="display:grid; grid-template-columns: 1fr auto; font: 400 22px var(--sans)">
+          <div style="padding:14px 0; border-bottom:1px solid var(--rule)">Needed per day once live</div><div style="padding:14px 0; border-bottom:1px solid var(--rule); font-weight:600; text-align:right">$7,369</div>
+          <div style="padding:14px 0; border-bottom:1px solid var(--rule); color:var(--ink2)">plus Studio's running cost, as lower margin</div><div style="padding:14px 0; border-bottom:1px solid var(--rule); font-weight:600; text-align:right">$2,235</div>
+          <div style="padding:14px 0; border-bottom:2px solid var(--ink)">Extra subscription revenue a day, after margin</div><div style="padding:14px 0; border-bottom:2px solid var(--ink); font-weight:600; text-align:right">$11,201</div>
+        </div>
+        <div style="display:flex; align-items:baseline; gap:20px; margin-top:26px">
+          <div class="kpi" style="font-size:84px; color:var(--coral)">+16%</div>
+          <div class="note">revenue per install, on today's $70,000 a day from new users</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>"Once live" includes 2 months of build, a test month at 10%, a rollout month at 50% and 9% discounting · Source: Remini_Studio_Impact.xlsx, Hurdle</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Impact · Scenarios</div>
+    <div class="title">Balanced reaches the $5M target, Engaged beats it by 26%, and Trial rush falls just short</div>
+    <div class="exhibit">NPV over 2 years by scenario, $M, against the $5M target</div>
+    <div class="body" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 48px; position:relative">
+      <div style="position:absolute; left:-12px; right:-12px; top: 94px; border-top: 2px dashed var(--coral); z-index:2"></div>
+      <div style="position:absolute; left:-12px; top: 64px; font: 600 16px var(--sans); color:var(--coral); z-index:2">$5M target</div>
+      <div style="display:flex; flex-direction:column">
+        <div style="height:330px; display:flex; align-items:flex-end"><div style="width:100%; height:221.6px; background:#B9B9C1; border-radius:6px 6px 0 0; position:relative"><span style="position:absolute; top:14px; right:20px; font:400 48px var(--serif)">$4.7M</span></div></div>
+        <div style="border-top:2px solid var(--ink); padding-top:14px"><div style="font:600 23px var(--sans)">Trial rush</div><div class="note" style="margin-top:4px">Many more trials from the showcase, but many only look around</div><div class="note" style="margin-top:4px; color:var(--mute)">Trials +20% · conversion −5% · paid weeks flat · revenue per install +14.4% vs a 15.1% bar</div></div>
+      </div>
+      <div style="display:flex; flex-direction:column">
+        <div style="height:330px; display:flex; align-items:flex-end"><div style="width:100%; height:250.3px; background:var(--grad); border-radius:6px 6px 0 0; position:relative"><span style="position:absolute; top:14px; left:20px; font:400 48px var(--serif); color:#fff">$5.3M</span></div></div>
+        <div style="border-top:2px solid var(--ink); padding-top:14px"><div style="font:600 23px var(--sans)">Balanced</div><div class="note" style="margin-top:4px">Projects meet the free limit, and creating with friends makes the trial worth paying for</div><div class="note" style="margin-top:4px; color:var(--mute)">Trials +10% · conversion held · paid weeks +6% · revenue per install +16.9% vs a 16.0% bar</div></div>
+      </div>
+      <div style="display:flex; flex-direction:column">
+        <div style="height:330px; display:flex; align-items:flex-end"><div style="width:100%; height:297px; background:#0B0B0F; border-radius:6px 6px 0 0; position:relative"><span style="position:absolute; top:14px; left:20px; font:400 48px var(--serif); color:#fff">$6.3M</span></div></div>
+        <div style="border-top:2px solid var(--ink); padding-top:14px"><div style="font:600 23px var(--sans)">Engaged</div><div class="note" style="margin-top:4px">Fewer extra trials, but people build projects and create with friends</div><div class="note" style="margin-top:4px; color:var(--mute)">Trials +7% · conversion +3% · paid weeks +10% · revenue per install +21.8% vs a 17.9% bar</div></div>
+      </div>
+    </div>
+    <div class="foot"><span>Bars to scale · the bar rises with AI usage, as margin falls · revenue per install includes invited friends · Source: Remini_Studio_Impact.xlsx, Scenarios, NPV and Hurdle</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Impact · Where the value comes from</div>
+    <div class="title">In Balanced, more trials and longer subscriptions drive the value, and extra AI usage is the main cost</div>
+    <div class="exhibit">NPV over 2 years, Balanced, $M</div>
+    <!-- scale: 92.86px per $1M from x = 590 -->
+    <div class="body">
+      <svg viewBox="0 0 1424 460" width="100%" font-family="Instrument Sans, Arial">
+        <g font-size="21" fill="#3A3A42">
+          <text x="0" y="52">More trials, conversion and paid weeks among new users</text>
+          <text x="0" y="132">Returning users starting a trial</text>
+          <text x="0" y="212">Invited friends</text>
+          <text x="0" y="292">Ads</text>
+          <text x="0" y="372">Extra AI usage (lower margin)</text>
+          <text x="0" y="452" font-weight="600" fill="#0B0B0F">NPV</text>
+        </g>
+        <line x1="590" y1="10" x2="590" y2="460" stroke="#0B0B0F" stroke-width="1.5"/>
+        <rect x="590" y="24" width="545.1" height="40" rx="3" fill="#22B86A"/>
+        <rect x="1135.1" y="104" width="75.3" height="40" rx="3" fill="#22B86A"/>
+        <rect x="1210.4" y="184" width="10.9" height="40" rx="3" fill="#22B86A"/>
+        <rect x="1220.3" y="264" width="2" height="40" fill="#FF6A6A"/>
+        <rect x="1082.2" y="344" width="138.1" height="40" rx="3" fill="#FF6A6A"/>
+        <rect x="590" y="424" width="492.2" height="40" rx="3" fill="url(#gv)"/>
+        <defs><linearGradient id="gv" x1="0" x2="1"><stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#FF2E7E"/></linearGradient></defs>
+        <g font-size="21" font-weight="600">
+          <text x="1145" y="52">+$5.9M</text><text x="1220" y="132">+$0.8M</text><text x="1231" y="212">+$0.1M</text><text x="1232" y="292">−$0.01M</text><text x="1072" y="372" text-anchor="end">−$1.5M</text><text x="1092" y="452" fill="#FF2E7E">$5.3M</text>
+        </g>
+      </svg>
+    </div>
+    <div class="foot"><span>Source: Remini_Studio_Impact.xlsx, Summary section 3 (5.87 + 0.81 + 0.12 − 0.01 − 1.49 = 5.31)</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Impact · Margins</div>
+    <div class="title">Studio's real cost is margin: AI creation costs about 25 times an enhancement</div>
+    <div class="body cols" style="grid-template-columns: 1fr 1fr; gap: 72px">
+      <div>
+        <div class="col-h">AI cost per action, list prices</div>
+        <div class="li">Enhancement: <b>$0.0024</b></div>
+        <div class="li">AI image: <b>$0.039</b> · short video: <b>$0.25</b></div>
+        <div class="li">AI creation, blended (90% images, 10% videos): <b>$0.060</b></div>
+        <div class="li" style="border-bottom:0">AI creation is 74% of AI cost in Balanced</div>
+      </div>
+      <div>
+        <div class="lbl">Margin after AI compute and storage</div>
+        <div style="display:flex; align-items:baseline; gap:18px; margin-top:14px"><div class="kpi">89%</div><div class="arrow">→</div><div class="kpi" style="color:var(--coral)">85.7%</div></div>
+        <div class="note" style="margin-top:14px">Today → Balanced, worth −$1.5M of NPV</div>
+        <div class="so">Free limits and the 7-day trial keep usage bounded. At list prices, the real margin may be higher: Remini runs its own enhancement models and buys at volume</div>
+      </div>
+    </div>
+    <div class="foot"><span>Sources: Remini_Studio_Impact.xlsx, Margins and Inputs; list prices for Real-ESRGAN, Gemini 2.5 Flash Image and Veo 3.1 Lite</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Impact · Modelling choices</div>
+    <div class="title">The model is deliberately simple, and what it leaves out is upside</div>
+    <div class="body" style="margin-top:26px">
+      <table class="t s" style="font-size:20px">
+        <tr><th style="width:19%">Choice</th><th>How it is modelled</th></tr>
+        <tr><td><b>Timing</b></td><td>2 months to build, a test month on 10% of new installs, a rollout month at 50%, then everyone</td></tr>
+        <tr><td><b>Discounting</b></td><td>9% a year, an estimate from Bending Spoons' debt cost and the equity cost of internet software</td></tr>
+        <tr><td><b>Costs</b></td><td>Only what Studio adds: AI compute and storage</td></tr>
+        <tr><td><b>Paid weeks</b></td><td>+6% = about 1.7 paid days, under half the gap between median and top-quarter first renewal in photo apps (45% vs 53%, RevenueCat 2026)</td></tr>
+        <tr><td><b>Returning users</b></td><td>Assumption: 1 in 20,000 a day starts a trial, about 730 a day at launch, fading 5% a month; the least evidenced input</td></tr>
+        <tr><td><b>Invites and ads</b></td><td>Invites add about 0.3% more installs; ads move by a few dollars a day</td></tr>
+        <tr><td style="border-bottom:0"><b>Left out, all upside</b></td><td style="border-bottom:0">Invites by invited friends, people who come back after cancelling, cheaper internal compute</td></tr>
+      </table>
+    </div>
+    <div class="foot"><span>Source: Remini_Studio_Impact.xlsx, Inputs and Scenarios</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Feasibility</div>
+    <div class="title">Most of Studio already runs in Remini; what is new is the space, the storage and the sharing</div>
+    <div class="body" style="margin-top:26px">
+      <table class="t s" style="font-size:20px">
+        <tr><th style="width:30%">Piece</th><th style="width:30%">In Remini today</th><th>What is new</th></tr>
+        <tr><td><b>Face profiles</b></td><td>Yes, several per account in AI Photos</td><td>Reused inside projects; friends add their own</td></tr>
+        <tr><td><b>Enhance, AI photos, video, retouch</b></td><td>Yes</td><td>Results can go into a project</td></tr>
+        <tr><td><b>Trend packs and duo photoshoots</b></td><td>Yes</td><td>Run on saved profiles, including groups</td></tr>
+        <tr><td><b>AI chat</b></td><td>Yes</td><td>Works inside a project, shared with its members</td></tr>
+        <tr><td><b>Projects with progress</b></td><td>No</td><td>The Studio area and storage of results per account</td></tr>
+        <tr><td><b>Enhance all</b></td><td>No</td><td>Batch processing on the existing enhancement model</td></tr>
+        <tr><td><b>Invites and shared projects</b></td><td>No</td><td>Invite links, members, notifications</td></tr>
+        <tr><td style="border-bottom:0"><b>User-made styles and remix</b></td><td style="border-bottom:0">Partly: a trend pack is already a saved recipe</td><td style="border-bottom:0">Users save and share a recipe; others apply it to their own profile</td></tr>
+      </table>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "Feasibility"</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="full"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Risks</div>
+    <div class="title">The operating risks are real, and each one has a clear rule</div>
+    <div class="body">
+      <table class="t s">
+        <tr><th style="width:26%">Risk</th><th>How I would handle it</th></tr>
+        <tr><td><b>Other people's faces</b></td><td>Only the person can add their own face; they are notified when it is used and can remove it. Friends by invite only, like a shared album, not a public feed</td></tr>
+        <tr><td><b>Privacy of saved faces</b></td><td>The same consent and deletion rules as AI Photos, with a clear "delete my profile" control</td></tr>
+        <tr><td><b>Inappropriate content</b></td><td>Projects are private to their members; shared styles are recipes within Remini</td></tr>
+        <tr><td><b>Compute and storage cost</b></td><td>Grows with use; free users keep their limits and trials are time-limited. The main swing is the video share: at 30% of creations instead of 10%, Balanced falls to $4.1M</td></tr>
+        <tr><td style="border-bottom:0"><b>Building it</b></td><td style="border-bottom:0">Existing product teams, reusing existing models and profiles</td></tr>
+      </table>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "Operating risk"; video sensitivity from the model in Remini_Studio_Impact.xlsx</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<!-- ================= APPENDIX ================= -->
+
+<div class="frame" data-part="app"><section class="slide dark">
+  <div class="glow" style="right:-300px; bottom:-420px"></div>
+  <div class="pad">
+    <div class="tracker">Part 3</div>
+    <div style="flex:1; display:flex; align-items:center"><div style="font: 400 140px/0.95 var(--serif); letter-spacing:-.03em" class="grad-text">Appendix</div></div>
+    <div class="foot"><span></span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="app"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Appendix · Fact sheet</div>
+    <div class="title">The case numbers behind the story</div>
+    <div class="body" style="margin-top:26px">
+      <table class="t s" style="font-size:21px">
+        <tr><th style="width:38%">Number</th><th style="width:38%">Value</th><th>Source</th></tr>
+        <tr><td>Daily / monthly active users</td><td>15M / 100M</td><td>Brief</td></tr>
+        <tr><td>Installs</td><td>350,000 a day</td><td>Brief</td></tr>
+        <tr><td>Installs starting a free trial</td><td>5% (60% of trials at onboarding)</td><td>Brief</td></tr>
+        <tr><td>Trials converting to paid</td><td>20%</td><td>Brief</td></tr>
+        <tr><td>Weekly price / revenue per subscriber</td><td>$5 / $20, so about 4 paid weeks</td><td>Brief</td></tr>
+        <tr><td>Downloaders who enhance / generate</td><td>90% (6 photos) / 20% (1 item)</td><td>Brief</td></tr>
+        <tr><td>Free allowance · ads</td><td>5 enhancements and 5 generations · $0.005 per ad</td><td>Brief</td></tr>
+        <tr><td>AI Photos</td><td>Trial start +20%, conversion unchanged, the lift lasted</td><td>Remini team</td></tr>
+        <tr><td style="border-bottom:0">Comparable apps</td><td style="border-bottom:0">24.3% median trial-to-paid, weekly plans with 5 to 9 day trials</td><td style="border-bottom:0">RevenueCat 2026</td></tr>
+      </table>
+    </div>
+    <div class="foot"><span>Source: Truth doc, "Fact sheet and sources"</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="app"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Appendix · Scenario inputs</div>
+    <div class="title">Usage growth and invites behind each scenario</div>
+    <div class="body">
+      <table class="t" style="font-size:21px">
+        <tr><th></th><th class="n">Trial rush</th><th class="n hl">Balanced</th><th class="n">Engaged</th></tr>
+        <tr><td>Enhancement usage with Studio</td><td class="n">+25%</td><td class="n hl">+50%</td><td class="n">+75%</td></tr>
+        <tr><td>AI creation usage with Studio</td><td class="n">+15%</td><td class="n hl">+30%</td><td class="n">+50%</td></tr>
+        <tr><td>Invited installs per 100 trial users</td><td class="n">5</td><td class="n hl">5</td><td class="n">8</td></tr>
+        <tr><td>AI cost per trial (today $0.44)</td><td class="n">$0.51</td><td class="n hl">$0.60</td><td class="n">$0.71</td></tr>
+        <tr><td>Margin after AI cost (today 89%)</td><td class="n">86.6%</td><td class="n hl">85.7%</td><td class="n">84.3%</td></tr>
+        <tr><td style="border-bottom:0">Bar for the target at this margin</td><td class="n" style="border-bottom:0">+15.1%</td><td class="n hl" style="border-bottom:0">+16.0%</td><td class="n" style="border-bottom:0">+17.9%</td></tr>
+      </table>
+    </div>
+    <div class="foot"><span>Source: Remini_Studio_Impact.xlsx, Scenarios and Margins</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="app"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Appendix · Sensitivity</div>
+    <div class="title">Balanced depends on returning users, the least evidenced input</div>
+    <div class="exhibit">NPV over 2 years, Balanced, $M, against the $5M target</div>
+    <div class="body">
+      <!-- scale: 150px per $1M from x = 560 -->
+      <svg viewBox="0 0 1424 400" width="100%" font-family="Instrument Sans, Arial">
+        <g font-size="21" fill="#3A3A42">
+          <text x="0" y="62" font-weight="600" fill="#0B0B0F">Balanced</text>
+          <text x="0" y="152">If their base shrinks 10.6% a month instead of 5%</text>
+          <text x="0" y="242">Without returning users</text>
+          <text x="0" y="332">If videos are 30% of creations instead of 10%</text>
+        </g>
+        <rect x="560" y="32" width="796.5" height="44" rx="3" fill="url(#gs)"/>
+        <rect x="560" y="122" width="739.5" height="44" rx="3" fill="#B9B9C1"/>
+        <rect x="560" y="212" width="674" height="44" rx="3" fill="#B9B9C1"/>
+        <rect x="560" y="302" width="616.5" height="44" rx="3" fill="#B9B9C1"/>
+        <defs><linearGradient id="gs" x1="0" x2="1"><stop offset="0" stop-color="#FF5A4E"/><stop offset="1" stop-color="#FF2E7E"/></linearGradient></defs>
+        <line x1="1310" y1="12" x2="1310" y2="370" stroke="#FF2E7E" stroke-width="2" stroke-dasharray="6 5"/>
+        <text x="1310" y="394" text-anchor="middle" font-size="16" font-weight="600" fill="#FF2E7E">$5M target</text>
+        <g font-size="22" font-weight="600" fill="#0B0B0F">
+          <text x="1340" y="62" fill="#fff" text-anchor="end">$5.3M</text><text x="1260" y="152" text-anchor="end">$4.9M</text><text x="1246" y="242">$4.5M</text><text x="1188" y="332">$4.1M</text>
+        </g>
+      </svg>
+    </div>
+    <div class="foot"><span>Each case changes one input, all else as in Balanced · computed with the formulas of Remini_Studio_Impact.xlsx</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+<div class="frame" data-part="app"><section class="slide">
+  <div class="pad">
+    <div class="tracker">Appendix · Sources</div>
+    <div class="title">Sources</div>
+    <div class="body cols" style="grid-template-columns: 1fr 1fr; gap: 64px; margin-top:26px">
+      <div>
+        <div class="col-h">Market and products</div>
+        <div class="li" style="font-size:21px">Bending Spoons prospectus (2026) · Bending Spoons Q2 2026 earnings call</div>
+        <div class="li" style="font-size:21px">Business Today on ChatGPT image generation (Apr 2025) · 9to5Google on Nano Banana (Sep 2025)</div>
+        <div class="li" style="font-size:21px">RevenueCat, State of Subscription Apps 2026</div>
+        <div class="li" style="font-size:21px">CapCut help centre · Picsart blog · Remix blog (Feb 2024) · Axios, CNBC and Sherwood News on Sora · TechCrunch on Meta Vibes · OpenAI on ChatGPT group chats · Appfigures on Lensa (Jan 2023)</div>
+      </div>
+      <div>
+        <div class="col-h">Model inputs</div>
+        <div class="li" style="font-size:21px">Case brief and Remini team answers</div>
+        <div class="li" style="font-size:21px">AI costs: public list prices for Real-ESRGAN (enhancement), Gemini 2.5 Flash Image (images) and Veo 3.1 Lite (short videos), CostGoat</div>
+        <div class="li" style="font-size:21px">Storage: Amazon S3 list price</div>
+        <div class="li" style="font-size:21px">Discount rate 9%: Bending Spoons debt cost (Q1 2026 interest on debt) and the equity cost of internet software (Damodaran, Jan 2026)</div>
+      </div>
+    </div>
+    <div class="foot"><span>Figures use fictitious case data where the brief provides it</span><span class="brand"><b>Remini Studio</b><span class="pg"></span></span></div>
+  </div>
+</section></div>
+
+</div>
+<script>
+  function fit() {
+    document.querySelectorAll('.frame').forEach((f) => {
+      f.querySelector('.slide').style.transform = `scale(${f.clientWidth / 1600})`;
+    });
+  }
+  const frames = [...document.querySelectorAll('.frame')];
+  // Page numbers follow the order in this file, so each deck numbers itself.
+  frames.forEach((f, i) => f.querySelectorAll('.pg').forEach((p) => (p.textContent = ` · ${i + 1}`)));
+  let cur = 0;
+  function present(i) {
+    cur = Math.max(0, Math.min(frames.length - 1, i));
+    document.body.classList.add('present');
+    frames.forEach((f, k) => f.classList.toggle('on', k === cur));
+    fit();
+  }
+  function leave() { document.body.classList.remove('present'); frames.forEach((f) => f.classList.remove('on')); fit(); frames[cur].scrollIntoView({ block: 'center' }); }
+  addEventListener('keydown', (e) => {
+    const on = document.body.classList.contains('present');
+    if (e.key === 'p' || e.key === 'P') return on ? leave() : present(cur);
+    if (!on) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') present(cur + 1);
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') present(cur - 1);
+    else if (e.key === 'Escape') leave();
+  });
+  frames.forEach((f, k) => f.addEventListener('dblclick', () => present(k)));
+  addEventListener('resize', fit);
+  document.fonts && document.fonts.ready.then(fit);
+  fit();
+</script>
+</body>
+</html>

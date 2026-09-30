@@ -1,0 +1,76 @@
+
+  :root {
+    --ink: #0B0B0F; --ink2: #3A3A42; --mute: #7A7A84; --rule: #E7E7EA; --paper: #FFFFFF; --wash: #F6F6F4;
+    --night: #0B0B0F; --night2: #16161C;
+    --coral: #FF2E7E; --coral2: #FF5A4E; --grad: linear-gradient(90deg, #FF5A4E, #FF2E7E);
+    --t: #F2A516; --c: #22B86A; --w: #2F8FE8; --i: #9B6BF2;
+    --serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    --sans: 'Instrument Sans', -apple-system, 'Segoe UI', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #2A2A30; }
+  body { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  /* ---------- viewer ---------- */
+  .bar { position: sticky; top: 0; z-index: 10; display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 10px 16px; background: #1B1B20; color: #ddd; font-size: 13px; }
+  .bar b { color: #fff; }
+  .bar button { background: #fff; color: #111; border: 0; border-radius: 8px; padding: 7px 12px; font: 600 13px var(--sans); cursor: pointer; }
+  .deck { display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 28px 16px 60px; }
+  .frame { width: min(1200px, 100%); aspect-ratio: 16 / 9; position: relative; overflow: hidden; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+  .slide { position: absolute; top: 0; left: 0; width: 1600px; height: 900px; transform-origin: 0 0; overflow: hidden; background: var(--paper); }
+  body.present { overflow: hidden; background: #000; }
+  body.present .bar { display: none; }
+  body.present .deck { padding: 0; gap: 0; height: 100vh; justify-content: center; }
+  body.present .frame { display: none; width: min(100vw, calc(100vh * 16 / 9)); border-radius: 0; box-shadow: none; }
+  body.present .frame.on { display: block; }
+
+  /* ---------- slide system ---------- */
+  .pad { position: absolute; inset: 0; padding: 64px 88px 56px; display: flex; flex-direction: column; }
+  .tracker { display: flex; align-items: center; gap: 12px; font: 600 15px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+  .tracker::before { content: ''; width: 28px; height: 3px; border-radius: 2px; background: var(--grad); }
+  .title { margin-top: 18px; font: 400 56px/1.06 var(--serif); letter-spacing: -.01em; max-width: 1340px; }
+  .exhibit { margin-top: 14px; font: 500 18px var(--sans); color: var(--mute); }
+  .body { flex: 1; margin-top: 36px; min-height: 0; }
+  .foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; font: 400 14px var(--sans); color: var(--mute); padding-top: 18px; border-top: 1px solid var(--rule); }
+  .foot .brand { white-space: nowrap; }
+  .foot .brand b { font-weight: 600; color: var(--ink2); }
+  .dark { background: var(--night); color: #fff; }
+  .dark .tracker { color: rgba(255,255,255,.55); }
+  .dark .foot { border-top-color: rgba(255,255,255,.1); color: rgba(255,255,255,.45); }
+  .dark .foot .brand b { color: rgba(255,255,255,.8); }
+  .glow { position: absolute; width: 900px; height: 900px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,46,126,.28), rgba(255,90,78,.08) 55%, transparent); pointer-events: none; }
+  .grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .phone { border-radius: 38px; box-shadow: 0 0 0 7px #1C1C22, 0 0 0 8px #34343C, 0 30px 60px rgba(0,0,0,.35); display: block; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; font: 600 18px var(--sans); padding: 5px 12px 5px 8px; border-radius: 999px; background: var(--wash); color: var(--ink2); white-space: nowrap; }
+  .chip i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  table.t { width: 100%; border-collapse: collapse; font: 400 21px/1.35 var(--sans); }
+  table.t th { font: 600 15px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); text-align: left; padding: 0 16px 14px; border-bottom: 2px solid var(--ink); }
+  table.t td { padding: 18px 16px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  table.t td.n, table.t th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  table.t .hl { background: rgba(255,46,126,.06); }
+  table.t th.hl { color: var(--coral); border-bottom-color: var(--coral); }
+  .kpi { font: 400 96px/0.95 var(--serif); letter-spacing: -.02em; }
+  .kpi-s { font: 400 44px/1 var(--serif); }
+  .lbl { font: 600 15px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--mute); }
+  .note { font: 400 21px/1.45 var(--sans); color: var(--ink2); }
+
+  /* ---------- additions for the full deck ---------- */
+  .cols { display: grid; gap: 48px; }
+  .col-h { font: 600 15px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--mute); padding-bottom: 12px; border-bottom: 2px solid var(--ink); margin-bottom: 4px; }
+  .col-h.c { color: var(--coral); border-bottom-color: var(--coral); }
+  .li { font: 400 24px/1.38 var(--sans); padding: 17px 0; border-bottom: 1px solid var(--rule); color: var(--ink); }
+  .li b { font-weight: 600; }
+  .card { background: var(--wash); border-radius: 18px; padding: 26px 26px 24px; }
+  .card .k { font: 400 44px/1 var(--serif); color: var(--coral); }
+  .card h3 { font: 600 28px var(--sans); margin-top: 16px; }
+  .card p { font: 400 22px/1.4 var(--sans); color: var(--ink2); margin-top: 8px; }
+  .so { margin-top: 30px; padding: 20px 24px; border-left: 4px solid var(--coral); background: rgba(255,46,126,.05); font: 500 23px/1.4 var(--sans); }
+  .timeline { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap: 6px; }
+  .timeline div { padding: 22px 20px; border-radius: 12px; font: 600 23px/1.25 var(--sans); }
+  .timeline small { display: block; font: 400 18px var(--sans); margin-top: 4px; opacity: .75; }
+  table.t.s { font-size: 22px; }
+  table.t.s td { padding: 15px 14px; }
+  table.t.s th { padding: 0 14px 12px; font-size: 14.5px; }
+  .dark .li { color: rgba(255,255,255,.85); border-bottom-color: rgba(255,255,255,.1); }
+  .dark .note { color: rgba(255,255,255,.75); }
+  .arrow { font: 400 40px var(--serif); color: var(--mute); align-self: center; }
