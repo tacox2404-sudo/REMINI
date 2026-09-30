@@ -73,7 +73,7 @@
   table.t.s th { padding: 0 14px 12px; font-size: 14.5px; }
   .dark .li { color: rgba(255,255,255,.85); border-bottom-color: rgba(255,255,255,.1); }
   .dark .note { color: rgba(255,255,255,.75); }
-  .arrow { font: 400 40px var(--serif); color: var(--mute); align-self: center; }
+  .arrow { color: var(--mute); align-self: center; display: flex; align-items: center; justify-content: center; }
 
   /* ---------- layout: centre content vertically when a slide is not full ---------- */
   .body { display: flex; flex-direction: column; justify-content: center; }

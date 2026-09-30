@@ -41,7 +41,7 @@ def decks():
     assert frames, 'no frames found'
     start = full.index('<div class="frame"')
     end = full.index('</div>\n<script>')
-    body = ''.join(m.group(0) for m in re.finditer(r'<div class="frame" data-part="exec">.*?</section></div>\n', full, flags=re.S))
+    body = ''.join(m.group(0) for m in re.finditer(r'<div class="frame" data-part="(?:exec|end)">.*?</section></div>\n', full, flags=re.S))
     pitch = full[:start] + body + full[end:]
     pitch = pitch.replace('<title>Remini Studio</title>', '<title>Remini Studio Pitch</title>').replace('Remini Studio · full deck', 'Remini Studio · Pitch')
     write('Remini-Studio-Pitch.html', pitch)
