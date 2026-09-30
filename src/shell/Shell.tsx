@@ -476,7 +476,7 @@ export function Shell({ phone }: { phone: ReactNode }) {
           <div className="rounded-2xl border border-white/[0.06] p-4 text-[13px] leading-relaxed text-white/50">
             <b className="text-white/80">How to explore</b>
             <br />
-            Press <b className="text-white/70">Start demo</b> for the guided tour (about 5 minutes), or use the phone freely. After the demo the app stays in a full state: open the projects, the chats from the bubble, Me, and How Studio works.
+            Press <b className="text-white/70">Start demo</b> for the guided tour, or use the phone freely. After the demo the app stays in a full state: open the projects, the chats from the bubble, Me, and How Studio works.
           </div>
         )}
       </aside>

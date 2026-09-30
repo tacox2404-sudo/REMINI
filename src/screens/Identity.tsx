@@ -34,11 +34,11 @@ export function IdentityScreen({ id }: { id: string }) {
           <div className="rounded-2xl bg-white/[0.05] p-3.5">
             <div className="flex items-center justify-between text-[13px]">
               <span className="font-semibold">{lk.label}</span>
-              <span className="text-mute">improves as you add photos</span>
+              <span className="text-mute">{p.refs.length} photos</span>
             </div>
             <ProgressBar value={lk.v} className="mt-2" />
             <p className="mt-2.5 text-[12.5px] leading-relaxed text-white/70">
-              The profile Remini already makes for AI Photos, now kept. It stays with you and gets better over time, so every project, pack and duo shoot looks more like you today.
+              The profile Remini already makes for AI Photos, now kept. Add more photos of you, with different light and angles, and the likeness gets better for every project, trend and duo shoot.
             </p>
           </div>
         </div>
@@ -71,24 +71,6 @@ export function IdentityScreen({ id }: { id: string }) {
           <I.Chevron size={16} className="text-mute" />
         </button>
       )}
-
-      <div data-demo="me-history" className="px-4 pt-5">
-        <h2 className="text-[17px] font-bold">{mine ? 'How Me has grown' : `${p.name}’s profile`}</h2>
-        <div className="mt-2.5 space-y-0">
-          {p.history.map((h, i) => (
-            <div key={i} className="flex gap-3">
-              <div className="flex flex-col items-center">
-                <span className={`mt-1 h-2.5 w-2.5 rounded-full ${i === p.history.length - 1 ? 'bg-[#FF2E7E]' : 'bg-white/30'}`} />
-                {i < p.history.length - 1 && <span className="w-px flex-1 bg-white/15" />}
-              </div>
-              <div className="pb-3">
-                <div className="text-[11.5px] text-mute">{h.when}</div>
-                <div className="text-[13.5px]">{h.text}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {mine && usedIn.length > 0 && (
         <div className="px-4 pt-3">

@@ -4,7 +4,7 @@ import { StatusBar, TopBar } from './components/Chrome';
 import { ChatBubble, TodayHome, TodayScreen, ToolBar } from './screens/Today';
 import { FirstCreationScreen } from './screens/First';
 import { GeneratingOverlay, Spotlight, Toast } from './components/Overlays';
-import { BEATS } from './state/demo';
+import { BEATS, CHAPTERS } from './state/demo';
 import { useStore } from './state/store';
 import type { Route } from './state/types';
 import { AboutScreen, AnimateScreen, GridScreen, PickerScreen, ResultScreen, Splash, TrendScreen } from './screens/Flows';
@@ -136,6 +136,54 @@ function PhoneContent() {
   );
 }
 
+/** A full-screen chapter card on the phone whenever the demo moves into a new section. */
+function ChapterCard() {
+  const { demo } = useStore();
+  const prev = useRef<number | null>(null);
+  const [show, setShow] = useState<number | null>(null);
+  useEffect(() => {
+    const was = prev.current;
+    prev.current = demo;
+    if (demo === null) return setShow(null);
+    const step = BEATS[demo]?.step;
+    if (was === null || BEATS[was]?.step !== step) {
+      setShow(step);
+      const t = window.setTimeout(() => setShow(null), 1250);
+      return () => clearTimeout(t);
+    }
+    setShow(null);
+  }, [demo]);
+  const ch = show ? CHAPTERS[show - 1] : null;
+  return (
+    <AnimatePresence>
+      {ch && (
+        <motion.div
+          key={show}
+          data-ctl="chapter-card"
+          className="pointer-events-none absolute inset-0 z-[80] flex flex-col justify-end overflow-hidden bg-ink px-7 pb-24"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+        >
+          <div className="absolute -right-24 -top-24 h-[380px] w-[380px] rounded-full bg-[radial-gradient(closest-side,rgba(255,46,126,0.45),transparent)]" />
+          <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.05, duration: 0.4 }} className="relative">
+            <div className="text-[120px] font-extrabold leading-none tracking-tighter text-white/[0.08]">{String(show).padStart(2, '0')}</div>
+            {ch.isNew && <span className="rounded-md bg-brand px-2 py-[2px] text-[11px] font-extrabold tracking-wider">NEW WITH STUDIO</span>}
+            <div className="mt-3 text-[44px] font-extrabold leading-[1.02] tracking-tight">{ch.name}</div>
+            <div className="mt-2 text-[17px] leading-snug text-white/65">{ch.tagline}</div>
+            <div className="mt-6 flex gap-1.5">
+              {CHAPTERS.map((_, i) => (
+                <span key={i} className={`h-1 flex-1 rounded-full ${i + 1 < (show ?? 0) ? 'bg-white/40' : i + 1 === show ? 'bg-brand' : 'bg-white/10'}`} />
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export function Phone() {
   const { demo } = useStore();
   const root = useRef<HTMLDivElement>(null);
@@ -157,6 +205,7 @@ export function Phone() {
           <PhoneContent />
           <div className="dynamic-island" />
           <Spotlight target={target} root={root} />
+          <ChapterCard />
         </div>
       </div>
     </div>

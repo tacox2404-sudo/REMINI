@@ -1,4 +1,4 @@
-import { A, FRIEND } from './data';
+import { A, FRIEND, styleCreation } from './data';
 import { STAGE, type Stage, type Store } from './store';
 import type { Mode, Route } from './types';
 
@@ -31,16 +31,15 @@ const remix: Route = { name: 'result', kind: 'remix', image: A.remix90s, title: 
 const duo: Route = { name: 'result', kind: 'together', image: A.together90s, title: `You & ${FRIEND}`, projectId: 'eighties' };
 
 /** The chapters follow the idea: what's new, then Projects, Profiles, Together and Remini chat. */
-export const CHAPTERS: { name: string; isNew?: boolean }[] = [
-  { name: 'Remini today' },
-  { name: 'Keep', isNew: true },
-  { name: 'Meet Studio', isNew: true },
-  { name: 'Projects', isNew: true },
-  { name: 'Profiles', isNew: true },
-  { name: 'Together', isNew: true },
-  { name: 'Remini chat', isNew: true },
-  { name: 'Coming back' },
-  { name: 'After cancelling' },
+export const CHAPTERS: { name: string; tagline: string; isNew?: boolean }[] = [
+  { name: 'Remini today', tagline: 'Great results, one photo at a time' },
+  { name: 'Keep', tagline: 'One new button', isNew: true },
+  { name: 'Meet Studio', tagline: 'Where kept photos live and keep going', isNew: true },
+  { name: 'Projects', tagline: 'A job bigger than one edit', isNew: true },
+  { name: 'Profiles', tagline: 'Your face, saved once, getting better', isNew: true },
+  { name: 'Together', tagline: 'Projects with the people in them', isNew: true },
+  { name: 'Remini chat', tagline: 'One chat per project', isNew: true },
+  { name: 'Coming back', tagline: 'Three weeks later, still on Pro' },
 ];
 
 export const BEATS: Beat[] = [
@@ -126,8 +125,18 @@ export const BEATS: Beat[] = [
   },
   {
     step: 5,
+    title: 'One more, same style',
+    caption: 'Back in the Y2K set, one tap makes another look in the same style, straight from Me: no selfies to upload, no model to wait for.',
+    target: 'creation-progress',
+    enter: (s) => {
+      scene(s, 'studio', STAGE.ME, [{ name: 'studio' }, { name: 'creation', id: 'style-y2k' }]);
+      s.upsertCreation(styleCreation('y2k', [A.y2kMe, A.y2kMe2]));
+    },
+  },
+  {
+    step: 5,
     title: 'Me, saved once',
-    caption: 'Me is the profile Remini already makes, now kept in Studio. Every trend, pack and duo shoot uses it, with no new uploads, and it gets better as you add photos.',
+    caption: 'Me is the profile Remini already makes, now kept in Studio. Every trend, pack and duo shoot uses it. Add more photos of you and the likeness gets better.',
     target: 'me-likeness',
     enter: (s) => scene(s, 'studio', STAGE.ME, [{ name: 'studio' }, { name: 'identity', id: 'me' }]),
   },
@@ -209,21 +218,6 @@ export const BEATS: Beat[] = [
     caption: 'Studio opens on what changed: Luca joined the trip with 6 photos. New looks are only made if you tap.',
     target: 'welcome-card',
     enter: (s) => scene(s, 'studio', STAGE.BACK, [{ name: 'studio' }]),
-  },
-  {
-    step: 8,
-    title: 'Me, better than before',
-    caption: 'From 4 selfies to 6 photos, each one added by you. Every project and trend now looks more like you.',
-    target: 'me-history',
-    enter: (s) => scene(s, 'studio', STAGE.BACK, [{ name: 'studio' }, { name: 'identity', id: 'me' }]),
-  },
-  // 9. After cancelling
-  {
-    step: 9,
-    title: 'Nothing is held back',
-    caption: 'If you ever cancel, every project stays to view and download, ready for when you come back. After the demo, everything stays clickable.',
-    target: 'after-cancel',
-    enter: (s) => scene(s, 'studio', STAGE.CANCELLED, [{ name: 'studio' }]),
   },
 ];
 

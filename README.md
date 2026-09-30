@@ -46,21 +46,20 @@ The photos live in `public/assets/` (web-sized JPGs); the full-size originals ar
 
 ### Guided demo path
 
-Nine chapters, 22 beats. The chapters follow the idea (Projects, Profiles, Together, Remini chat), and the ones Studio adds are marked NEW in the caption:
+Eight chapters, 21 beats. Each new chapter opens with a full-screen chapter card on the phone. The chapters follow the idea (Projects, Profiles, Together, Remini chat), and the ones Studio adds are marked NEW in the caption:
 
 1. **Remini today**: the home, and an old family photo restored and saved.
 2. **Keep** (new): the same restore with Studio. Save and Share as before, plus Keep in Studio.
 3. **Meet Studio** (new): the first Keep opens a one-screen introduction, then Studio with the photo in Kept.
 4. **Projects** (new): a second old photo is kept, and Studio suggests a Family archive. You add the album (12 photos), then the free limit lands inside it (5 of 12).
-5. **Profiles** (new): on Pro, the Y2K Yearbook trend saves Me once from 4 selfies. Me is kept and used everywhere.
+5. **Profiles** (new): on Pro, the Y2K Yearbook trend saves Me once from 4 selfies. One more look in the same style needs no upload. Me is kept, used everywhere, and its likeness improves with more photos.
 6. **Together** (new): the Philippines trip as a shared project.
    - A WhatsApp invite; joining is free.
    - Paola joins the trip.
    - Paola shares her 80s look; you make your version with your face.
    - A duo shoot, kept as its own project, 80s with Paola.
 7. **Remini chat** (new): the bubble opens your chats, one per project; the trip's chat is shared.
-8. **Coming back**: three weeks later, still on Pro. Notifications, Welcome back, and Me improved.
-9. **After cancelling**: projects stay viewable and downloadable.
+8. **Coming back**: three weeks later, still on Pro. Notifications, then Welcome back.
 
 When the demo ends, the app stays in a full state to explore on the phone. The business levers and the impact model are only shown when **Why it matters** is switched on.
 
