@@ -1,7 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { chatReply } from './chat';
-import { A, EVERYDAY, FRIEND, INTENTS, ME, SEGMENTS, STYLE_SETS, chatThread, familyArchive, friendsTrip, linkedinSet, look, photo, seedStyles, styleCreation, styleOf, tripAlbum, withPaola } from './data';
-import type { ChatMsg, CommunityStyle, Creation, Generating, Identity, Intent, Lever, LogEvent, Mode, Route, Segment, Sheet, Tab } from './types';
+import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
+import { chatReply, type ChatCtx } from './chat';
+import { A, FRIEND, OTHERS, SEGMENTS, STYLE_SETS, TRIP_PHOTOS_OF_ME, familyArchive, look, meProfile, paolaProfile, personalChat, photo, styleCreation, styleOf, tripAlbum, tripProject, INTENTS } from './data';
+import type { ChatMsg, Creation, Generating, Identity, Intent, Lever, LogEvent, Mode, Route, Segment, Sheet, Tab } from './types';
 
 export const FREE_LIMIT = 5;
 
@@ -18,10 +18,11 @@ function useSyncState<T>(initial: T | (() => T)) {
 }
 
 /**
- * Where a user is in the journey. Each stage includes everything before it:
- * 0 new · 1 first creation kept · 2 made something with one friend · 3 group album · 4 came back.
+ * Where a user is in the journey (the moments of the strategy). Each stage
+ * includes everything before it. The guided demo jumps straight to a stage.
  */
-export type Stage = 0 | 1 | 1.5 | 2 | 3 | 4;
+export const STAGE = { NEW: 0, KEPT: 1, LIMIT: 2, TRIAL: 3, JOINED: 4, SHARED: 5, MADE: 6, BACK: 7, CANCELLED: 8 } as const;
+export type Stage = (typeof STAGE)[keyof typeof STAGE];
 
 let chatSeq = 0;
 
@@ -36,17 +37,19 @@ function useStoreValue() {
   const [showLevers, setShowLevers] = useState(false);
   const [events, setEvents] = useState<LogEvent[]>([]);
   const [identities, setIdentities, identitiesRef] = useSyncState<Identity[]>([]);
-  const [creations, setCreations, creationsRef] = useSyncState<Creation[]>([]);
-  const [styles, setStyles] = useSyncState<CommunityStyle[]>(seedStyles);
-  const [unlocked, setUnlocked] = useState({ friend: false, group: false });
+  const [creations, setCreations, creationsRef] = useSyncState<Creation[]>([personalChat()]);
+  const [paolaJoined, setPaolaJoined, paolaJoinedRef] = useSyncState(false);
+  const [styleShared, setStyleShared, styleSharedRef] = useSyncState(false);
+  const [newLooks, setNewLooks] = useState(false);
   const [returning, setReturning] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
   const [segment, setSegment] = useState<Segment | null>(null);
   const [onboarded, setOnboarded] = useState<Record<Mode, boolean>>({ today: true, studio: false });
   const [chatTyping, setChatTyping] = useState<string | null>(null);
   const [lastDemoDone, setLastDemoDone] = useState(false);
   const [closing, setClosing] = useState(false);
-  const [freeUsed, setFreeUsed] = useState(0);
-  const [isPro, setIsPro] = useState(false);
+  const [freeUsed, setFreeUsed, freeUsedRef] = useSyncState(0);
+  const [isPro, setIsPro, isProRef] = useSyncState(false);
   const [demo, setDemo] = useState<number | null>(null);
   const [splash, setSplash] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -129,112 +132,92 @@ function useStoreValue() {
     }, g.duration);
   }, [later]);
 
-  // ---------- creations ----------
+  // ---------- projects ----------
   const updateCreation = useCallback((id: string, fn: (c: Creation) => Creation) => {
     setCreations((cs) => cs.map((c) => (c.id === id ? fn(c) : c)));
   }, [setCreations]);
   const upsertCreation = useCallback((c: Creation) => {
     setCreations((cs) => [c, ...cs.filter((x) => x.id !== c.id)]);
   }, [setCreations]);
+  const findCreation = useCallback((id: string) => creationsRef.current.find((c) => c.id === id), [creationsRef]);
 
-  /** Build the state of a stage directly (used by the guided demo). */
+  /** Build the state of a journey stage directly (used by the guided demo). */
   const setStage = useCallback((st: Stage) => {
-    setIdentities(st >= 1 ? [{ ...ME, variants: st >= 1.5 ? [...ME.variants, EVERYDAY] : ME.variants }] : []);
-    const cs: Creation[] = [];
-    if (st >= 1) cs.push(linkedinSet(3));
-    if (st >= 1.5) cs.push(styleCreation('eighties', [A.remix90s]), styleCreation('y2k', [A.y2kMe]), chatThread());
-    if (st >= 2) cs.unshift(withPaola());
-    if (st >= 3) cs.unshift(friendsTrip(st >= 4 ? 17 : 5));
-    if (st >= 4) cs.forEach((c) => (c.lastEdit = c.id === 'trip' ? '2 days ago' : '4 days ago'));
+    const madeLooks = st >= STAGE.MADE ? [look(A.remix90s, '80s film · your version'), look(A.together90s, `You & ${FRIEND}`)] : [];
+    const trip =
+      st >= STAGE.BACK
+        ? tripProject({ done: 17, joined: [FRIEND, 'Luca'], invited: ['Marco'], paola: true, paolaMore: true, looks: madeLooks })
+        : st >= STAGE.JOINED
+          ? tripProject({ done: 17, joined: [FRIEND], invited: OTHERS, paola: true, looks: madeLooks })
+          : st >= STAGE.TRIAL
+            ? tripProject({ done: 17 })
+            : st >= STAGE.LIMIT
+              ? tripProject({ done: 5 })
+              : tripProject({ done: 1 });
+    const cs: Creation[] = [personalChat()];
+    if (st >= STAGE.KEPT) cs.unshift(trip);
     setCreations(cs);
-    setUnlocked({ friend: st >= 2, group: st >= 3 });
-    setReturning(st >= 4);
-    setOnboarded({ today: true, studio: st >= 1 });
-    setStyles(seedStyles());
-  }, [setCreations, setIdentities, setStyles]);
+    const ids: Identity[] = [];
+    if (st >= STAGE.MADE) ids.push(meProfile(st >= STAGE.BACK));
+    if (st >= STAGE.JOINED) ids.push(paolaProfile());
+    setIdentities(ids);
+    setPaolaJoined(st >= STAGE.JOINED);
+    setStyleShared(st >= STAGE.SHARED);
+    setNewLooks(st >= STAGE.BACK);
+    setReturning(st === STAGE.BACK);
+    setCancelled(st === STAGE.CANCELLED);
+    setIsPro(st >= STAGE.TRIAL && st < STAGE.CANCELLED);
+    setFreeUsed(st >= STAGE.LIMIT ? FREE_LIMIT : st >= STAGE.KEPT ? 1 : 0);
+    setOnboarded({ today: true, studio: st >= STAGE.KEPT });
+  }, [setCreations, setIdentities, setPaolaJoined, setStyleShared, setIsPro, setFreeUsed]);
 
-  /** Onboarding answer: logged as a segment; With Studio it suggests the first creation. */
+  /** Onboarding answer: logged as a segment; it suggests the first thing to do. */
   const answerSegment = useCallback((seg: Segment) => {
     const label = SEGMENTS.find((s) => s.id === seg)?.label ?? seg;
     setSegment(seg);
     track(`segment: ${label}`, 't');
     setOnboarded((o) => ({ ...o, studio: true }));
     setNavDir(1);
-    setStack([{ name: 'first', step: 'intro', path: seg === 'restore' ? 'restore' : 'profile' }]);
+    setStack([{ name: 'first', step: 'intro', path: seg === 'restore' ? 'restore' : seg === 'profile' ? 'profile' : 'enhance' }]);
   }, [setStack, track]);
 
-  /** "Is this you?": the profile is locked in once, with a Work version for this creation. */
-  const lockIdentity = useCallback((refs: string[]) => {
-    setIdentities([{ ...ME, refs: refs.length ? refs : ME.refs }]);
-    track('profile_locked_in', 'c');
-  }, [setIdentities, track]);
+  /** Any single enhance uses one free action. */
+  const spendFree = useCallback(() => setFreeUsed((n) => Math.min(FREE_LIMIT, n + 1)), [setFreeUsed]);
 
-  /** "Keep this": the result becomes a creation in Studio. */
-  const keepSet = useCallback(() => {
-    upsertCreation(linkedinSet(3));
-    track('kept_in_studio', 'w');
-    return 'linkedin';
-  }, [track, upsertCreation]);
+  /** Keep a quick enhance: the trip project starts, with the rest of the trip found in the gallery. */
+  const startTrip = useCallback(() => {
+    if (!findCreation('trip')) upsertCreation(tripProject({ done: 1 }));
+    track('project_started_from_result', 't');
+    return 'trip';
+  }, [findCreation, track, upsertCreation]);
 
-  /** Keep a result: it joins the creation of its own style (never a mixed one). */
+  /** Keep a set of looks (profile path, personal chat): one project per style. */
   const keepLook = useCallback((src: string, title: string, into?: string) => {
-    if (src === A.together90s) {
-      if (!creationsRef.current.some((c) => c.id === 'paola')) upsertCreation(withPaola());
-      track('kept_in_studio', 'w');
-      return 'paola';
-    }
     const key = styleOf(src);
     const id = into ?? (key ? STYLE_SETS[key].id : 'looks');
-    const existing = creationsRef.current.find((c) => c.id === id);
-    if (!existing) upsertCreation(key === 'headshot' ? { ...linkedinSet(0), looks: [look(src, title, true)] } : key ? styleCreation(key, [src]) : { id, title: 'My looks', intent: 'looks', cover: src, photos: [], looks: [look(src, title, true)], goal: 1, lastEdit: 'Just now' });
+    const existing = findCreation(id);
+    if (!existing) upsertCreation(key ? styleCreation(key, [src]) : { id, title: 'My looks', intent: 'looks', cover: src, photos: [], looks: [look(src, title, true)], goal: 1, lastEdit: 'Just now' });
     else
       setCreations((cs) => {
         const c = cs.find((x) => x.id === id)!;
         const updated = { ...c, lastEdit: 'Just now', looks: c.looks.some((l) => l.src === src) ? c.looks : [...c.looks, look(src, title, true)] };
         return [updated, ...cs.filter((x) => x.id !== id)];
       });
-    track('kept_in_studio', 'w');
+    track('kept_in_project', 'w');
     return id;
-  }, [creationsRef, setCreations, track, upsertCreation]);
+  }, [findCreation, setCreations, track, upsertCreation]);
+
+  const keepSet = useCallback((srcs: string[]) => {
+    let id = 'linkedin';
+    srcs.forEach((s) => (id = keepLook(s, 'Casual Headshot')));
+    return id;
+  }, [keepLook]);
 
   /** Restore path: the restored photos become the Family archive. */
   const keepRestore = useCallback(() => {
     upsertCreation(familyArchive(4));
-    track('kept_in_studio', 'w');
+    track('project_started_from_result', 't');
     return 'family';
-  }, [track, upsertCreation]);
-
-  /** Sharing with one friend: they join from the link (an install) and their style comes back. */
-  const shareWithFriend = useCallback(() => {
-    track('shared_with_friend', 'I');
-    setUnlocked((u) => ({ ...u, friend: true }));
-  }, [track]);
-
-  /** Your version of the friend's style: the same locked profile adapts into an Everyday version. */
-  const remixStyle = useCallback((styleId: string, onResult: (r: Route) => void) => {
-    const st = styles.find((s) => s.id === styleId);
-    if (!st) return;
-    runGenerating({ steps: [`Applying ${st.creator}'s style to you`, 'Using your locked profile · Everyday', 'Final touches'], duration: 2100, preview: st.cover }, () => {
-      setStyles((ss) => ss.map((s) => (s.id === styleId ? { ...s, remixes: s.remixes + 1 } : s)));
-      setIdentities((is) => is.map((i) => (i.variants.some((v) => v.name === EVERYDAY.name) ? i : { ...i, variants: [...i.variants, EVERYDAY] })));
-      track('friend_style_remixed', 'w');
-      onResult({ name: 'result', kind: 'remix', image: st.result, title: `${st.title} · your version`, styleId });
-    });
-  }, [runGenerating, setIdentities, setStyles, styles, track]);
-
-  const makeTogether = useCallback((onResult: (r: Route) => void) => {
-    runGenerating({ steps: [`You and ${FRIEND}, each with your own profile`, 'Same 80s film style', 'Final touches'], duration: 2000, preview: A.together90s }, () => {
-      track('made_together', 'I');
-      onResult({ name: 'result', kind: 'together', image: A.together90s, title: `You & ${FRIEND}` });
-    });
-  }, [runGenerating, track]);
-
-  /** From one friend to the whole group: the shared album. */
-  const startGroup = useCallback(() => {
-    upsertCreation(friendsTrip(5));
-    setUnlocked((u) => ({ ...u, group: true }));
-    track('group_album_started', 'I');
-    return 'trip';
   }, [track, upsertCreation]);
 
   const processPhotos = useCallback((id: string, ids: string[], onDone?: () => void) => {
@@ -252,126 +235,221 @@ function useStoreValue() {
     });
   }, [later, updateCreation]);
 
-  const restyleAll = useCallback((id: string, style: string) => {
-    const c = creationsRef.current.find((x) => x.id === id);
-    if (!c) return;
-    updateCreation(id, (x) => ({ ...x, style, shared: x.shared && { ...x.shared, style, feed: [{ who: 'You', text: `set “${style}” for everyone`, when: 'now' }, ...x.shared.feed] } }));
-    processPhotos(id, c.photos.filter((p) => p.status === 'enhanced').map((p) => p.id));
-    track('style_changed_for_everyone', 'w');
-  }, [creationsRef, processPhotos, track, updateCreation]);
-
-  /** Free users use their free enhancements, then meet the paywall on the unfinished work. */
+  /** Free limits stay as they are: the last free enhancements run, then the limit lands inside the project. */
   const enhanceAll = useCallback((id: string) => {
-    const c = creationsRef.current.find((x) => x.id === id);
+    const c = findCreation(id);
     if (!c) return;
     const todo = c.photos.filter((p) => p.status === 'original').map((p) => p.id);
     if (!todo.length) return showToast('Everything here is done');
     track('enhance_all_tapped', 't');
-    if (isPro) return processPhotos(id, todo, () => showToast('All photos done'));
-    const free = Math.max(0, FREE_LIMIT - freeUsed);
+    if (isProRef.current) return processPhotos(id, todo, () => showToast(`${c.title}: all done`));
+    const free = Math.max(0, FREE_LIMIT - freeUsedRef.current);
     processPhotos(id, todo.slice(0, free), () => {
       setFreeUsed(FREE_LIMIT);
-      track('paywall_unfinished_work', 't');
+      track('free_limit_inside_project', 't');
       later(() => setSheet({ type: 'paywall', creationId: id, stage: 'offer' }), 350);
     });
-  }, [creationsRef, freeUsed, isPro, later, processPhotos, showToast, track]);
+  }, [findCreation, freeUsedRef, isProRef, later, processPhotos, setFreeUsed, showToast, track]);
 
   const startTrial = useCallback((id: string) => {
     setIsPro(true);
+    setCancelled(false);
     track('trial_started', 't');
     setSheet({ type: 'paywall', creationId: id, stage: 'success' });
-  }, [track]);
+  }, [setIsPro, track]);
 
   const finishAfterTrial = useCallback((id: string) => {
     setSheet(null);
-    const c = creationsRef.current.find((x) => x.id === id);
+    const c = findCreation(id);
     if (!c) return;
     processPhotos(id, c.photos.filter((p) => p.status === 'original').map((p) => p.id), () => {
-      track('batch_enhance_completed', 'c');
+      track('project_finished_in_trial', 'c');
       showToast(`${c.title} is finished`);
     });
-  }, [creationsRef, processPhotos, showToast, track]);
+  }, [findCreation, processPhotos, showToast, track]);
 
-  /** Continue a creation with more of the same style; stop when the set is complete. */
+  const cancelPro = useCallback(() => {
+    setIsPro(false);
+    setCancelled(true);
+    setReturning(false);
+    track('subscription_cancelled');
+  }, [setIsPro, track]);
+
+  // ---------- together (a trial feature) ----------
+  /** Invites go out through any app; friends without Remini get a link into the project. */
+  const inviteFriends = useCallback((id: string, via: string) => {
+    track(`invite_sent_${via.toLowerCase()}`, 'I');
+    updateCreation(id, (c) => {
+      const members = c.shared?.members ?? ['You'];
+      const invited = [FRIEND, ...OTHERS].filter((f) => !members.includes(f));
+      return { ...c, shared: { members, invited, feed: c.shared?.feed ?? [] } };
+    });
+  }, [track, updateCreation]);
+
+  /** Paola's own 80s creation arrives in the trip. Until now it didn't exist in your app. */
+  const shareStyle = useCallback(() => {
+    if (styleSharedRef.current) return;
+    setStyleShared(true);
+    updateCreation('trip', (c) => (c.shared ? { ...c, shared: { ...c.shared, feed: [{ who: FRIEND, text: 'shared her 80s film style', when: 'now' }, ...c.shared.feed] } } : c));
+    track('friend_shared_style', 'c');
+  }, [setStyleShared, styleSharedRef, track, updateCreation]);
+
+  /** Paola joins from the link: into the trip, with everyone's photos already there. */
+  const friendJoins = useCallback((thenShare = true) => {
+    if (paolaJoinedRef.current) return;
+    setPaolaJoined(true);
+    track('invited_friend_installed', 'I');
+    const c = findCreation('trip');
+    if (c) {
+      const next = tripProject({ done: 17, joined: [FRIEND], invited: OTHERS, paola: true, looks: c.looks });
+      // Keep your own progress as it is; add Paola's photos.
+      upsertCreation({ ...next, photos: [...c.photos, ...next.photos.slice(17)], goal: c.photos.length + 4 });
+    }
+    setIdentities((is) => (is.some((i) => i.id === 'paola') ? is : [...is, paolaProfile()]));
+    if (thenShare) later(shareStyle, 2600);
+  }, [findCreation, later, paolaJoinedRef, setIdentities, setPaolaJoined, shareStyle, track, upsertCreation]);
+
+  /** Anything that uses your face needs Me. The first time, it's saved from 4 selfies, as AI Photos does. */
+  const withMe = useCallback((then: () => void) => {
+    if (identitiesRef.current.some((i) => i.id === 'me')) return then();
+    push({
+      name: 'picker',
+      title: 'Your profile: pick 4 selfies',
+      min: 4,
+      max: 4,
+      preselect: 4,
+      pool: [...[1, 2, 3, 4].map(A.ref), A.enhance2Before, A.enhanceBefore],
+      cta: 'Save as Me',
+      onDone: () => {
+        pop();
+        setIdentities((is) => [meProfile(false), ...is.filter((i) => i.id !== 'me')]);
+        track('profile_saved', 'c');
+        then();
+      },
+    });
+  }, [identitiesRef, pop, push, setIdentities, track]);
+
+  const saveMe = useCallback(() => {
+    if (!identitiesRef.current.some((i) => i.id === 'me')) setIdentities((is) => [meProfile(false), ...is]);
+    track('profile_saved', 'c');
+  }, [identitiesRef, setIdentities, track]);
+
+  /** A friend's shared style, with your own face. */
+  const applyFriendStyle = useCallback((onResult: (r: Route) => void) => {
+    withMe(() =>
+      runGenerating({ steps: [`${FRIEND}’s 80s film`, 'With your profile, Me', 'Final touches'], duration: 2000, preview: A.friend90s }, () => {
+        track('friend_style_used', 'c');
+        onResult({ name: 'result', kind: 'remix', image: A.remix90s, title: '80s film · your version', styleId: 'st-80s', projectId: 'trip' });
+      }),
+    );
+  }, [runGenerating, track, withMe]);
+
+  /** Duo photoshoot: each of you with your own profile. */
+  const makeDuo = useCallback((onResult: (r: Route) => void) => {
+    withMe(() =>
+      runGenerating({ steps: [`You and ${FRIEND}, each with your own profile`, 'Duo photoshoot', 'Final touches'], duration: 2000, preview: A.together90s }, () => {
+        track('duo_shoot_made', 'c');
+        onResult({ name: 'result', kind: 'together', image: A.together90s, title: `You & ${FRIEND}`, projectId: 'trip' });
+      }),
+    );
+  }, [runGenerating, track, withMe]);
+
+  /** Keep a result inside the project it was made in. */
+  const keepInProject = useCallback((id: string, src: string, title: string) => {
+    updateCreation(id, (c) => ({ ...c, lastEdit: 'Just now', looks: c.looks.some((l) => l.src === src) ? c.looks : [...c.looks, look(src, title, true)] }));
+    track('kept_in_project', 'w');
+    return id;
+  }, [track, updateCreation]);
+
+  // ---------- Me: kept and updated over time ----------
+  const improveMe = useCallback(() => {
+    setIdentities((is) =>
+      is.map((i) =>
+        i.id === 'me' && !i.refs.includes(TRIP_PHOTOS_OF_ME[0])
+          ? { ...i, subtitle: 'Updated just now', refs: [...i.refs, ...TRIP_PHOTOS_OF_ME], history: [...i.history, { when: 'Just now', text: 'You added 3 photos of you from Philippines trip' }] }
+          : i,
+      ),
+    );
+    track('profile_updated', 'w');
+  }, [setIdentities, track]);
+
+  const removeProfile = useCallback((id: string) => {
+    setIdentities((is) => is.filter((i) => i.id !== id));
+    track('profile_removed');
+  }, [setIdentities, track]);
+
+  /** New looks made on your updated profile: kept only if you want them. */
+  const keepNewLooks = useCallback(() => {
+    setNewLooks(false);
+    const id = keepSet([A.linkedin(1), A.linkedin(2), A.linkedin(3)]);
+    track('new_looks_kept', 'w');
+    return id;
+  }, [keepSet, track]);
+
+  /** Continue a set of looks with more of the same style; stop when the set is complete. */
   const continueCreation = useCallback((id: string) => {
-    const c = creationsRef.current.find((x) => x.id === id);
+    const c = findCreation(id);
     if (!c) return;
     const set = Object.values(STYLE_SETS).find((v) => v.id === id);
     const have = new Set(c.looks.map((l) => l.src));
     const next = (set?.srcs ?? []).filter((s) => !have.has(s)).slice(0, Math.max(0, c.goal - c.looks.length));
     if (!next.length) return showToast('That’s the whole set in this style');
-    track('creation_continued', 'w');
-    runGenerating({ steps: [`Same style: ${c.style ?? c.title}`, 'Using your locked profile', `Making ${next.length} more`], duration: 1900, preview: next[0] }, () => {
+    track('project_continued', 'w');
+    runGenerating({ steps: [`Same style: ${c.style ?? c.title}`, 'With your profile, Me', `Making ${next.length} more`], duration: 1900, preview: next[0] }, () => {
       updateCreation(id, (x) => ({ ...x, lastEdit: 'Just now', looks: [...x.looks, ...next.map((s) => look(s, x.style ?? x.title, true))] }));
-      track('creation_completed', 'c');
       showToast(`${c.title}: ${Math.min(c.goal, c.looks.length + next.length)} of ${c.goal} done`);
     });
-  }, [creationsRef, runGenerating, showToast, track, updateCreation]);
+  }, [findCreation, runGenerating, showToast, track, updateCreation]);
 
-  /** "What are you creating?" (the fake-door screen). */
+  /** "New project" from Studio. */
   const createFromIntent = useCallback((intent: Intent, picked: string[]) => {
     const meta = INTENTS.find((i) => i.id === intent)!;
     const c: Creation =
       intent === 'trip'
         ? tripAlbum(picked)
-        : { id: `c${Date.now().toString(36)}`, title: meta.title, intent, cover: picked[0], goal: picked.length, lastEdit: 'Just now', looks: [], photos: picked.map((s) => photo(s, 'original', s.includes('archive_old') ? s.replace('archive_old', 'archive_restored') : undefined)) };
+        : intent === 'family'
+          ? { ...familyArchive(0), id: `fam-${Date.now().toString(36)}`, title: 'New archive' }
+          : { id: `c${Date.now().toString(36)}`, title: meta.title, intent, cover: picked[0], goal: picked.length, lastEdit: 'Just now', looks: [], photos: picked.map((s) => photo(s, 'original')) };
     upsertCreation(c);
-    track('creation_started', 't');
+    track('project_started', 't');
     return c.id;
   }, [track, upsertCreation]);
 
-  // ---------- Remini chat: presets and filters ----------
+  // ---------- Remini chat: one personal, one per project ----------
+  const chatCtx = useCallback((): ChatCtx => ({ hasMe: identitiesRef.current.some((i) => i.id === 'me'), paolaJoined: paolaJoinedRef.current, styleShared: styleSharedRef.current }), [identitiesRef, paolaJoinedRef, styleSharedRef]);
+
   const sendChat = useCallback((creationId: string, text: string) => {
-    const c = creationsRef.current.find((x) => x.id === creationId);
+    const c = findCreation(creationId);
     if (!c || !text.trim()) return;
     const mine: ChatMsg = { id: `m${++chatSeq}`, from: 'me', text: text.trim() };
     updateCreation(creationId, (x) => ({ ...x, chat: [...(x.chat ?? []), mine], lastEdit: 'Just now' }));
-    track(c.shared ? 'album_chat_preset' : 'chat_preset', 'w');
+    track(c.shared ? 'shared_project_chat' : 'chat_request', 'c');
     setChatTyping(creationId);
-    const r = chatReply(text, c);
+    const r = chatReply(text, c, chatCtx());
     later(() => {
       setChatTyping(null);
       const p = r.preset;
-      const msg: ChatMsg = { id: `m${++chatSeq}`, from: 'remini', text: r.text, images: p?.image ? [p.image] : undefined, action: p?.restyle ? 'restyled' : p?.enhance ? 'enhanced' : undefined };
+      const msg: ChatMsg = { id: `m${++chatSeq}`, from: 'remini', text: r.text, images: p?.images, action: p?.batch ? (c.intent === 'family' ? 'restored' : 'enhanced') : undefined };
       updateCreation(creationId, (x) => ({ ...x, chat: [...(x.chat ?? []), msg] }));
-      if (p?.image) keepLook(p.image, p.title ?? 'Preset');
-      if (p?.restyle) restyleAll(creationId, p.restyle);
-      if (p?.enhance) {
-        const todo = creationsRef.current.find((x) => x.id === creationId)?.photos.filter((ph) => ph.status === 'original').map((ph) => ph.id) ?? [];
-        if (isPro) processPhotos(creationId, todo);
-        else if (todo.length) later(() => setSheet({ type: 'paywall', creationId, stage: 'offer' }), 600);
-      }
-    }, 1700);
-  }, [creationsRef, isPro, keepLook, later, processPhotos, restyleAll, track, updateCreation]);
+      if (p?.batch) enhanceAll(creationId);
+      if (p?.more) continueCreation(creationId);
+    }, 1500);
+  }, [chatCtx, continueCreation, enhanceAll, findCreation, later, track, updateCreation]);
 
-  // The friend's style keeps travelling: its remix counter ticks up while you watch.
-  useEffect(() => {
-    if (!unlocked.friend) return;
-    const t = window.setInterval(() => setStyles((ss) => ss.map((s) => ({ ...s, remixes: s.remixes + (Math.random() < 0.5 ? 1 : 0) }))), 1200);
-    return () => clearInterval(t);
-  }, [setStyles, unlocked.friend]);
-
-  const publishStyle = useCallback((title: string, image: string) => {
-    const id = `st-mine-${Date.now().toString(36)}`;
-    setStyles((ss) => [...ss.filter((s) => !s.mine), { id, title: title || 'My style', creator: 'You', cover: image, result: image, remixes: 0, mine: true }]);
-    track('style_published', 'I');
-    return id;
-  }, [setStyles, track]);
-
-  const improveIdentity = useCallback((id: string, picked: string[]) => {
-    setIdentities((is) => is.map((i) => (i.id === id ? { ...i, refs: [...i.refs, ...picked].slice(0, 8) } : i)));
-    track('profile_improved', 'c');
-  }, [setIdentities, track]);
-
-  const rememberMe = useCallback((name: string, refs: string[]) => {
-    setIdentities((is) => [...is, { id: `id${Date.now().toString(36)}`, name, subtitle: `Locked in from ${refs.length} photos`, cover: refs[0], refs, variants: [] }]);
-    track('profile_locked_in', 'c');
-  }, [setIdentities, track]);
+  /** Keep a chat result: into the project (project chats) or into its own set (personal chat). */
+  const keepFromChat = useCallback((creationId: string, msgId: string) => {
+    const c = findCreation(creationId);
+    const m = c?.chat?.find((x) => x.id === msgId);
+    if (!c || !m?.images) return;
+    updateCreation(creationId, (x) => ({ ...x, chat: x.chat?.map((y) => (y.id === msgId ? { ...y, kept: true } : y)) }));
+    const id = c.chatOnly ? (m.images.length > 1 ? keepSet(m.images) : keepLook(m.images[0], 'Y2K Yearbook')) : keepInProject(creationId, m.images[0], m.images[0] === A.remix90s ? '80s film · your version' : `You & ${FRIEND}`);
+    showToast(`Kept in ${findCreation(id)?.title ?? 'your project'}`);
+  }, [findCreation, keepInProject, keepLook, keepSet, showToast, updateCreation]);
 
   const setFlags = useCallback((f: { isPro?: boolean; freeUsed?: number }) => {
     if (f.isPro !== undefined) setIsPro(f.isPro);
     if (f.freeUsed !== undefined) setFreeUsed(f.freeUsed);
-  }, []);
+  }, [setFreeUsed, setIsPro]);
 
   const resetAll = useCallback(() => {
     clearTimers();
@@ -382,10 +460,12 @@ function useStoreValue() {
     setToast(null);
     setEvents([]);
     setIdentities([]);
-    setCreations([]);
-    setStyles(seedStyles());
-    setUnlocked({ friend: false, group: false });
+    setCreations([personalChat()]);
+    setPaolaJoined(false);
+    setStyleShared(false);
+    setNewLooks(false);
     setReturning(false);
+    setCancelled(false);
     setSegment(null);
     setOnboarded({ today: true, studio: false });
     setFreeUsed(0);
@@ -393,17 +473,17 @@ function useStoreValue() {
     setLastDemoDone(false);
     setClosing(false);
     startedAt.current = Date.now();
-  }, [clearTimers, setCreations, setIdentities, setStack, setStyles]);
+  }, [clearTimers, setCreations, setFreeUsed, setIdentities, setIsPro, setPaolaJoined, setStack, setStyleShared]);
 
   return {
     mode, setMode, tab, goTab, stack, stackRef, navDir, push, pop, replaceTop, resetStack,
     sheet, openSheet, closeSheet, generating, runGenerating, toast, showToast, clearToast: useCallback(() => setToast(null), []),
     showLevers, setShowLevers, events, track, clearEvents: useCallback(() => setEvents([]), []),
-    identities, identitiesRef, creations, creationsRef, styles, unlocked, returning, segment, onboarded, setOnboarded,
+    identities, identitiesRef, creations, creationsRef, paolaJoined, styleShared, newLooks, returning, cancelled, segment, onboarded, setOnboarded,
     freeUsed, isPro, processing, demo, setDemo, splash, setSplash, lastDemoDone, setLastDemoDone, closing, setClosing, chatTyping,
-    setStage, answerSegment, lockIdentity, keepSet, keepLook, keepRestore, shareWithFriend, remixStyle, makeTogether, startGroup,
-    processPhotos, restyleAll, enhanceAll, startTrial, finishAfterTrial, continueCreation, createFromIntent, sendChat,
-    publishStyle, improveIdentity, rememberMe, updateCreation, upsertCreation, setFlags, resetAll, clearTimers, friend: FRIEND,
+    setStage, answerSegment, spendFree, startTrip, keepLook, keepSet, keepRestore, keepInProject, processPhotos, enhanceAll, startTrial, finishAfterTrial, cancelPro,
+    inviteFriends, friendJoins, shareStyle, withMe, saveMe, applyFriendStyle, makeDuo, improveMe, removeProfile, keepNewLooks, continueCreation, createFromIntent,
+    sendChat, keepFromChat, chatCtx, updateCreation, upsertCreation, setFlags, resetAll, clearTimers, friend: FRIEND,
   };
 }
 

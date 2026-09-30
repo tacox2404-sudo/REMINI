@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
-import { A, FRIEND, friendsTrip, linkedinSet } from '../state/data';
+import { A, FRIEND } from '../state/data';
 import { useStore } from '../state/store';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
 import { LeverTag } from '../components/ui';
+import type { Lever } from '../state/types';
 
 function AppGlyph() {
   // Neutral stand-in app icon (not the real Remini logo).
@@ -14,24 +15,22 @@ function AppGlyph() {
   );
 }
 
+/** Coming back: every reason is the user's own work and friends. */
 export function LockScreen() {
-  const s = useStore();
-  const { track, resetStack, setMode, mode, goTab, creationsRef, upsertCreation, friend } = s;
+  const { track, resetStack, setMode, mode, goTab, creationsRef } = useStore();
 
-  const open = (which: 'linkedin' | 'friend' | 'trip') => {
-    track(`notification_opened_${which}`, 'w');
+  const open = (k: string) => {
+    track(`notification_opened_${k}`, 'w');
     if (mode !== 'studio') setMode('studio');
     goTab('studio');
-    if (which === 'linkedin' && !creationsRef.current.some((c) => c.id === 'linkedin')) upsertCreation(linkedinSet(3));
-    if (which === 'trip' && !creationsRef.current.some((c) => c.id === 'trip')) upsertCreation(friendsTrip(17));
-    resetStack(which === 'friend' ? [{ name: 'studio' }] : [{ name: 'studio' }, { name: 'creation', id: which }]);
+    const hasTrip = creationsRef.current.some((c) => c.id === 'trip');
+    resetStack(k === 'looks' || !hasTrip ? [{ name: 'studio' }] : [{ name: 'studio' }, { name: 'creation', id: 'trip' }]);
   };
-  void friend;
 
-  const notes = [
-    { k: 'linkedin' as const, title: 'Your LinkedIn set is 3 of 5 done', body: 'Two more and it is ready. Continue?', when: 'now', img: A.linkedin(2) },
-    { k: 'trip' as const, title: 'Luca added 6 photos to Friends trip', body: 'They already have the album’s Golden hour style', when: '1h ago', img: A.trip(3) },
-    { k: 'friend' as const, title: `${FRIEND}’s 80s film style passed 12k remixes`, body: 'Your version is one of them', when: '9:00', img: A.together90s },
+  const notes: { k: string; title: string; body: string; when: string; img: string; l: Lever }[] = [
+    { k: 'trip', title: `${FRIEND} added 8 photos to Philippines trip`, body: 'From the last night. They’re waiting in your project.', when: 'now', img: A.trip(5), l: 'w' },
+    { k: 'looks', title: 'New looks with your updated Me', body: 'Casual Headshot, made with your latest photos', when: '1h ago', img: A.linkedin(2), l: 'w' },
+    { k: 'luca', title: 'Luca joined Philippines trip', body: 'From your link. He’s adding his photos.', when: 'Yesterday', img: A.trip(1), l: 'I' },
   ];
 
   return (
@@ -42,7 +41,7 @@ export function LockScreen() {
       </div>
       <div className="relative flex h-full flex-col items-center pt-[64px]">
         <I.Lock size={18} className="text-white/80" />
-        <div className="mt-2 text-[17px] font-semibold text-white/85">Tuesday 29 September</div>
+        <div className="mt-2 text-[17px] font-semibold text-white/85">Saturday 3 October</div>
         <div className="text-[92px] font-bold leading-[1] tracking-tight" style={{ fontFeatureSettings: '"tnum"' }}>
           9:41
         </div>
@@ -67,11 +66,11 @@ export function LockScreen() {
                 <div className="truncate text-[13px] text-white/75">{n.body}</div>
               </div>
               <Img src={n.img} className="h-10 w-10 shrink-0 rounded-lg" label={false} />
-              <LeverTag l={n.k === 'friend' ? 'I' : 'w'} />
+              <LeverTag l={n.l} />
             </motion.button>
           ))}
         </div>
-        <button onClick={() => resetStack([], -1)} className="mt-auto mb-7 flex flex-col items-center gap-2 text-[13px] text-white/60">
+        <button onClick={() => resetStack([], -1)} className="mb-7 mt-auto flex flex-col items-center gap-2 text-[13px] text-white/60">
           Tap to unlock
           <span className="h-[5px] w-[134px] rounded-full bg-white" />
         </button>
@@ -79,4 +78,3 @@ export function LockScreen() {
     </div>
   );
 }
-

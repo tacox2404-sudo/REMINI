@@ -1,12 +1,10 @@
 import { motion } from 'framer-motion';
-import { A, FRIEND, progressOf } from '../state/data';
+import { A, FRIEND, OTHERS, PAOLA_STYLE, progressOf } from '../state/data';
 import { useStore } from '../state/store';
-import type { CommunityStyle, Creation } from '../state/types';
+import type { Creation, Identity } from '../state/types';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
-import { Avatar, HScroll, LeverTag, NavHeader, NewBadge, PillWhite, SectionHeader } from '../components/ui';
-
-export const fmtRemixes = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k remixes` : `${n} remix${n === 1 ? '' : 'es'}`);
+import { Avatar, HScroll, LeverTag, NavHeader, NewBadge, PillWhite, ProBadge, SectionHeader } from '../components/ui';
 
 export function ProgressRing({ value, size = 34, stroke = 3.5, label }: { value: number; size?: number; stroke?: number; label?: string }) {
   const r = (size - stroke) / 2;
@@ -50,7 +48,7 @@ export function CreationCard({ c, wide }: { c: Creation; wide?: boolean }) {
       </div>
       <div className="p-3">
         <div className="truncate text-[15px] font-bold">{c.title}</div>
-        <div className="mt-0.5 text-[12px] text-mute">
+        <div className="mt-0.5 truncate text-[12px] text-mute">
           {pr.label} · {c.lastEdit}
         </div>
       </div>
@@ -58,175 +56,173 @@ export function CreationCard({ c, wide }: { c: Creation; wide?: boolean }) {
   );
 }
 
-export function StyleCard({ st }: { st: CommunityStyle }) {
-  const { remixStyle, push } = useStore();
+/** A saved profile: Me grows over time; a friend's exists only because they added it. */
+export function ProfileCard({ p }: { p: Identity }) {
+  const { push, creations } = useStore();
+  const mine = p.owner === 'me';
+  const used = creations.filter((c) => !c.chatOnly && (c.looks.length > 0 || c.intent === 'profile')).length;
   return (
-    <div data-demo="style-friend" className="relative overflow-hidden rounded-[22px] bg-card">
-      <div className="flex">
-        <Img src={st.cover} className="h-[170px] w-[128px] shrink-0" label={false} />
-        <div className="flex flex-1 flex-col p-3.5">
-          <div className="flex items-center gap-1.5 text-[12px] font-semibold text-white/60">
-            <Avatar name={st.creator} size={18} /> {st.creator} shared her style
-          </div>
-          <div className="mt-1.5 text-[18px] font-bold leading-tight">{st.title}</div>
-          <motion.div key={st.remixes} initial={{ opacity: 0.5 }} animate={{ opacity: 1 }} className="mt-0.5 text-[12px] font-semibold text-[#FF8FB0]">
-            {fmtRemixes(st.remixes)}
-          </motion.div>
-          <button data-demo="make-your-version" onClick={() => remixStyle(st.id, (r) => push(r))} className="relative mt-auto flex h-10 items-center justify-center rounded-full bg-white text-[14px] font-semibold text-black active:scale-95">
-            Make your version
-            <LeverTag l="w" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** The profile: locked in once, adapted per creation through versions. */
-export function MeCard() {
-  const { identities, creations, push } = useStore();
-  const me = identities[0];
-  if (!me) return null;
-  return (
-    <button data-demo="me-card" onClick={() => push({ name: 'identity', id: me.id })} className="relative mx-4 block w-[calc(100%-2rem)] rounded-[22px] bg-card p-4 text-left">
-      <LeverTag l="c" />
+    <button data-demo={mine ? 'me-card' : `profile-${p.id}`} onClick={() => push({ name: 'identity', id: p.id })} className="relative block w-full rounded-[22px] bg-card p-3.5 text-left">
+      {mine && <LeverTag l="w" />}
       <div className="flex items-center gap-3">
-        <span className="rounded-full bg-brand p-[2px]">
-          <Img src={me.cover} className="h-14 w-14 rounded-full ring-2 ring-card" label={false} />
+        <span className={`rounded-full p-[2px] ${mine ? 'bg-brand' : 'bg-white/20'}`}>
+          <Img src={p.cover} className="h-12 w-12 rounded-full ring-2 ring-card" label={false} />
         </span>
-        <div className="flex-1">
-          <div className="flex items-center gap-1.5 text-[17px] font-bold">
-            {me.name} <I.Lock size={14} className="text-[#2ED47A]" />
-          </div>
-          <div className="text-[12.5px] text-mute">{me.subtitle} · used in {creations.filter((c) => !c.chatOnly).length} creations</div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[16px] font-bold">{p.name}</div>
+          <div className="truncate text-[12.5px] text-mute">{mine ? `${p.subtitle} · ${p.refs.length} photos${used ? ` · in ${used} project${used > 1 ? 's' : ''}` : ''}` : p.subtitle}</div>
         </div>
         <I.Chevron size={18} className="text-mute" />
       </div>
-      <div className="mt-3 flex gap-2">
-        {me.variants.map((v) => (
-          <span key={v.name} className="flex items-center gap-2 rounded-full bg-white/[0.07] py-1 pl-1 pr-3 text-[12.5px]">
-            <Img src={v.cover} className="h-7 w-7 rounded-full" label={false} />
-            <span>
-              <b>{v.name}</b> <span className="text-white/55">· {v.usedFor}</span>
-            </span>
-          </span>
-        ))}
-      </div>
+      {mine && (
+        <div className="mt-2.5 flex gap-1">
+          {p.refs.slice(0, 7).map((r, i) => (
+            <Img key={r + i} src={r} className="h-9 w-9 rounded-lg" label={false} />
+          ))}
+        </div>
+      )}
     </button>
   );
 }
 
-/** Studio: only your own and shared work. Everything else stays on Remini's usual pages. */
+/** Studio: a personal space for what you choose to keep, alone or with friends. */
 export function StudioScreen() {
-  const { creations, styles, unlocked, returning, push, pop, identities } = useStore();
-  const works = creations.filter((c) => !c.chatOnly);
-  const open = works.filter((c) => progressOf(c).done < progressOf(c).total);
-  const friendStyle = styles.find((s) => s.friend);
-  // Remix: your versions of styles (one creation per style), and styles friends shared.
-  const remixes = works.filter((c) => c.id.startsWith('style-'));
-  // Chats: every conversation with Remini, reopenable.
-  const chats = creations.filter((c) => (c.chat ?? []).some((m) => m.from !== 'remini') || c.chatOnly);
-  const album = creations.find((c) => c.id === 'trip');
-  const paola = creations.find((c) => c.id === 'paola');
+  const { creations, identities, isPro, cancelled, returning, newLooks, paolaJoined, styleShared, push, pop, openSheet } = useStore();
+  const projects = creations.filter((c) => !c.chatOnly);
+  const trip = projects.find((c) => c.id === 'trip');
+  const me = identities.find((i) => i.id === 'me');
+  const others = identities.filter((i) => i.id !== 'me');
+  const waiting = trip ? trip.photos.filter((p) => p.status === 'original').length : 0;
 
   return (
     <div>
       <NavHeader title="" onBack={pop} />
-      <div className="px-4 pb-2">
+      <div className="px-4 pb-1">
         <div className="flex items-center gap-2">
           <h1 className="text-[30px] font-bold leading-none tracking-tight">Studio</h1>
           <span className="rounded-md bg-brand px-1.5 py-[1px] text-[10px] font-extrabold">NEW</span>
         </div>
-        <p className="mt-1.5 text-[14px] leading-snug text-white/65">What you make with Remini, kept and ready to continue. On your own and with friends.</p>
+        <p className="mt-1.5 text-[14px] leading-snug text-white/65">What you choose to keep, in projects that keep going. On your own and with friends.</p>
       </div>
 
-      {returning && open.length > 0 && (
-        <div data-demo="welcome-card" className="relative mx-4 mt-3 rounded-[22px] bg-gradient-to-br from-[#2a1320] to-card p-4 ring-1 ring-[#FF2E7E]/25">
+      {cancelled && (
+        <div data-demo="after-cancel" className="relative mx-4 mt-3 rounded-[20px] bg-card p-3.5 ring-1 ring-white/10">
           <LeverTag l="w" />
-          <div className="text-[13px] font-semibold text-white/60">Welcome back</div>
-          <div className="mt-1 text-[19px] font-bold leading-tight">
-            {open.map((c) => `${c.title} is ${progressOf(c).done} of ${progressOf(c).total}`).join(' · ')}. Continue?
-          </div>
-          <PillWhite className="mt-3 !h-11" onClick={() => push({ name: 'creation', id: open[0].id })}>
-            Continue
-          </PillWhite>
+          <div className="text-[14px] font-bold">You’re on Free. Nothing is held back.</div>
+          <div className="mt-0.5 text-[12.5px] text-mute">Every project stays here to view and download. Restart Pro whenever you want to continue.</div>
         </div>
       )}
 
-      <SectionHeader demo="keep-going" title={<span className="relative">Keep going<LeverTag l="w" className="-right-5 -top-1" /></span>} sub="Everything you kept saves itself" />
-      {works.length ? (
-        <HScroll>
-          {works.filter((c) => !c.id.startsWith('style-')).map((c) => (
-            <CreationCard key={c.id} c={c} />
-          ))}
-          <button data-demo="what-creating" onClick={() => push({ name: 'create' })} className="relative flex w-[150px] shrink-0 flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-white/20 p-3 text-center">
-            <span className="grid h-11 w-11 place-items-center rounded-full bg-white text-black">
-              <I.Plus />
-            </span>
-            <span className="text-[14px] font-semibold leading-tight">What are you creating?</span>
-            <LeverTag l="t" />
-          </button>
-        </HScroll>
-      ) : (
-        <div className="mx-4 rounded-[20px] border border-dashed border-white/15 p-5 text-center text-[13px] text-mute">Nothing kept yet. Create anything in Remini and tap “Keep this”.</div>
-      )}
-
-      <SectionHeader demo="remix" title={<span className="relative">Remix<LeverTag l="w" className="-right-5 -top-1" /></span>} sub="Styles and filters on your profile, one creation per style" />
-      {remixes.length ? (
-        <HScroll>
-          {remixes.map((c) => (
-            <CreationCard key={c.id} c={c} />
-          ))}
-        </HScroll>
-      ) : (
-        <div className="mx-4 rounded-[20px] border border-dashed border-white/15 p-4 text-[13px] text-mute">Try a filter like 80s Vibes, or a preset in Remini chat, on your profile. Each style is kept here.</div>
-      )}
-
-      <SectionHeader demo="chats" title="Chats" sub="Your conversations with Remini, kept to reopen" />
-      <div className="space-y-2 px-4">
-        {chats.length ? (
-          chats.map((c) => {
-            const last = [...(c.chat ?? [])].reverse()[0];
-            return (
-              <button key={c.id} data-demo={`chat-${c.id}`} onClick={() => push({ name: 'chat', creationId: c.id })} className="flex w-full items-center gap-3 rounded-[18px] bg-card p-3 text-left">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand"><I.Enhance size={18} /></span>
+      {returning && (
+        <div data-demo="welcome-card" className="relative mx-4 mt-3 rounded-[22px] bg-gradient-to-br from-[#2a1320] to-card p-4 ring-1 ring-[#FF2E7E]/25">
+          <LeverTag l="w" />
+          <div className="text-[13px] font-semibold text-white/60">Welcome back · since you were here</div>
+          <div className="mt-2 space-y-2">
+            {trip && waiting > 0 && (
+              <button onClick={() => push({ name: 'creation', id: 'trip' })} className="flex w-full items-center gap-3 text-left">
+                <Img src={A.trip(5)} className="h-11 w-11 rounded-xl" label={false} />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[14.5px] font-semibold">{c.chatOnly ? 'Remini chat' : `${c.title} · chat`}</span>
-                  <span className="block truncate text-[12.5px] text-mute">{last ? `${last.from === 'me' ? 'You' : last.from === 'remini' ? 'Remini' : last.from}: ${last.text}` : 'No messages yet'}</span>
+                  <span className="block text-[14.5px] font-bold leading-tight">{FRIEND} added 8 photos to {trip.title}</span>
+                  <span className="block text-[12px] text-mute">{waiting} waiting to be enhanced</span>
                 </span>
                 <I.Chevron size={16} className="text-mute" />
               </button>
-            );
-          })
-        ) : (
-          <div className="rounded-[20px] border border-dashed border-white/15 p-4 text-[13px] text-mute">Open Remini chat from the bubble on the home. Every chat is kept here.</div>
-        )}
-      </div>
+            )}
+            {newLooks && me && (
+              <button onClick={() => push({ name: 'result', kind: 'set', image: A.linkedin(1), images: [A.linkedin(1), A.linkedin(2), A.linkedin(3)], title: 'Casual Headshot' })} className="flex w-full items-center gap-3 text-left">
+                <Img src={A.linkedin(1)} className="h-11 w-11 rounded-xl" label={false} />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14.5px] font-bold leading-tight">New looks with your updated Me</span>
+                  <span className="block text-[12px] text-mute">Casual Headshot · keep them if you like them</span>
+                </span>
+                <I.Chevron size={16} className="text-mute" />
+              </button>
+            )}
+          </div>
+          {trip && waiting > 0 && (
+            <PillWhite className="mt-3 !h-11" onClick={() => push({ name: 'creation', id: 'trip' })}>
+              Continue {trip.title}
+            </PillWhite>
+          )}
+        </div>
+      )}
 
-      <SectionHeader title={<span className="relative">Together<LeverTag l="I" className="-right-5 -top-1" /></span>} sub="Made with friends, then with the whole group" />
-      <div className="space-y-2.5 px-4">
-        {unlocked.friend && (
-          <div data-demo="friend-joined" className="flex items-center gap-3 rounded-[18px] bg-card p-3">
-            <Img src={A.friend} className="h-11 w-11 rounded-full" label={false} />
-            <div className="min-w-0 flex-1">
-              <div className="text-[14.5px] font-semibold">{FRIEND} joined Remini</div>
-              <div className="text-[12px] text-mute">From your WhatsApp invite · now a Remini friend</div>
-            </div>
-            <span className="rounded-full bg-[#2ED47A]/15 px-2.5 py-1 text-[11px] font-bold text-[#2ED47A]">Friend</span>
+      <SectionHeader demo="projects" title={<span className="relative">Projects<LeverTag l="t" className="-right-5 -top-1" /></span>} sub="Jobs that keep going, with progress. They save themselves." />
+      <HScroll>
+        {projects.map((c) => (
+          <CreationCard key={c.id} c={c} />
+        ))}
+        <button data-demo="new-project" onClick={() => push({ name: 'create' })} className="relative flex w-[150px] shrink-0 flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-white/20 p-3 text-center">
+          <span className="grid h-11 w-11 place-items-center rounded-full bg-white text-black">
+            <I.Plus />
+          </span>
+          <span className="text-[14px] font-semibold leading-tight">New project</span>
+          <span className="text-[11.5px] leading-snug text-mute">Or tap Keep on any result</span>
+        </button>
+      </HScroll>
+
+      <SectionHeader demo="profiles" title="Profiles" sub="Saved faces for everything you create. Yours gets better as you go." />
+      <div className="space-y-2 px-4">
+        {me ? (
+          <ProfileCard p={me} />
+        ) : (
+          <div className="rounded-[20px] border border-dashed border-white/15 p-3.5 text-[13px] leading-snug text-mute">
+            <b className="text-white/80">Me</b> is saved the first time you create with your face, from 4 selfies as AI Photos does. Then it stays and improves.
           </div>
         )}
-        {unlocked.friend && friendStyle && !paola && <StyleCard st={friendStyle} />}
-        {paola && <CreationCard c={paola} wide />}
-        {album && <CreationCard c={album} wide />}
-        {!unlocked.friend && <div className="rounded-[20px] border border-dashed border-white/15 p-4 text-[13px] text-mute">Share something you made and create with a friend. Then bring the whole group.</div>}
+        {others.map((p) => (
+          <ProfileCard key={p.id} p={p} />
+        ))}
       </div>
 
-      {identities.length > 0 && (
-        <>
-          <SectionHeader title="Me" sub="Your profile, locked in once, adapted to each creation" />
-          <MeCard />
-        </>
-      )}
+      <SectionHeader demo="together" title={<span className="relative">Together<LeverTag l="I" className="-right-5 -top-1" /></span>} sub="Projects with the people in them." right={!isPro ? <ProBadge /> : undefined} />
+      <div className="space-y-2.5 px-4">
+        {!isPro ? (
+          <button data-demo="together-locked" onClick={() => openSheet({ type: 'together' })} className="relative block w-full overflow-hidden rounded-[22px] bg-card text-left">
+            <LeverTag l="t" />
+            <div className="grid grid-cols-3 gap-1 p-1">
+              {[A.trip(1), A.trip(2), A.trip(5)].map((s) => (
+                <Img key={s} src={s} className="aspect-[4/3] rounded-[14px]" label={false} />
+              ))}
+            </div>
+            <div className="p-3.5 pt-2.5">
+              <div className="text-[15px] font-bold">Invite friends into a project</div>
+              <div className="mt-0.5 text-[12.5px] leading-snug text-mute">They add their photos and, if they want, their own face. Duo shoots, friends’ styles with your face, one Remini chat for all.</div>
+              <div className="mt-2.5 text-[13px] font-semibold text-[#FF6A8E]">{cancelled ? 'Restart Pro to create together' : 'Try it free with Pro →'}</div>
+            </div>
+          </button>
+        ) : !paolaJoined ? (
+          <button data-demo="together-invite" onClick={() => trip && openSheet({ type: 'withFriend', title: trip.title, image: trip.cover, link: '', projectId: 'trip' })} className="flex w-full items-center gap-3 rounded-[20px] bg-card p-3.5 text-left">
+            <div className="flex -space-x-2">
+              {[FRIEND, ...OTHERS].map((m) => (
+                <Avatar key={m} name={m} size={30} />
+              ))}
+            </div>
+            <span className="flex-1 text-[14px] font-semibold">Invite the friends from {trip?.title ?? 'your trip'}</span>
+            <I.Chevron size={16} className="text-mute" />
+          </button>
+        ) : (
+          <>
+            <div data-demo="friend-joined" className="flex items-center gap-3 rounded-[18px] bg-card p-3">
+              <Img src={A.friend} className="h-11 w-11 rounded-full" label={false} />
+              <div className="min-w-0 flex-1">
+                <div className="text-[14.5px] font-semibold">{FRIEND} joined from your link</div>
+                <div className="text-[12px] text-mute">In {trip?.title ?? 'your trip'} · added her photos and her face</div>
+              </div>
+            </div>
+            {styleShared && (
+              <button onClick={() => push({ name: 'creation', id: PAOLA_STYLE.projectId })} className="flex w-full items-center gap-3 rounded-[18px] bg-card p-3 text-left">
+                <Img src={PAOLA_STYLE.cover} className="h-11 w-11 rounded-xl" label={false} />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[14.5px] font-semibold">{FRIEND}’s {PAOLA_STYLE.title}</div>
+                  <div className="text-[12px] text-mute">Shared with you in {trip?.title ?? 'your trip'} · use it with your face</div>
+                </div>
+                <I.Chevron size={16} className="text-mute" />
+              </button>
+            )}
+          </>
+        )}
+      </div>
       <div className="h-16" />
     </div>
   );
@@ -244,8 +240,8 @@ export function StudioEntryCard() {
       <LeverTag l="w" />
       <Img src={c.cover} className="h-14 w-14 shrink-0 rounded-xl" label={false} />
       <span className="min-w-0 flex-1">
-        <span className="block text-[12px] font-semibold text-[#FF6A8E]">Your Studio · {creations.length} kept</span>
-        <span className="block truncate text-[15px] font-bold">Keep going: {c.title}</span>
+        <span className="block text-[12px] font-semibold text-[#FF6A8E]">Your Studio · {creations.length} project{creations.length > 1 ? 's' : ''}</span>
+        <span className="block truncate text-[15px] font-bold">{c.title}</span>
         <span className="block text-[12px] text-mute">{pr.label}</span>
       </span>
       <ProgressRing value={pr.done / pr.total} size={40} label={`${pr.done}/${pr.total}`} />

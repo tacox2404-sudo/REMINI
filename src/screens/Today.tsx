@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { A } from '../state/data';
+import { GALLERY } from '../state/data';
+import { useFlows } from '../state/flows';
 import { useStore } from '../state/store';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
@@ -7,8 +8,6 @@ import { NavHeader, PillWhite } from '../components/ui';
 
 /** Generic, face-free stand-ins for Remini's own sample imagery (placeholders unless provided). */
 const G = (n: number) => `generic_${n}.jpg`;
-/** Photos in the phone's gallery, as Enhance shows them. */
-const GALLERY = [A.trip(3), A.old(2), A.trip(4), A.old(4), A.trip(6), A.old(1)];
 
 function Tile({ src, label, className = '' }: { src: string; label?: string; className?: string }) {
   return (
@@ -36,25 +35,9 @@ function Head({ title, emoji, right }: { title: string; emoji: string; right?: R
 }
 
 export function useTodayActions() {
-  const { push, runGenerating, replaceTop, track } = useStore();
+  const { quickEnhance } = useFlows();
   /** Enhance and Retouch open the gallery straight away. */
-  const openGallery = (title: string) =>
-    push({
-      name: 'picker',
-      title,
-      max: 1,
-      pool: GALLERY,
-      cta: title === 'Retouch' ? 'Retouch' : 'Enhance',
-      onDone: (picked) => {
-        const src = picked[0] ?? GALLERY[0];
-        const old = src.includes('archive_old');
-        runGenerating({ steps: ['Uploading', old ? 'Restoring faces' : 'Enhancing details'], duration: 1600, preview: src }, () => {
-          track('enhance_completed');
-          replaceTop({ name: 'result', kind: 'enhance', title: 'Enhanced', image: old ? src.replace('archive_old', 'archive_restored') : src, before: old ? src : undefined });
-        });
-      },
-    });
-  return { openGallery };
+  return { openGallery: quickEnhance };
 }
 
 export function TodayHome() {
@@ -88,7 +71,7 @@ export function TodayHome() {
         </button>
       </div>
       <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto px-4">
-        {GALLERY.map((src) => (
+        {GALLERY.slice(0, 6).map((src) => (
           <button key={src} onClick={() => openGallery('Enhance')}>
             <Tile src={src} className="h-[124px] w-[124px] !rounded-[16px]" />
           </button>
@@ -144,20 +127,13 @@ export function ToolBar() {
   );
 }
 
-/** The floating chat bubble (bottom right), as in Remini. */
+/** The floating chat bubble (bottom right), as in Remini. With Studio it opens your chats. */
 export function ChatBubble() {
-  const { mode, push, identities, creationsRef, upsertCreation } = useStore();
-  /** With a locked profile, Remini Chat works on "My looks" with presets and filters. */
-  const openChat = () => {
-    if (mode !== 'studio' || !identities.length) return push({ name: 'today', screen: 'chat' });
-    if (!creationsRef.current.some((c) => c.id === 'chat'))
-      upsertCreation({ id: 'chat', title: 'Remini chat', intent: 'other', chatOnly: true, cover: identities[0].cover, photos: [], looks: [], goal: 0, lastEdit: 'Just now', chat: [{ id: 'hello', from: 'remini', text: 'Hi! Pick a preset and I’ll apply it to your locked profile. Each style is kept in its own creation in Studio.' }] });
-    push({ name: 'chat', creationId: 'chat' });
-  };
+  const { mode, push } = useStore();
   return (
     <button
       data-demo="chat-bubble"
-      onClick={openChat}
+      onClick={() => push(mode === 'studio' ? { name: 'chats' } : { name: 'today', screen: 'chat' })}
       className="absolute bottom-[112px] right-4 z-30 grid h-[62px] w-[62px] place-items-center rounded-full bg-ink p-[3px] shadow-2xl"
       style={{ background: 'conic-gradient(from 200deg, #FF5A4E, #FF2E7E, #B57CFF, #FFB020, #FF5A4E)' }}
       aria-label="Remini Chat"
@@ -173,9 +149,8 @@ export function ChatBubble() {
 }
 
 export function TodayScreen({ screen }: { screen: 'photos' | 'filters' | 'videos' | 'chat' | 'profile' }) {
-  const { pop, push, runGenerating, showToast, track, mode, identities } = useStore();
+  const { pop, push, runGenerating, showToast, track } = useStore();
   const [variation, setVariation] = useState('80s Vibes');
-  const canTry = mode === 'studio' && identities.length > 0 && variation === '80s Vibes';
   const [chatPhoto, setChatPhoto] = useState<string | null>(null);
   const [reply, setReply] = useState<string | null>(null);
   const [prompt, setPrompt] = useState('');
@@ -231,22 +206,7 @@ export function TodayScreen({ screen }: { screen: 'photos' | 'filters' | 'videos
             <span className="absolute right-0 top-2 h-[118px] w-[92px] rotate-6 rounded-2xl bg-card2" />
           </div>
           <p className="mt-6 text-[16px] leading-snug">Pick a photo and turn it into a work of art 🎨</p>
-          {canTry ? (
-            <PillWhite
-              demo="filter-try"
-              className="mt-5 !w-[260px]"
-              onClick={() =>
-                runGenerating({ steps: ['80s Vibes', 'Using your locked profile · Everyday'], duration: 1800, preview: A.remix90s }, () => {
-                  track('filter_on_profile', 'w');
-                  push({ name: 'result', kind: 'preset', image: A.remix90s, title: '80s film' });
-                })
-              }
-            >
-              Try on my profile
-            </PillWhite>
-          ) : (
-            <PillWhite className="mt-5 !w-[240px]" onClick={() => showToast(mode === 'studio' ? 'Display only in this prototype: try 80s Vibes' : 'Opens your gallery')}>Pick a Photo <I.Plus size={18} /></PillWhite>
-          )}
+          <PillWhite className="mt-5 !w-[240px]" onClick={() => showToast('Opens your gallery')}>Pick a Photo <I.Plus size={18} /></PillWhite>
         </div>
         <div className="mt-auto rounded-t-[26px] bg-card px-4 pb-6 pt-3">
           <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20" />

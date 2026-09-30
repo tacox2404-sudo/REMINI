@@ -7,7 +7,7 @@ import { Img } from '../components/Img';
 import { LeverTag, PillWhite } from '../components/ui';
 
 /** Entry paths built in the prototype. */
-const OPEN = ['profile', 'restore'];
+const OPEN = ['lookgreat', 'restore', 'profile'];
 
 /** Photo permission, then Remini's "What brings you to Remini?" question. */
 export function OnboardingScreen({ start }: { start?: 'question' }) {
@@ -53,7 +53,7 @@ export function OnboardingScreen({ start }: { start?: 'question' }) {
     <div className="flex h-full flex-col px-5 pt-6">
       <Wordmark className="text-[22px]" />
       <h1 className="mt-6 text-[28px] font-bold leading-tight tracking-tight">What brings you to Remini?</h1>
-      <p className="mt-1.5 text-[14px] text-mute">{mode === 'studio' ? 'We’ll suggest your first creation around it.' : 'We will tailor your experience.'}</p>
+      <p className="mt-1.5 text-[14px] text-mute">{mode === 'studio' ? 'We’ll suggest where to start.' : 'We will tailor your experience.'}</p>
       <div data-demo="segments" className="relative mt-5 space-y-2">
         <LeverTag l="t" className="-right-1 -top-2" />
         {SEGMENTS.map((s, i) => (
@@ -63,7 +63,7 @@ export function OnboardingScreen({ start }: { start?: 'question' }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            onClick={() => (mode === 'studio' && !OPEN.includes(s.id) ? showToast(s.id === 'exploring' ? 'Sharing comes right after your first creation' : 'In this prototype: Profile or work photos, or Restore old photos') : answerSegment(s.id))}
+            onClick={() => (mode === 'studio' && !OPEN.includes(s.id) ? showToast('In this prototype: Look great, Restore, or Profile photos') : answerSegment(s.id))}
             className={`flex h-[54px] w-full items-center gap-3 rounded-2xl bg-card px-4 text-left text-[15px] font-semibold active:bg-card2 ${mode === 'studio' && !OPEN.includes(s.id) ? 'opacity-45' : ''}`}
           >
             <span className="text-[20px]">{s.emoji}</span> {s.label}

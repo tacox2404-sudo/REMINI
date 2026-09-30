@@ -7,21 +7,26 @@ export type Intent = 'profile' | 'trip' | 'family' | 'social' | 'looks' | 'other
 
 export type Segment = 'restore' | 'lookgreat' | 'profile' | 'social' | 'trends' | 'exploring';
 
-export interface IdentityVariant {
-  name: string;
-  cover: string;
-  /** Which creation or use this version of you is for. */
-  usedFor: string;
+/** One step in how a profile grew: every addition is chosen by its owner. */
+export interface ProfileUpdate {
+  when: string;
+  text: string;
 }
 
-/** A profile locked in once from selfies, adapted per creation through variants. */
+/**
+ * A saved face profile. Remini already builds these for AI Photos; in Studio it
+ * is kept, updated over time and used across projects. Friends' profiles only
+ * exist when the friend adds their own face.
+ */
 export interface Identity {
   id: string;
   name: string;
   subtitle: string;
   cover: string;
   refs: string[];
-  variants: IdentityVariant[];
+  history: ProfileUpdate[];
+  /** Whose face it is: 'me' or a friend's name. Only they can add or remove it. */
+  owner: string;
 }
 
 export interface Look {
@@ -45,14 +50,12 @@ export interface ChatMsg {
   from: string;
   text: string;
   images?: string[];
-  /** A short video made from several photos (rendered as an animated slideshow). */
-  video?: string[];
-  /** A poster made from one photo and a title. */
-  poster?: { src: string; title: string };
-  action?: 'paywall' | 'animate' | 'enhanced' | 'restyled';
+  action?: 'enhanced' | 'restored';
+  /** Results stay in the chat until you choose to keep them. */
+  kept?: boolean;
 }
 
-/** A "creation": ongoing work in My Creations. Persistence is automatic. */
+/** A project: a job that keeps going in Studio (a trip, a family archive, a set of looks). */
 export interface Creation {
   id: string;
   title: string;
@@ -65,11 +68,13 @@ export interface Creation {
   goal: number;
   lastEdit: string;
   chat?: ChatMsg[];
-  /** Albums made together: every member's photos share one style and change together. */
-  shared?: { members: string[]; style: string; feed: { who: string; text: string; when: string }[] };
-  /** One look applied across the whole creation. */
+  /** Projects made together: members add their own photos and make their own things, in any style. */
+  shared?: { members: string[]; invited: string[]; feed: { who: string; text: string; when: string }[] };
+  /** Style a set of looks is made in (look-based projects only). */
   style?: string;
-  /** A chat thread with Remini that isn't a creation itself (its results go to style creations). */
+  /** Where the photos are from, shown under the title. */
+  place?: string;
+  /** The personal Remini chat: one per user, not a project. */
   chatOnly?: boolean;
 }
 
@@ -79,11 +84,10 @@ export interface CommunityStyle {
   creator: string;
   /** The creator's own result. */
   cover: string;
-  /** What it looks like on you (remix result). */
+  /** What it looks like with your face. */
   result: string;
-  remixes: number;
-  mine?: boolean;
-  friend?: boolean;
+  /** The project it was shared into. */
+  projectId: string;
 }
 
 export interface Trend {
@@ -101,29 +105,30 @@ export type ResultKind = 'trend' | 'enhance' | 'look' | 'remix' | 'set' | 'toget
 export type Route =
   | { name: 'onboarding'; step?: 'question' }
   | { name: 'today'; screen: 'photos' | 'filters' | 'videos' | 'chat' | 'profile' }
-  | { name: 'first'; step: 'intro' | 'confirm'; path?: 'profile' | 'restore' }
+  | { name: 'first'; step: 'intro' | 'confirm'; path?: 'profile' | 'restore' | 'enhance' }
   | { name: 'studio' }
   | { name: 'trend'; trendId: string }
-  | { name: 'result'; kind: ResultKind; image: string; title: string; trendId?: string; styleId?: string; before?: string; images?: string[] }
+  | { name: 'result'; kind: ResultKind; image: string; title: string; trendId?: string; styleId?: string; before?: string; images?: string[]; projectId?: string }
   | { name: 'picker'; title: string; min?: number; max: number; preselect?: number; pool?: string[]; cta: string; onDone: (picked: string[]) => void }
   | { name: 'identity'; id: string }
   | { name: 'create' }
   | { name: 'creation'; id: string }
   | { name: 'photo'; creationId: string; photoId: string }
   | { name: 'chat'; creationId: string }
+  | { name: 'chats' }
   | { name: 'lock' }
   | { name: 'about' }
   | { name: 'animate'; src: string; creationId: string }
   | { name: 'grid'; title: string; items: { src: string; title?: string }[] };
 
 export type Sheet =
-  | { type: 'keepThis'; photo: string; title: string }
+  | { type: 'keepThis'; photo: string; title: string; before?: string }
   | { type: 'paywall'; creationId: string; stage: 'offer' | 'success' }
+  | { type: 'together' }
+  | { type: 'cancelled' }
   | { type: 'paywallGeneric'; image?: string; reason: 'onboarding' | 'result' }
-  | { type: 'withFriend'; title: string; image: string; link: string; challenge?: boolean; via?: string }
-  | { type: 'publish'; image: string; from: string }
+  | { type: 'withFriend'; title: string; image: string; link: string; via?: string; projectId?: string }
   | { type: 'privacy' }
-  | { type: 'rememberMe' }
   | { type: 'profileToday' };
 
 export interface Generating {

@@ -8,7 +8,7 @@ import { BEATS } from './state/demo';
 import { useStore } from './state/store';
 import type { Route } from './state/types';
 import { AboutScreen, AnimateScreen, GridScreen, PickerScreen, ResultScreen, Splash, TrendScreen } from './screens/Flows';
-import { ChatScreen } from './screens/Chat';
+import { ChatScreen, ChatsScreen } from './screens/Chat';
 import { CreateScreen, IdentityScreen } from './screens/Identity';
 import { OnboardingScreen } from './screens/Onboarding';
 import { CreationScreen, PhotoScreen } from './screens/Creation';
@@ -43,6 +43,8 @@ function renderRoute(r: Route) {
       return <PhotoScreen creationId={r.creationId} photoId={r.photoId} />;
     case 'chat':
       return <ChatScreen creationId={r.creationId} />;
+    case 'chats':
+      return <ChatsScreen />;
     case 'lock':
       return <LockScreen />;
     case 'about':

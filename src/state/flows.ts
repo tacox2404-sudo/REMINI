@@ -1,42 +1,42 @@
 import { useCallback } from 'react';
-import { A, CAMERA_ROLL, TRENDS } from './data';
+import { A, GALLERY, TRENDS } from './data';
 import { useStore } from './store';
-import type { ResultKind } from './types';
+
+/** What a picked gallery photo looks like once enhanced (before/after pair). */
+export function enhancedPair(src: string) {
+  if (src === A.enhance2Before) return { image: A.enhance2After, before: A.enhance2Before };
+  if (src === A.enhanceBefore) return { image: A.enhanceSrc, before: A.enhanceBefore };
+  if (src.includes('archive_old')) return { image: src.replace('archive_old', 'archive_restored'), before: src };
+  return { image: src, before: undefined };
+}
 
 /** Multi-step user flows shared by several screens. */
 export function useFlows() {
   const s = useStore();
-  const { push, pop, replaceTop, runGenerating, track, mode } = s;
+  const { push, pop, replaceTop, runGenerating, track, spendFree } = s;
 
-  const enhancePhoto = useCallback(() => {
-    push({
-      name: 'picker',
-      title: 'Choose a photo to enhance',
-      max: 1,
-      cta: 'Enhance',
-      onDone: (picked) => {
-        const src = picked[0] ?? A.enhanceBefore;
-        const pair = src === A.enhance2Before ? { image: A.enhance2After, before: A.enhance2Before } : { image: A.enhanceSrc, before: A.enhanceBefore };
-        runGenerating({ steps: ['Uploading', 'Enhancing details', 'Restoring faces'], duration: 1800, preview: pair.before }, () => {
-          track('enhance_completed');
-          replaceTop({ name: 'result', kind: 'enhance', title: 'Enhanced', ...pair });
-        });
-      },
-    });
-  }, [push, replaceTop, runGenerating, track]);
-
-  /** With Studio: the saved "Me" is used automatically, no selfie upload. */
-  const tryTrendMine = useCallback(
-    (trendId: string, replace = false) => {
-      const t = TRENDS.find((x) => x.id === trendId) ?? TRENDS[0];
-      runGenerating({ steps: ['Using your saved Me', 'No new selfies needed', `Styling ${t.title}`], duration: 2000, preview: t.result }, () => {
-        track('trend_tried_with_saved_me', 'w');
-        const r = { name: 'result' as const, kind: 'trend' as const, image: t.result, title: t.title, trendId: t.id };
-        if (replace) replaceTop(r);
-        else push(r);
+  /** Quick enhance, exactly as Remini does it: pick, enhance, result. */
+  const quickEnhance = useCallback(
+    (title = 'Enhance') => {
+      push({
+        name: 'picker',
+        title,
+        max: 1,
+        preselect: 1,
+        pool: GALLERY,
+        cta: title === 'Retouch' ? 'Retouch' : 'Enhance',
+        onDone: (picked) => {
+          const src = picked[0] ?? GALLERY[0];
+          const pair = enhancedPair(src);
+          runGenerating({ steps: ['Uploading', src.includes('archive_old') ? 'Restoring faces' : 'Enhancing details'], duration: 1600, preview: src }, () => {
+            spendFree();
+            track('enhance_completed');
+            replaceTop({ name: 'result', kind: 'enhance', title: 'Enhanced', ...pair });
+          });
+        },
       });
     },
-    [push, replaceTop, runGenerating, track],
+    [push, replaceTop, runGenerating, spendFree, track],
   );
 
   /** Today: upload 8–12 selfies every time and wait for a model. */
@@ -61,35 +61,19 @@ export function useFlows() {
     [push, replaceTop, runGenerating, track],
   );
 
-  const openTrend = useCallback(
-    (trendId: string, direct = false) => {
-      if (direct && mode === 'studio') return tryTrendMine(trendId);
-      push({ name: 'trend', trendId });
+  /** With Studio: the trend runs on your saved Me, no new selfies. */
+  const tryTrendMine = useCallback(
+    (trendId: string) => {
+      const t = TRENDS.find((x) => x.id === trendId) ?? TRENDS[0];
+      s.withMe(() =>
+        runGenerating({ steps: ['With your profile, Me', 'No new selfies needed', `Styling ${t.title}`], duration: 2000, preview: t.result }, () => {
+          track('trend_on_saved_profile', 'w');
+          push({ name: 'result', kind: 'trend', image: t.result, title: t.title, trendId: t.id });
+        }),
+      );
     },
-    [mode, push, tryTrendMine],
+    [push, runGenerating, s, track],
   );
 
-  /** Generic single-photo tool (filters, retouch, videos). */
-  const quickTool = useCallback(
-    (title: string, kind: ResultKind, image: string, video = false) => {
-      push({
-        name: 'picker',
-        title: `${title}: choose a photo`,
-        max: 1,
-        pool: CAMERA_ROLL,
-        cta: 'Continue',
-        onDone: (picked) => {
-          const src = picked[0] ?? image;
-          runGenerating({ steps: ['Uploading', `Applying ${title}`, 'Almost there'], duration: 1800, preview: src }, () => {
-            track(video ? 'video_generated' : 'tool_used');
-            if (video) replaceTop({ name: 'animate', src, creationId: '' });
-            else replaceTop({ name: 'result', kind, image: kind === 'look' ? image : src, title });
-          });
-        },
-      });
-    },
-    [push, replaceTop, runGenerating, track],
-  );
-
-  return { enhancePhoto, tryTrendMine, tryTrendToday, openTrend, quickTool, pop };
+  return { quickEnhance, tryTrendToday, tryTrendMine, pop };
 }

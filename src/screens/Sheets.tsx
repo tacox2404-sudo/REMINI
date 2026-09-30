@@ -1,20 +1,19 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
-import { A, progressOf } from '../state/data';
+import { A, FRIEND, OTHERS, TRIPS, progressOf } from '../state/data';
 import { FREE_LIMIT, useStore } from '../state/store';
 import type { Sheet } from '../state/types';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
 import { SheetFrame } from '../components/Overlays';
-import { LeverTag, PillBrand, PillWhite, ProgressBar } from '../components/ui';
-import { fmtRemixes } from './Studio';
+import { Avatar, LeverTag, PillBrand, PillWhite, ProgressBar } from '../components/ui';
 
 export function SheetHost() {
   const { sheet, closeSheet } = useStore();
   return (
     <AnimatePresence>
       {sheet && (
-        <SheetFrame key={`${sheet.type}-${sheet.type === 'withFriend' ? sheet.via ?? '' : ''}`} onClose={closeSheet} tall={sheet.type === 'paywall' || sheet.type === 'paywallGeneric'}>
+        <SheetFrame key={`${sheet.type}-${sheet.type === 'withFriend' ? sheet.via ?? '' : ''}`} onClose={closeSheet} tall={sheet.type === 'paywall' || sheet.type === 'paywallGeneric' || sheet.type === 'together'}>
           <SheetBody sheet={sheet} />
         </SheetFrame>
       )}
@@ -30,14 +29,14 @@ function SheetBody({ sheet }: { sheet: Sheet }) {
       return <PaywallUnfinished creationId={sheet.creationId} stage={sheet.stage} />;
     case 'paywallGeneric':
       return <PaywallGeneric image={sheet.image} reason={sheet.reason} />;
+    case 'together':
+      return <TogetherShowcase />;
+    case 'cancelled':
+      return <Cancelled />;
     case 'withFriend':
-      return <WithFriend title={sheet.title} image={sheet.image} link={sheet.link} challenge={sheet.challenge} via={sheet.via} />;
-    case 'publish':
-      return <Publish image={sheet.image} from={sheet.from} />;
+      return <WithFriend title={sheet.title} image={sheet.image} via={sheet.via} projectId={sheet.projectId} />;
     case 'privacy':
       return <Privacy />;
-    case 'rememberMe':
-      return <RememberMe />;
     case 'profileToday':
       return <ProfileToday />;
   }
@@ -57,55 +56,122 @@ function PlanBlock({ trial, setTrial }: { trial: boolean; setTrial: (v: boolean)
           <span className="text-[16px] font-bold">{trial ? '7-day free trial' : 'Weekly'}</span>
           {trial && <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold">FREE</span>}
         </div>
-        <div className="mt-0.5 text-[13px] text-mute">{trial ? 'Then billed weekly' : 'Billed weekly'}</div>
+        <div className="mt-0.5 text-[13px] text-mute">{trial ? 'Then billed weekly · cancel anytime, your projects stay' : 'Billed weekly'}</div>
       </div>
     </>
   );
 }
 
+/** "Keep this in a project?": people choose what to keep and where. */
 function KeepThis({ photo, title }: { photo: string; title: string }) {
-  const { creations, closeSheet, push, keepLook, showToast, resetStack, goTab } = useStore();
+  const { creations, closeSheet, push, keepLook, startTrip, showToast, resetStack, track } = useStore();
+  const projects = creations.filter((c) => !c.chatOnly);
+  const hasTrip = projects.some((c) => c.id === 'trip');
+  const fromTrip = photo.includes('enhance2') || photo.includes('trip_') || photo.includes('me_ref_4');
+  const open = (id: string) => {
+    closeSheet();
+    resetStack([{ name: 'studio' }, { name: 'creation', id }]);
+  };
   return (
     <div className="px-5 pt-2">
       <div className="flex items-center gap-3">
         <Img src={photo} className="h-14 w-14 rounded-xl" label={false} />
         <div>
-          <h3 className="text-[20px] font-bold leading-tight">Keep this</h3>
-          <p className="text-[13px] text-mute">It goes into one of your creations. Nothing to organise.</p>
+          <h3 className="text-[20px] font-bold leading-tight">Keep this in a project?</h3>
+          <p className="text-[13px] text-mute">A project keeps going: all the photos, with progress.</p>
         </div>
       </div>
-      <div className="mt-4 space-y-1.5">
-        {creations.slice(0, 4).map((c) => (
-          <button
-            key={c.id}
-            onClick={() => {
-              closeSheet();
-              keepLook(photo, title, c.id);
-              showToast(`Kept in ${c.title}`);
-              goTab('studio');
-              resetStack([{ name: 'creation', id: c.id }]);
-            }}
-            className="flex w-full items-center gap-3 rounded-2xl bg-white/[0.05] p-2.5 text-left active:bg-white/10"
-          >
-            <Img src={c.cover} className="h-11 w-11 rounded-xl" label={false} />
-            <span className="flex-1">
-              <span className="block text-[15px] font-semibold">{c.title}</span>
-              <span className="block text-[12px] text-mute">{progressOf(c).label}</span>
-            </span>
-          </button>
-        ))}
-      </div>
+
+      {fromTrip && !hasTrip && (
+        <button
+          data-demo="keep-new-trip"
+          onClick={() => {
+            const id = startTrip();
+            showToast('Philippines trip started');
+            open(id);
+          }}
+          className="relative mt-4 block w-full rounded-2xl bg-white p-3.5 text-left text-black"
+        >
+          <LeverTag l="t" />
+          <div className="text-[12px] font-bold uppercase tracking-wider text-[#FF2E7E]">Suggested · new project</div>
+          <div className="mt-0.5 text-[18px] font-bold leading-tight">Philippines trip</div>
+          <div className="text-[13px] text-black/60">16 more photos from 12–18 Sep in your gallery</div>
+          <div className="mt-2.5 flex gap-1">
+            {TRIPS.map((s) => (
+              <Img key={s} src={s} degrade className="h-11 flex-1 rounded-lg" label={false} />
+            ))}
+          </div>
+        </button>
+      )}
+
+      {projects.length > 0 && (
+        <div className="mt-4 space-y-1.5">
+          <div className="text-[12px] font-semibold uppercase tracking-wider text-mute">Your projects</div>
+          {projects.slice(0, 4).map((c) => (
+            <button
+              key={c.id}
+              onClick={() => {
+                if (c.intent === 'trip' || c.intent === 'family') showToast(`Already in ${c.title}`);
+                else {
+                  keepLook(photo, title, c.id);
+                  showToast(`Kept in ${c.title}`);
+                }
+                open(c.id);
+              }}
+              className="flex w-full items-center gap-3 rounded-2xl bg-white/[0.05] p-2.5 text-left active:bg-white/10"
+            >
+              <Img src={c.cover} className="h-11 w-11 rounded-xl" label={false} />
+              <span className="flex-1">
+                <span className="block text-[15px] font-semibold">{c.title}</span>
+                <span className="block text-[12px] text-mute">{progressOf(c).label}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <button
         onClick={() => {
           closeSheet();
           push({ name: 'create' });
         }}
-        className="relative mt-3 flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left text-black"
+        className="mt-2 flex w-full items-center gap-3 rounded-2xl bg-white/[0.05] p-2.5 text-left"
       >
-        <span className="grid h-10 w-10 place-items-center rounded-xl bg-black text-white"><I.Plus /></span>
-        <span className="flex-1 text-[15px] font-bold">Something new: what are you creating?</span>
-        <LeverTag l="t" />
+        <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/10"><I.Plus /></span>
+        <span className="flex-1 text-[15px] font-semibold">Another new project</span>
       </button>
+      <button
+        onClick={() => {
+          closeSheet();
+          track('saved_to_gallery');
+          showToast('Saved to Gallery');
+        }}
+        className="mt-1 h-11 w-full text-[13px] font-semibold text-white/50"
+      >
+        No thanks, just save it
+      </button>
+    </div>
+  );
+}
+
+/** What Together adds, shown to free users as the reason to try Pro. */
+function TogetherRow() {
+  return (
+    <div data-demo="together-showcase" className="relative mt-4 rounded-2xl bg-white/[0.05] p-3.5">
+      <LeverTag l="t" />
+      <div className="flex items-center gap-2">
+        <div className="flex -space-x-2">
+          {[FRIEND, ...OTHERS].map((m) => (
+            <Avatar key={m} name={m} size={26} />
+          ))}
+        </div>
+        <span className="text-[14px] font-bold">With Pro, make it together</span>
+      </div>
+      <ul className="mt-2 space-y-1 text-[12.5px] text-white/70">
+        <li>• Invite the friends who were there into the project</li>
+        <li>• Duo shoots, and friends’ styles with your own face</li>
+        <li>• One Remini chat for everyone in the project</li>
+      </ul>
     </div>
   );
 }
@@ -124,7 +190,7 @@ function PaywallUnfinished({ creationId, stage }: { creationId: string; stage: '
           <I.Check size={40} strokeWidth={2.6} />
         </motion.span>
         <h3 className="mt-5 text-[24px] font-bold">Your trial has started</h3>
-        <p className="mt-2 text-[14px] leading-relaxed text-mute">Finishing {c.title} now. We will remind you before the trial ends.</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-mute">Finishing {c.title} now. Together is on: invite the friends who were there.</p>
         <PillWhite demo="finish-now" className="mt-7" onClick={() => finishAfterTrial(creationId)}>Finish {c.title}</PillWhite>
       </div>
     );
@@ -133,8 +199,6 @@ function PaywallUnfinished({ creationId, stage }: { creationId: string; stage: '
   const rest = c.photos.filter((p) => p.status !== 'enhanced');
   return (
     <div data-demo="paywall-unfinished" className="relative px-5">
-      <LeverTag l="t" className="right-5 top-0" />
-      <LeverTag l="c" className="right-12 top-0" />
       <div className="text-center text-[12px] font-bold uppercase tracking-wider text-[#FFB020]">{done.length} of {pr.total} done free</div>
       <h3 className="mt-1.5 text-center text-[25px] font-bold leading-tight tracking-tight">Finish your {c.title} with Pro</h3>
       <ProgressBar value={done.length / pr.total} className="mt-4" />
@@ -150,13 +214,59 @@ function PaywallUnfinished({ creationId, stage }: { creationId: string; stage: '
           </div>
         ))}
       </div>
-      <p className="mt-2 text-center text-[12px] text-mute">{rest.length} photos waiting · unlimited enhancements and your Studio, 7 days free</p>
+      <p className="mt-2 text-center text-[12px] text-mute">{rest.length} photos waiting · your {done.length} stay yours either way</p>
+      <TogetherRow />
       <PlanBlock trial={trial} setTrial={setTrial} />
       <PillBrand demo="start-trial" className="mt-4" onClick={() => startTrial(creationId)}>
         {trial ? 'Start free trial' : 'Continue'}
         <LeverTag l="t" />
       </PillBrand>
       <button onClick={closeSheet} className="mt-1 h-10 w-full text-[13px] font-semibold text-white/50">Keep my {done.length} for now</button>
+    </div>
+  );
+}
+
+function TogetherShowcase() {
+  const { creations, startTrial, closeSheet, setFlags, showToast } = useStore();
+  const [trial, setTrial] = useState(true);
+  const trip = creations.find((c) => c.id === 'trip');
+  return (
+    <div className="px-5">
+      <div className="grid grid-cols-3 gap-1.5">
+        {[A.trip(1), A.trip(2), A.trip(5)].map((s) => (
+          <Img key={s} src={s} className="aspect-[3/4] rounded-xl" label={false} />
+        ))}
+      </div>
+      <h3 className="mt-4 text-center text-[24px] font-bold leading-tight tracking-tight">Make it together</h3>
+      <p className="mt-1 text-center text-[13.5px] text-white/65">Your projects, with the people in them.</p>
+      <TogetherRow />
+      <PlanBlock trial={trial} setTrial={setTrial} />
+      <PillBrand
+        className="mt-4"
+        onClick={() => {
+          if (trip) startTrial(trip.id);
+          else {
+            setFlags({ isPro: true });
+            closeSheet();
+            showToast('Trial started · Together is on');
+          }
+        }}
+      >
+        {trial ? 'Start free trial' : 'Continue'}
+        <LeverTag l="t" />
+      </PillBrand>
+      <button onClick={closeSheet} className="mt-1 h-10 w-full text-[13px] font-semibold text-white/50">Not now</button>
+    </div>
+  );
+}
+
+function Cancelled() {
+  const { closeSheet } = useStore();
+  return (
+    <div className="px-5 pt-1">
+      <h3 className="text-[20px] font-bold">Pro ended</h3>
+      <p className="mt-1 text-[14px] text-mute">Your projects stay: view and download everything. Restart Pro to keep going.</p>
+      <PillWhite className="mt-5" onClick={closeSheet}>OK</PillWhite>
     </div>
   );
 }
@@ -203,47 +313,57 @@ const APPS: { name: string; color: string; glyph: string }[] = [
 ];
 
 /**
- * Sharing reaches two kinds of people: friends outside Remini (a message with a
- * join link, through any messaging or social app) and friends already on Remini.
+ * Share (any photo, as today) or invite into a project. Invites go out through
+ * any app; friends without Remini get a link straight into the project.
  */
-function WithFriend({ title, image, challenge, via: initialVia }: { title: string; image: string; link: string; challenge?: boolean; via?: string }) {
-  const { closeSheet, track, showToast, friend, unlocked, shareWithFriend, resetStack } = useStore();
+function WithFriend({ title, image, via: initialVia, projectId }: { title: string; image: string; via?: string; projectId?: string }) {
+  const { closeSheet, track, showToast, creations, paolaJoined, inviteFriends, friendJoins, resetStack } = useStore();
   const [via, setVia] = useState<string | null>(initialVia ?? null);
-  const joinLink = 'remini.app/join/you-3f9';
+  const project = creations.find((c) => c.id === projectId);
+  const joinLink = `remini.app/join/${(project?.title ?? 'you').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
-  const sendOutside = () => {
+  const pickApp = (name: string) => {
+    if (project) return setVia(name);
     closeSheet();
-    track(`invite_sent_${(via ?? 'link').toLowerCase()}`, 'I');
-    if (!unlocked.friend) {
-      // The first invite: the friend installs Remini from the link and becomes a Remini friend.
-      shareWithFriend();
-      showToast(`${friend} joined Remini from your ${via} invite`);
-      window.setTimeout(() => resetStack([{ name: 'studio' }]), 1000);
-    } else showToast(`Sent via ${via}`);
+    track(`shared_via_${name.toLowerCase()}`);
+    showToast(`Shared via ${name}`);
   };
 
-  // Step 2: the message as it appears in the chosen app.
-  if (via)
+  const sendInvite = () => {
+    if (!project) return;
+    closeSheet();
+    inviteFriends(project.id, via ?? 'link');
+    showToast(`Invites sent to ${FRIEND}, Luca and Marco`);
+    if (!paolaJoined)
+      window.setTimeout(() => {
+        friendJoins();
+        showToast(`${FRIEND} joined ${project.title} from your link`);
+        resetStack([{ name: 'studio' }, { name: 'creation', id: project.id }]);
+      }, 1600);
+  };
+
+  // Step 2: the invite as it appears in the chosen app.
+  if (via && project)
     return (
       <div className="px-5 pt-1">
         <button onClick={() => setVia(null)} className="text-[13px] font-semibold text-white/60">‹ Back</button>
         <h3 className="mt-1 text-[20px] font-bold">Invite via {via}</h3>
-        <p className="mt-1 text-[13px] text-mute">{friend} isn’t on Remini yet. She gets your photo and a link; joining takes one tap.</p>
+        <p className="mt-1 text-[13px] text-mute">Friends without Remini get a link that opens {project.title} with everyone’s photos in it.</p>
         <div data-demo="invite-preview" className="mt-4 rounded-[22px] bg-[#0b141a] p-3">
-          <div className="text-center text-[11px] text-white/40">{via} · {friend}</div>
+          <div className="text-center text-[11px] text-white/40">{via} · Philippines crew 🌴</div>
           <div className="ml-auto mt-2 w-[240px] overflow-hidden rounded-[14px] bg-[#005c4b]">
             <Img src={image} className="h-[150px] w-full" label={false} />
             <div className="p-2.5">
-              <div className="text-[13px] font-semibold leading-snug">{challenge ? `I did “${title}”. Your turn 👀` : `My new ${title}, made with Remini`}</div>
+              <div className="text-[13px] font-semibold leading-snug">All our trip photos are here, enhanced. Add yours!</div>
               <div className="mt-1 rounded-lg bg-black/20 p-2 text-[11.5px]">
-                <div className="font-semibold">Join me on Remini</div>
+                <div className="font-semibold">Join {project.title} on Remini</div>
                 <div className="text-white/60">{joinLink}</div>
               </div>
             </div>
           </div>
         </div>
-        <PillBrand demo="send-friend" className="mt-4" onClick={sendOutside}>
-          Send to {friend}
+        <PillBrand demo="send-invite" className="mt-4" onClick={sendInvite}>
+          Send to the group
           <LeverTag l="I" />
         </PillBrand>
       </div>
@@ -251,81 +371,36 @@ function WithFriend({ title, image, challenge, via: initialVia }: { title: strin
 
   return (
     <div className="px-5 pt-1">
-      <h3 className="text-[20px] font-bold">{challenge ? 'Challenge a friend' : 'Share'}</h3>
-
+      <h3 className="text-[20px] font-bold">{project ? `Invite to ${project.title}` : 'Share'}</h3>
       <div data-demo="share-apps" className="relative mt-3">
-        <LeverTag l="I" />
-        <div className="text-[12px] font-semibold uppercase tracking-wider text-mute">Send outside Remini</div>
+        {project && <LeverTag l="I" />}
+        <div className="text-[12px] font-semibold uppercase tracking-wider text-mute">{project ? 'Send the invite through' : `Share “${title}” to`}</div>
         <div className="mt-2.5 flex justify-between">
           {APPS.map((a) => (
-            <button key={a.name} data-demo={`app-${a.name.toLowerCase()}`} onClick={() => setVia(a.name)} className="flex flex-col items-center gap-1.5 text-[11px] text-white/75">
+            <button key={a.name} data-demo={`app-${a.name.toLowerCase()}`} onClick={() => pickApp(a.name)} className="flex flex-col items-center gap-1.5 text-[11px] text-white/75">
               <span className="grid h-[52px] w-[52px] place-items-center rounded-2xl text-[18px] font-extrabold text-white" style={{ background: a.color }}>
                 {a.glyph}
               </span>
               {a.name}
             </button>
           ))}
-          <button onClick={() => { track('invite_link_copied', 'I'); showToast('Link copied'); }} className="flex flex-col items-center gap-1.5 text-[11px] text-white/75">
+          <button onClick={() => { track('link_copied'); showToast('Link copied'); }} className="flex flex-col items-center gap-1.5 text-[11px] text-white/75">
             <span className="grid h-[52px] w-[52px] place-items-center rounded-2xl bg-white/10"><I.Link size={22} /></span>
             Copy link
           </button>
         </div>
-        <p className="mt-2.5 text-[12px] leading-snug text-mute">Friends without Remini get the photo and a link to join. Once they join, they’re your Remini friends and you can create together.</p>
+        {project && <p className="mt-2.5 text-[12px] leading-snug text-mute">Each friend adds their own photos and, if they want, their own face. Only they can add it, and they can remove it anytime.</p>}
       </div>
-
-      <div className="mt-5 text-[12px] font-semibold uppercase tracking-wider text-mute">Friends on Remini</div>
-      {unlocked.friend ? (
-        <button
-          onClick={() => {
-            closeSheet();
-            track('shared_in_remini', 'I');
-            showToast(`Sent to ${friend} in Remini`);
-          }}
-          className="mt-2 flex w-full items-center gap-3 rounded-2xl bg-white/[0.05] p-2.5 text-left"
-        >
-          <Img src={A.friend} className="h-10 w-10 rounded-full" label={false} />
-          <span className="flex-1">
-            <span className="block text-[15px] font-semibold">{friend}</span>
-            <span className="block text-[12px] text-mute">On Remini · joined from your invite</span>
-          </span>
-          <span className="rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-black">Send</span>
-        </button>
-      ) : (
-        <div className="mt-2 rounded-2xl border border-dashed border-white/15 p-3 text-[12.5px] text-mute">No friends on Remini yet. Invite someone from another app above.</div>
+      {project && paolaJoined && (
+        <>
+          <div className="mt-5 text-[12px] font-semibold uppercase tracking-wider text-mute">Already in</div>
+          <div className="mt-2 flex items-center gap-3 rounded-2xl bg-white/[0.05] p-2.5">
+            <Img src={A.friend} className="h-10 w-10 rounded-full" label={false} />
+            <span className="flex-1 text-[15px] font-semibold">{FRIEND}</span>
+            <span className="text-[12px] text-mute">joined from your link</span>
+          </div>
+        </>
       )}
-    </div>
-  );
-}
-
-function Publish({ image, from }: { image: string; from: string }) {
-  const { publishStyle, closeSheet, goTab, resetStack, showToast } = useStore();
-  const [name, setName] = useState('80s film, my way');
-  return (
-    <div className="px-5 pt-1">
-      <h3 className="text-[20px] font-bold">Publish as a style</h3>
-      <p className="mt-1 text-[13px] text-mute">Name your recipe. Anyone can try it on their own saved identity, like a filter.{from ? ` Credits ${from} as the original.` : ''}</p>
-      <div className="mt-4 flex gap-3">
-        <Img src={image} className="h-[120px] w-[90px] shrink-0 rounded-xl" label={false} />
-        <div className="flex-1">
-          <label className="text-[12px] font-semibold text-mute">Style name</label>
-          <input data-demo="style-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1.5 h-11 w-full rounded-xl bg-card2 px-3 text-[15px] font-semibold outline-none ring-1 ring-white/10 focus:ring-white/40" />
-          <div className="mt-2 text-[12px] text-mute">by You · {fmtRemixes(0)}</div>
-        </div>
-      </div>
-      <PillBrand
-        demo="publish-confirm"
-        className="mt-5"
-        onClick={() => {
-          publishStyle(name.trim(), image);
-          closeSheet();
-          showToast('Published to Styles from the community');
-          goTab('studio');
-          resetStack([{ name: 'studio' }]);
-        }}
-      >
-        Publish
-        <LeverTag l="I" />
-      </PillBrand>
     </div>
   );
 }
@@ -335,48 +410,14 @@ function Privacy() {
   return (
     <div className="px-5 pt-1">
       <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#2ED47A]/15 text-[#2ED47A]"><I.Shield /></span>
-      <h3 className="mt-3 text-[20px] font-bold">Your face data is private</h3>
+      <h3 className="mt-3 text-[20px] font-bold">Your face, your call</h3>
       <ul className="mt-3 space-y-2.5 text-[14px] leading-snug text-white/80">
-        <li>• Your saved Me is only used when you tap to create, try or remix.</li>
-        <li>• Friends and the community see results, never your face data.</li>
-        <li>• Remixes always use your own saved identity, never someone else's.</li>
-        <li>• Delete it anytime, instantly.</li>
+        <li>• Only you can add your face. Photos of you from projects are offered, never added on their own.</li>
+        <li>• Friends see what you make together, never your face data.</li>
+        <li>• You’re told when a friend uses your profile in a project, and you can remove it anytime.</li>
+        <li>• Studio is private: projects are seen only by the people in them.</li>
       </ul>
       <PillWhite className="mt-6" onClick={closeSheet}>Got it</PillWhite>
-    </div>
-  );
-}
-
-function RememberMe() {
-  const { closeSheet, push, pop, runGenerating, rememberMe, showToast } = useStore();
-  return (
-    <div className="px-5 pt-1">
-      <h3 className="text-[20px] font-bold">Remember me</h3>
-      <p className="mt-1 text-[14px] text-mute">Save another version of you (new haircut, work look) so every tool can use it without new selfies.</p>
-      <PillWhite
-        className="mt-5"
-        onClick={() => {
-          closeSheet();
-          push({
-            name: 'picker',
-            title: 'Pick 4 photos of you',
-            min: 4,
-            max: 4,
-            preselect: 4,
-            pool: [A.ref(3), A.ref(2), A.ref(1), A.ref(4), A.enhance2Before],
-            cta: 'Remember me',
-            onDone: (picked) => {
-              pop();
-              runGenerating({ steps: ['Checking faces', 'Learning your features', 'Remembering you'], duration: 1900, preview: picked[0] }, () => {
-                rememberMe('Me · Summer', picked);
-                showToast('Remembered');
-              });
-            },
-          });
-        }}
-      >
-        Pick 4 photos
-      </PillWhite>
     </div>
   );
 }
@@ -388,13 +429,9 @@ function ProfileToday() {
       <h3 className="text-[20px] font-bold">Account</h3>
       <div className="mt-3 space-y-2 rounded-2xl bg-white/[0.05] p-4 text-[14px]">
         <div className="flex justify-between"><span className="text-mute">Plan</span><span className="font-semibold">Free</span></div>
-        <div className="flex justify-between"><span className="text-mute">History</span><span className="font-semibold">Not kept</span></div>
-        <div className="flex justify-between"><span className="text-mute">Your face model</span><span className="font-semibold">Used once</span></div>
+        <div className="flex justify-between"><span className="text-mute">Free enhancements</span><span className="font-semibold">{FREE_LIMIT}</span></div>
       </div>
-      <p className="mt-3 text-[13px] text-mute">Results go to your camera roll. There is nothing here to come back to.</p>
       <PillWhite className="mt-5" onClick={closeSheet}>Close</PillWhite>
     </div>
   );
 }
-
-export const FREE = FREE_LIMIT;

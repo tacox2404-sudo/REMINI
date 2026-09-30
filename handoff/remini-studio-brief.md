@@ -1,73 +1,80 @@
 # Remini Studio: prototype brief
 
-This brief explains a clickable concept prototype so you can review it without running it. The file `remini-studio-screens.pdf` has one page per demo step, with the phone screen, the step title and the caption shown in the demo. Read the two together.
+This brief explains a clickable concept prototype, so you can review it without running it. The file `remini-studio-screens.pdf` has one page per demo beat, with the phone screen, the step, the title and the caption shown in the demo. Read the two together.
 
-The prototype was built for a product manager interview with Remini (Bending Spoons). It is a concept, not the real app: no backend, no real AI, and every image is a pre-made file.
+The prototype was built for a product manager interview with Remini (Bending Spoons). It is a concept, not the real app: no backend, no real AI, and every image is a pre-made file. It follows a strategy document that is the source of truth for the concept, and an impact model spreadsheet for the numbers.
 
-## The idea in one paragraph
+## The problem it answers
 
-Today, Remini is a set of one-off tools. You enhance a photo, try a trend, save or share it, and leave. Studio adds a place where your own work continues. It starts from normal Remini use. When you like a result you tap "Keep this", and it becomes a creation you can continue in the same style. Your AI profile (Remini already builds one from 4 selfies) becomes "Me": you confirm it once and lock it in, and it adapts per creation (a Work version for LinkedIn photos, an Everyday version later). Then you invite a friend from outside Remini, make things together, and build a group album where one preset applies to everyone's photos. The free usage runs out on work you care about, which is where the Pro trial is offered.
+Remini delivers great results for a single task, but little carries on after it. About 95% of installs never start a trial, and payers leave after about 4 weeks. Meanwhile single AI edits are becoming a commodity, viral waves fade and new users cost more. The growth path is giving people reasons to do more and come back, not more installs. The two main users need the same thing: fixers (most users, who enhance) have big jobs and stop at the free limit; creators have small jobs that need to grow.
 
-## What Studio holds
+## The idea
 
-Studio contains only the user's own work and work shared with friends. Trends, filters and effects stay on Remini's usual pages.
+Studio is a personal space inside Remini where people create, keep and grow their work, alone or with friends. In order of importance:
 
-- **Welcome back**: shown when you return, with what is waiting.
-- **Keep going**: creations in progress, for example "LinkedIn set 3 of 5".
-- **Remix**: your versions of each style (80s film, Y2K Yearbook). One style per creation; making more only adds the same style.
-- **Chats**: every conversation with Remini chat, ready to reopen.
-- **Together**: the friend who joined, their shared style, the photo made together, and the group album "Friends trip · Philippines".
-- **Me**: the locked profile and its versions.
+1. **Projects**: a job that keeps going (a trip, a family archive, a set of looks), with visible progress and Enhance all. After any result, the app asks whether to keep it in a project. People choose.
+2. **Profiles**: Me is the face profile Remini already makes for AI Photos, now kept and improving over time as you add photos of yourself. Friends' profiles exist only when they add their own face.
+3. **Together** (a trial feature): invite friends into a project through any app, duo shoots, a friend's shared style used with your own face. Everyone makes what they like, in any style.
+4. **Remini chat**: the bubble opens one personal chat plus one inside each project, shared with its members. It only offers what Remini already does.
 
-## The user journey (the demo order)
+Design rules: free limits stay as they are; people choose what to keep and share; only a person can add their own face and can remove it anytime; nothing is held back after cancelling; Studio is private, not a public feed.
 
-1. **Remini today** (3 beats): the current home, AI Photos with its 4-selfie profile, and Remini Chat.
-2. **Normal use first**: onboarding asks why you are here ("Profile or work photos" or "Restore old photos"). The profile path suggests a LinkedIn headshot, asks "Is this you?", locks the profile in, and shows the result with Save, Share and the new "Keep this".
-3. **Kept in Studio**: the set appears under Keep going; Me shows the locked profile and its Work version.
-4. **On your own**: AI Filters runs "80s Vibes" directly on your profile; keeping it creates an "80s film" creation. Remini chat offers presets (80s film, Y2K Yearbook, Studio headshot), and each result goes to that style's creation. Remix and Chats appear in Studio.
-5. **One friend**: Share opens WhatsApp, Messages, Instagram, TikTok or a link. Paola is not on Remini, so she gets the photo with "Join me on Remini" and a link. She joins, becomes your Remini friend, shares her 80s style back, you "Make your version", then "Make it together".
-6. **The group**: the "Friends trip · Philippines" album with Paola, Luca and Marco. In the album chat, a preset like Golden hour changes every member's photos at once.
-7. **Free usage ends**: "Finish your Friends trip with Pro" offers the trial on unfinished work (5 of 17 done).
-8. **Coming back**: a lock-screen notification about the LinkedIn set, then Welcome back in Studio.
-9. **Why it pays**: an interactive business model (below).
+## The demo (9 steps, 23 beats)
 
-## The levers and the business model
+1. **Remini today**: the home, AI Photos with its 4-selfie profile, and a quick enhance saved to the camera roll.
+2. **Start as usual**: onboarding asks "What brings you to Remini?". A quick enhance has Save and Share as always, plus a new Keep. "Keep this in a project?" suggests the Philippines trip, with 16 more photos from the same days.
+3. **What Studio is**: the trip project at 1 of 17, then the Studio home with Projects, Profiles and Together.
+4. **The free limit**: Enhance all uses the free enhancements, and the limit lands inside the trip ("5 of 17 done"). Pro finishes it, and Together is shown as a reason to try.
+5. **Trial week, together**: the trip finishes. You invite friends via WhatsApp and Paola joins with her photos and her own face. She shares her 80s style, which you use with your face (Me is saved from 4 selfies the first time). Then a duo shoot, and the shared project chat.
+6. **Chats and Me**: the bubble opens your chats. Me offers to add the photos of you from the trip.
+7. **Coming back**: lock-screen notifications (Paola added photos, Luca joined, new looks with your updated Me), Welcome back, and how Me has grown.
+8. **After cancelling**: every project stays viewable and downloadable.
+9. **Why it pays**: the impact model.
 
-Each design element carries a tag for the business lever it is meant to move. The tags and an event log appear when "Why it matters" is switched on.
+## What each moment is meant to trigger
 
-- **t**: trial starts
-- **c**: trial to paid conversion
-- **w**: paid weeks (retention)
-- **I**: installs (friends joining through invites)
+- **Trial start**: the free limit lands inside a project, and Together is showcased.
+- **Conversion**: during the trial week, friends join, share styles and create in the shared chat.
+- **Paid weeks**: unfinished projects, new looks on an improving profile, and friends' additions.
+- **Installs**: invited friends arrive into a project with work already waiting.
 
-The closing card has sliders for t, c and w. The levers multiply, so the NPV follows the combined uplift: (1 + t)(1 + c)(1 + w) − 1. The model is calibrated so that +5.6% on each lever (about 17.8% combined) gives a $5M NPV. The Low, Base and High cases give $2.6M, $5.9M and $11.2M. These figures come from the interview's business case with fictitious data, and the model is deliberately simplified.
+## The business case (from the impact model)
+
+- **The target**: $5M NPV over 2 years, about 10% of the ~$51M that subscriptions from new users bring in.
+- **Why no single lever**: the levers multiply, so 1% on any lever is worth the same ($700 a day). Pushing one lever without a real change in behaviour can pull the others down.
+- **Three scenarios**:
+  - Trial rush: trials +20%, conversion −5%, paid weeks flat. $4.7M.
+  - Balanced (base): trials +10%, conversion held, paid weeks +6%. $5.3M, 1.06x the target.
+  - Engaged: trials +7%, conversion +3%, paid weeks +10%. $6.3M.
+- **The bar**: +16.0% revenue per install. Balanced delivers +16.9%.
+- **Costs and upside**:
+  - Studio's real cost is margin: with more AI usage, the margin after AI cost falls from 89% to about 86%, worth −$1.5M.
+  - Returning free users starting a trial add about $0.8M.
+  - Invites add about 0.3% more installs.
+- **Assumptions**: 2 months to build, a test month on 10% of new installs, a rollout month at 50%, a 9% discount rate. The case data is fictitious.
 
 ## What is simulated
 
 - Every generation is a timed animation that shows a pre-made image.
-- "Paola joined", the friends' photos and the group activity are scripted.
-- The paywall and trial do not charge anything.
-- Notifications are a drawn lock screen, not real push.
-- The user's personal photos appear only after a generation; before that, the app shows generic Remini examples.
+- Paola joining, her photos and the friends' activity are scripted.
+- The paywall, the trial and cancelling do not charge or change anything real.
+- Notifications are a drawn lock screen.
 
 ## How to open it
 
-- **As a person**: open `remini-studio-standalone.html` in Chrome or Safari on a laptop. It works offline (about 8 MB, with the images embedded). Press "Start demo", then use → and ← to move through the steps and Esc to leave. The top toggle switches between Today and With Studio. "Why it matters" in the bottom-right corner shows the lever tags.
+- **As a person**: open `remini-studio-standalone.html` in Chrome or Safari on a laptop. It works offline (about 8 MB, images embedded). Press "Start demo", use → and ← to move and Esc to leave. The top toggle switches between Today and With Studio. "Why it matters" in the bottom-right corner shows the lever tags and the event log.
 - **As Claude in a chat**: the HTML file is mostly embedded image data, so reading it is not useful. Use this brief and the PDF.
-- **As Claude Code**: the source is in the GitHub repo `tacox2404-sudo/REMINI`, branch `claude/remini-studio-prototype-g6rena`. Run `npm install`, then `npm run dev` to try it, `npm run build` for the single-file build, `npm run standalone` for the offline HTML, and `npm run screenshots` to regenerate the demo screenshots with Playwright.
+- **As Claude Code**: the source is in the GitHub repo `tacox2404-sudo/REMINI`, branch `claude/remini-studio-prototype-g6rena`. Run `npm install`, then:
+  - `npm run dev` to try it;
+  - `npm run build` for the single-file build;
+  - `npm run standalone` for the offline HTML;
+  - `npm run screenshots` to regenerate the screenshots with Playwright.
 
 ## What feedback is useful
 
-- Is the step from "normal Remini use" to "Keep this" natural, or does Studio feel bolted on?
-- Is "Me" (lock in once, versions per creation) clear from the screens?
-- Is the invite from outside Remini (WhatsApp, then joining) believable as an install driver?
-- Does the paywall moment feel earned, or too early?
-- Is each lever tag plausible for the element it sits on?
+- Is the step from a quick enhance to "Keep this in a project?" natural, or does Studio feel bolted on?
+- Is it clear what Studio is by beat 8?
+- Does the free limit inside the project feel fair, and does Together read as a reason to try Pro?
+- Is Me, kept and improving, clearly different from the profile Remini has today?
+- Is the invite, from WhatsApp into the project, believable?
 - Which beats could be cut to keep the demo under about 5 minutes?
-
-## Rules the design follows
-
-- Nothing mixed or random: one style per creation, and more results stay in that style.
-- Remini chat works with presets and filters only. No videos or posters.
-- Captions describe what the user gets; they do not criticise the current app.
-- It is labelled as a concept prototype and uses no real Remini logo or copied assets.

@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { LEVER_META } from '../components/ui';
-import { BEATS, TOTAL_STEPS } from '../state/demo';
+import { BEATS, STEP_NAMES, TOTAL_STEPS } from '../state/demo';
+import { SCENARIOS, npv, type Levers } from '../state/npv';
 import { useStore } from '../state/store';
 import type { Lever } from '../state/types';
 
@@ -15,20 +16,20 @@ function LeverPill({ l }: { l: Lever }) {
 
 const LEVER_DETAIL: Record<Lever, { why: string; where: string }> = {
   t: {
-    why: 'The trial is offered on unfinished work the user already cares about ("Finish your Barcelona trip with Pro"), after they have seen free results, instead of a generic paywall before any use. Onboarding answers and "What are you creating?" tell us the job to be done.',
-    where: 'Onboarding question, What are you creating?, Enhance all, the unfinished-work paywall.',
+    why: 'The easiest lever to move: 95% of installs never try. Projects turn one edit into a job bigger than the free allowance, so the limit lands inside something people care about ("5 of 17 done"). Together is showcased to free users as a reason to try. Returning free users find their past work and the limit inside a project.',
+    where: 'Keep in a project, the project suggestion, Enhance all, the free limit in the project, the Together showcase.',
   },
   c: {
-    why: 'During the 7 days, value builds up in the Studio: a remembered identity, creations that are half done, results that are kept. Cancelling means walking away from work in progress, not from one image.',
-    where: '“Is this you?” lock-in, profile versions, Improve likeness, the unfinished-work paywall.',
+    why: 'During the 7-day trial Together unlocks: friends join the project, share styles, make duo shoots and use the shared chat. The project fills up with other people\'s work, which gives a reason to keep paying once the first job is done.',
+    where: 'Trial success, friends\' shared styles, duo shoots, the shared project chat, saving Me.',
   },
   w: {
-    why: 'Reasons to open the app every week: a creation waiting at "3 of 5", trends that run on your saved Me in seconds, community styles to remix, results that are kept automatically.',
-    where: 'Keep this, Keep going, Studio entry on the home, Make your version, album presets, Welcome back, notifications.',
+    why: 'The hardest lever: people need reasons to come back. Unfinished projects, new looks on a profile that keeps improving, and friends\' additions are those reasons. After cancelling, projects stay viewable and downloadable, a reason to come back later.',
+    where: 'Keep in the trip, Me updates, Welcome back, notifications, after cancelling.',
   },
   I: {
-    why: 'Every remix, challenge and published style is an invitation. A friend gets a link to make their own version with their own identity, and published styles travel like Instagram filters.',
-    where: 'Share with a friend, Make it together, Bring the whole group, the album.',
+    why: 'A cost-effective source of installs, not the goal: invited friends arrive into a project with their friends\' work already waiting and a reason to add their own face, so they should start trials more often than a typical install.',
+    where: 'Invite into a project, the WhatsApp link, friends joining.',
   },
 };
 
@@ -48,14 +49,14 @@ export function Controls({ compact = false }: { compact?: boolean }) {
       {!compact && (
         <div className="rounded-xl bg-white/[0.04] p-3.5 text-[12.5px] leading-relaxed text-white/60">
           <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-white/40">The idea</div>
-          <b className="text-white/85">Studio</b> adds what happens after a normal Remini creation: you can keep it, continue it, and make it with others.
+          <b className="text-white/85">Studio</b> is a personal space inside Remini where people create, keep and grow their work, alone or with friends.
           <ul className="mt-2 space-y-1">
-            <li><b className="text-white/85">Me</b>: the profile you already have, confirmed once and adapted to each creation</li>
-            <li><b className="text-white/85">Keep going</b>: kept results become creations that save themselves</li>
-            <li><b className="text-white/85">Together</b>: one friend first, then a group album with one style for all</li>
-            <li><b className="text-white/85">Remini chat</b>: presets and filters on your profile or the whole album</li>
+            <li><b className="text-white/85">Projects</b>: a job that keeps going, with progress and Enhance all</li>
+            <li><b className="text-white/85">Profiles</b>: Me, kept and improving over time, and friends who add their own face</li>
+            <li><b className="text-white/85">Together</b>: invite friends into a project, duo shoots, friends’ styles with your face</li>
+            <li><b className="text-white/85">Remini chat</b>: one for you, one inside each project, shared with its members</li>
           </ul>
-          <p className="mt-2">Trends, filters and effects stay on Remini’s usual pages.</p>
+          <p className="mt-2">Free limits stay as they are. People choose what to keep. Studio is private, not a feed.</p>
         </div>
       )}
       <div>
@@ -144,7 +145,7 @@ export function LeversPanel({ inline = false }: { inline?: boolean }) {
               <div>
                 <div className="text-[15px] font-bold">Why it matters</div>
                 <p className="mt-1 text-[12.5px] leading-relaxed text-white/60">
-                  The coloured tags on the screens mark the elements designed to stimulate four business levers. They are hypotheses to test with experiments, not measured results.
+                  The coloured tags mark what each part is meant to trigger. The subscription formula multiplies its terms, so 1% on any lever is worth the same ($700 a day); the choice is about room to grow and ease. They are hypotheses for the random test, not measured results.
                 </p>
               </div>
               <button onClick={() => setOpen(false)} className="text-[12px] font-semibold text-white/40 hover:text-white/80">
@@ -228,7 +229,7 @@ export function DemoCaption({ compact = false }: { compact?: boolean }) {
     <motion.div key={demo} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`rounded-2xl bg-white text-black shadow-2xl ${compact ? 'p-3' : 'p-4'}`}>
       <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-black/45">
         <span>
-          Step {b.step} of {TOTAL_STEPS}
+          Step {b.step} of {TOTAL_STEPS} · {STEP_NAMES[b.step - 1]}
         </span>
       </div>
       <div data-ctl={compact ? undefined : 'demo-title'} className={`mt-1 font-bold leading-tight ${compact ? 'text-[15px]' : 'text-[18px]'}`}>{b.title}</div>
@@ -282,117 +283,153 @@ function useDemoDriver() {
   }, [demo, setDemo]);
 }
 
-/** Target: $5M NPV when each lever grows about +5.6%. The levers multiply, so NPV follows the combined uplift. */
-const EQUAL_FOR_TARGET = 0.056;
-const COMBINED_FOR_TARGET = (1 + EQUAL_FOR_TARGET) ** 3 - 1; // ≈ 17.8%
-const NPV_PER_UPLIFT = 5 / COMBINED_FOR_TARGET; // $M of NPV per unit of combined uplift
-const equalFor = (npv: number) => ((1 + npv / NPV_PER_UPLIFT) ** (1 / 3) - 1) * 100;
-const PRESETS: { label: string; v: [number, number, number] }[] = [
-  { label: 'Target, split equally', v: [5.6, 5.6, 5.6] },
-  { label: 'Low case', v: Array(3).fill(+equalFor(2.6).toFixed(1)) as [number, number, number] },
-  { label: 'Base case', v: Array(3).fill(+equalFor(5.9).toFixed(1)) as [number, number, number] },
-  { label: 'High case', v: Array(3).fill(+equalFor(11.2).toFixed(1)) as [number, number, number] },
-  { label: 'Retention-led mix', v: [2, 2, 13] },
+const fmtM = (x: number) => `${x < 0 ? '−' : ''}$${Math.abs(x) < 1e5 ? `${Math.round(Math.abs(x) / 1e3)}k` : `${Math.abs(x / 1e6).toFixed(1)}M`}`;
+const pct = (x: number, d = 1) => `${x >= 0 ? '+' : '−'}${Math.abs(x * 100).toFixed(d)}%`;
+
+const SLIDERS: { k: 't' | 'c' | 'w' | 'inv'; l: Lever; name: string; min: number; max: number; step: number; unit: '%' | '#' }[] = [
+  { k: 't', l: 't', name: 'Trial start', min: -10, max: 30, step: 1, unit: '%' },
+  { k: 'c', l: 'c', name: 'Trial → paid', min: -10, max: 10, step: 1, unit: '%' },
+  { k: 'w', l: 'w', name: 'Paid weeks', min: -5, max: 20, step: 1, unit: '%' },
+  { k: 'inv', l: 'I', name: 'Invites → installs', min: 0, max: 12, step: 1, unit: '#' },
 ];
 
-/** Interactive business-case model: move each lever and see the NPV. */
+/** Interactive business case: the impact model's formulas, scenarios and ranges. */
 function ClosingCard() {
   const { closing, setClosing, setDemo } = useStore();
-  const [v, setV] = useState<[number, number, number]>([5.6, 5.6, 5.6]);
-  const levers: [Lever, string][] = [
-    ['t', 'Trial starts'],
-    ['c', 'Trial → paid'],
-    ['w', 'Paid weeks'],
+  const [scen, setScen] = useState('balanced');
+  const [v, setV] = useState<Levers>(SCENARIOS[1].v);
+  const r = npv(v);
+  const gap = r.total - r.target;
+  const base = SCENARIOS.find((s) => s.id === scen);
+  const custom = base && (['t', 'c', 'w', 'inv'] as const).some((k) => Math.abs(base.v[k] - v[k]) > 1e-9);
+  const parts: [string, number][] = [
+    ['Subscriptions from new installs', r.parts.newInstalls],
+    ['Returning users starting a trial', r.parts.returning],
+    ['Invited friends', r.parts.invites],
+    ['Ads', r.parts.ads],
+    ['Extra AI usage (lower margin)', r.parts.aiCost],
   ];
-  const combined = (1 + v[0] / 100) * (1 + v[1] / 100) * (1 + v[2] / 100) - 1;
-  const npv = combined * NPV_PER_UPLIFT;
-  const MAX = 14;
-  const pos = (x: number) => `${Math.max(0, Math.min(100, (x / MAX) * 100))}%`;
-  const gap = npv - 5;
+  const maxAbs = Math.max(...parts.map(([, x]) => Math.abs(x)));
+  const MAXN = 8e6;
+  const pos = (x: number) => `${Math.max(0, Math.min(100, (x / MAXN) * 100))}%`;
   return (
     <AnimatePresence>
       {closing && (
         <motion.div className="fixed inset-0 z-[300] grid place-items-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <motion.div data-ctl="closing-card" initial={{ y: 20, scale: 0.97 }} animate={{ y: 0, scale: 1 }} className="w-full max-w-[700px] rounded-[28px] border border-white/10 bg-[#111116] p-7 shadow-2xl">
+          <motion.div data-ctl="closing-card" initial={{ y: 20, scale: 0.97 }} animate={{ y: 0, scale: 1 }} className="my-4 w-full max-w-[760px] rounded-[28px] border border-white/10 bg-[#111116] p-5 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="text-[12px] font-bold uppercase tracking-[0.16em] text-[#FF6A8E]">Remini Studio · business case</div>
-                <h2 className="mt-1 text-[32px] font-extrabold tracking-tight">Why it pays</h2>
+                <div className="text-[12px] font-bold uppercase tracking-[0.16em] text-[#FF6A8E]">Remini Studio · impact model</div>
+                <h2 className="mt-1 text-[30px] font-extrabold tracking-tight">Why it pays</h2>
               </div>
               <button onClick={() => setClosing(false)} className="grid h-9 w-9 place-items-center rounded-full bg-white/10" aria-label="Close">✕</button>
             </div>
-            <p className="mt-2 text-[14px] leading-relaxed text-white/70">
-              Reaching <b className="text-white">$5M NPV</b> needs about <b className="text-white">+{(COMBINED_FOR_TARGET * 100).toFixed(1)}% combined</b> across the three levers, because they multiply. Split equally, that is about <b className="text-white">+5.6% each</b>. Move the sliders to try any mix.
+            <p className="mt-1.5 text-[13.5px] leading-relaxed text-white/70">
+              The target is <b className="text-white">$5M NPV over 2 years</b>, about 10% of the $51M new users bring in. The levers multiply, so each 1% is worth the same and several moderate moves beat one large one. Pushing one lever without a real change in behaviour can pull the others down.
             </p>
 
-            <div className="mt-5 space-y-4">
-              {levers.map(([l, name], i) => (
-                <div key={l} className="grid grid-cols-[150px_1fr_64px] items-center gap-4">
-                  <span className="flex items-center gap-2 text-[14px] font-semibold text-white/85">
-                    <LeverPill l={l} /> {name}
-                  </span>
-                  <input
-                    type="range"
-                    min={0}
-                    max={20}
-                    step={0.1}
-                    value={v[i]}
-                    data-ctl={`slider-${l}`}
-                    onChange={(e) => setV((cur) => cur.map((x, k) => (k === i ? +e.target.value : x)) as [number, number, number])}
-                    className="lever-range w-full"
-                    style={{ ['--fill' as string]: `${(v[i] / 20) * 100}%` }}
-                    aria-label={`${name} growth`}
-                  />
-                  <span className="text-right text-[16px] font-bold tabular-nums">+{v[i].toFixed(1)}%</span>
-                </div>
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              {SCENARIOS.map((s) => (
+                <button
+                  key={s.id}
+                  data-ctl={`scenario-${s.id}`}
+                  onClick={() => {
+                    setScen(s.id);
+                    setV(s.v);
+                  }}
+                  className={`rounded-xl p-2.5 text-left transition ${scen === s.id ? 'bg-white text-black' : 'bg-white/[0.06] text-white/80 hover:bg-white/10'}`}
+                >
+                  <div className="flex items-baseline justify-between text-[13.5px] font-bold">
+                    <span>{s.name}{s.id === 'balanced' ? ' (base)' : ''}</span>
+                    <span className="tabular-nums">{fmtM(npv(s.v).total)}</span>
+                  </div>
+                  <div className={`mt-0.5 text-[11px] leading-snug ${scen === s.id ? 'text-black/60' : 'text-white/45'}`}>{s.what}</div>
+                </button>
               ))}
             </div>
 
-            <div className="mt-6 grid grid-cols-[1fr_1.6fr] gap-3">
-              <div className="rounded-2xl bg-white/[0.05] p-4">
-                <div className="text-[13px] font-semibold text-white/70">Combined uplift</div>
-                <div className="mt-1.5 text-[32px] font-extrabold leading-none tabular-nums">+{(combined * 100).toFixed(1)}%</div>
-                <div className="mt-1.5 text-[12px] text-white/50">needs +{(COMBINED_FOR_TARGET * 100).toFixed(1)}% for $5M</div>
+            <div className="mt-4 space-y-2.5">
+              {SLIDERS.map((sl) => {
+                const val = sl.unit === '%' ? v[sl.k] * 100 : v[sl.k];
+                return (
+                  <div key={sl.k} className="grid grid-cols-[160px_1fr_78px] items-center gap-4">
+                    <span className="flex items-center gap-2 text-[13.5px] font-semibold text-white/85">
+                      <LeverPill l={sl.l} /> {sl.name}
+                    </span>
+                    <input
+                      type="range"
+                      min={sl.min}
+                      max={sl.max}
+                      step={sl.step}
+                      value={val}
+                      data-ctl={`slider-${sl.k}`}
+                      onChange={(e) => setV((cur) => ({ ...cur, [sl.k]: sl.unit === '%' ? +e.target.value / 100 : +e.target.value }))}
+                      className="lever-range w-full"
+                      style={{ ['--fill' as string]: `${((val - sl.min) / (sl.max - sl.min)) * 100}%` }}
+                      aria-label={sl.name}
+                    />
+                    <span className="text-right text-[15px] font-bold tabular-nums">{sl.unit === '%' ? pct(v[sl.k], 0) : `${v[sl.k]} /100`}</span>
+                  </div>
+                );
+              })}
+              <p className="text-[11px] text-white/40">Invites: new installs per 100 trial users. AI usage grows as in the {base?.name ?? 'selected'} scenario (enhancements +{Math.round(v.enh * 100)}%, AI creations +{Math.round(v.ai * 100)}%).{custom ? ' Levers edited.' : ''}</p>
+            </div>
+
+            <div className="mt-4 grid grid-cols-[1fr_1.5fr] gap-3">
+              <div className="space-y-3">
+                <div className="rounded-2xl bg-white/[0.05] p-3.5">
+                  <div className="text-[12.5px] font-semibold text-white/70">Revenue per install</div>
+                  <div className="mt-1 text-[28px] font-extrabold leading-none tabular-nums">{pct(r.delivered)}</div>
+                  <div className={`mt-1.5 text-[12px] ${r.delivered >= r.bar ? 'text-[#2ED47A]' : 'text-[#FFB020]'}`}>bar for $5M: {pct(r.bar)}</div>
+                </div>
+                <div className="rounded-2xl bg-white/[0.05] p-3.5">
+                  <div className="text-[12.5px] font-semibold text-white/70">Margin after AI cost</div>
+                  <div className="mt-1 text-[22px] font-extrabold leading-none tabular-nums">{(r.m0 * 100).toFixed(0)}% → {(r.m1 * 100).toFixed(1)}%</div>
+                  <div className="mt-1.5 text-[11.5px] text-white/45">AI creation costs about 25x an enhancement</div>
+                </div>
               </div>
               <div className="rounded-2xl bg-gradient-to-br from-[#2a1320] to-white/[0.04] p-4 ring-1 ring-[#FF2E7E]/30">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-[13px] font-semibold text-white/70">NPV</span>
+                  <span className="text-[13px] font-semibold text-white/70">NPV over 2 years</span>
                   <span className={`text-[12.5px] font-semibold ${gap >= 0 ? 'text-[#2ED47A]' : 'text-[#FFB020]'}`}>
-                    {Math.abs(gap) < 0.05 ? '✓ On target' : gap > 0 ? `✓ $${gap.toFixed(1)}M above target` : `$${(-gap).toFixed(1)}M below target`}
+                    {gap >= 0 ? `✓ ${(r.total / r.target).toFixed(2)}x the target` : `${fmtM(-gap)} below target`}
                   </span>
                 </div>
-                <div data-ctl="npv" className="mt-1 text-[40px] font-extrabold leading-none tabular-nums">${npv.toFixed(1)}M</div>
-                <div className="relative mb-6 mt-9 h-2 rounded-full bg-white/10">
-                  <div className="absolute inset-y-0 left-0 rounded-full bg-brand transition-all" style={{ width: pos(npv) }} />
-                  {[
-                    ['Low', 2.6],
-                    ['Target', 5],
-                    ['Base', 5.9],
-                    ['High', 11.2],
-                  ].map(([k, x]) => (
-                    <div key={k as string} className={`absolute flex -translate-x-1/2 items-center ${k === 'Target' ? 'bottom-[-3px] flex-col-reverse' : 'top-[-3px] flex-col'}`} style={{ left: pos(x as number) }}>
+                <div data-ctl="npv" className="mt-1 text-[40px] font-extrabold leading-none tabular-nums">{fmtM(r.total)}</div>
+                <div className="relative mb-4 mt-7 h-2 rounded-full bg-white/10">
+                  <div className="absolute inset-y-0 left-0 rounded-full bg-brand transition-all" style={{ width: pos(r.total) }} />
+                  {[...SCENARIOS.map((s) => [s.name, npv(s.v).total] as const), ['Target', r.target] as const].map(([k, x]) => (
+                    <div key={k} className={`absolute flex -translate-x-1/2 items-center ${k === 'Target' ? 'bottom-[-3px] flex-col-reverse' : 'top-[-3px] flex-col'}`} style={{ left: pos(x) }}>
                       <span className={`h-3.5 w-[2px] ${k === 'Target' ? 'bg-white' : 'bg-white/45'}`} />
-                      <span className={`whitespace-nowrap text-[10.5px] ${k === 'Target' ? 'mb-1 font-bold text-white' : 'mt-1 text-white/55'}`}>
-                        {k} ${x}M
+                      <span className={`whitespace-nowrap text-[10px] ${k === 'Target' ? 'mb-1 font-bold text-white' : 'mt-1 text-white/55'}`}>
+                        {k === 'Target' ? 'Target $5M' : ''}
                       </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-1">
+                  {parts.map(([k, x]) => (
+                    <div key={k} className="grid grid-cols-[1fr_70px_56px] items-center gap-2 text-[11.5px]">
+                      <span className="truncate text-white/65">{k}</span>
+                      <span className="h-1.5 rounded-full bg-white/10">
+                        <span className={`block h-full rounded-full ${x >= 0 ? 'bg-[#2ED47A]' : 'bg-[#FF6A6A]'}`} style={{ width: `${(Math.abs(x) / maxAbs) * 100}%` }} />
+                      </span>
+                      <span className="text-right font-semibold tabular-nums">{fmtM(x)}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {PRESETS.map((p) => (
-                <button key={p.label} onClick={() => setV(p.v)} className="h-8 rounded-full bg-white/[0.07] px-3 text-[12.5px] font-semibold text-white/80 hover:bg-white/15">
-                  {p.label}
-                </button>
-              ))}
-            </div>
-
-            <p className="mt-5 text-[11.5px] leading-relaxed text-white/40">
-              Figures from the business case model, fictitious case data. Simplified here: NPV scales with the combined uplift, calibrated so +5.6% on each lever gives $5M; the Low, Base and High cases are $2.6M, $5.9M and $11.2M.
+            <ul className="mt-4 space-y-1 text-[12px] leading-relaxed text-white/60">
+              <li>• <b className="text-white/85">Conversion is the pivot, not trial volume.</b> Trial rush doubles the trial lift of Balanced yet earns less per install, because the extra trials convert worse and paid weeks do not grow.</li>
+              <li>• <b className="text-white/85">The real cost is margin.</b> Group shoots and remixes are the costly line; free limits and the 7-day trial keep usage bounded.</li>
+              <li>• <b className="text-white/85">Returning users are the cheapest upside.</b> 1 in 20,000 a day starting a trial adds about $0.8M, even as that base shrinks.</li>
+            </ul>
+            <p className="mt-3 text-[11px] leading-relaxed text-white/35">
+              Same formulas as the impact model: 2 months to build, a test month on 10% of new installs, a rollout month at 50%, then everyone; 9% discount rate; AI compute and storage at public list prices. Fictitious case data. The random test settles it within weeks.
             </p>
-            <div className="mt-5 flex gap-2">
+            <div className="mt-4 flex gap-2">
               <button
                 data-ctl="closing-done"
                 onClick={() => {
