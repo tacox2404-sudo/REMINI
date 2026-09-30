@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { LEVER_META } from '../components/ui';
-import { BEATS, EXPLORE, STEP_NAMES, TOTAL_STEPS } from '../state/demo';
+import { BEATS, CHAPTERS, TOTAL_STEPS, afterDemo } from '../state/demo';
 import { SCENARIOS, npv, type Levers } from '../state/npv';
 import { useStore } from '../state/store';
 import type { Lever } from '../state/types';
@@ -214,17 +214,13 @@ export function DemoCaption({ compact = false }: { compact?: boolean }) {
   return (
     <motion.div key={demo} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`rounded-2xl bg-white text-black shadow-2xl ${compact ? 'p-3' : 'p-4'}`}>
       <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-black/45">
-        <span>
-          Step {b.step} of {TOTAL_STEPS} · {STEP_NAMES[b.step - 1]}
+        <span className="flex items-center gap-1.5">
+          {b.step} / {TOTAL_STEPS} · {CHAPTERS[b.step - 1].name}
+          {CHAPTERS[b.step - 1].isNew && <span className="rounded bg-[#FF2E7E] px-1.5 py-[1px] text-[9.5px] font-extrabold tracking-wider text-white">NEW</span>}
         </span>
       </div>
       <div data-ctl={compact ? undefined : 'demo-title'} className={`mt-1 font-bold leading-tight ${compact ? 'text-[15px]' : 'text-[18px]'}`}>{b.title}</div>
       {!compact && <p className="mt-1.5 text-[14px] leading-snug text-black/70">{b.caption}</p>}
-      {b.lever && (
-        <div data-ctl="beat-lever" className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-black/[0.06] py-1 pl-1 pr-2.5 text-[12px] font-semibold text-black/70">
-          <LeverPill l={b.lever} /> Moves {LEVER_META[b.lever].name.toLowerCase()}
-        </div>
-      )}
       <div className="mt-3 flex items-center gap-2">
         <div className="flex flex-1 gap-1">
           {Array.from({ length: TOTAL_STEPS }, (_, i) => (
@@ -248,7 +244,10 @@ function useDemoDriver() {
   const prev = useRef<number | null>(null);
 
   useEffect(() => {
-    if (demo === null && prev.current === BEATS.length - 1) setLastDemoDone(true);
+    if (demo === null && prev.current === BEATS.length - 1) {
+      setLastDemoDone(true);
+      afterDemo(s);
+    }
     prev.current = demo;
     if (demo === null) {
       setClosing(false);
@@ -458,40 +457,6 @@ function ClosingCard() {
   );
 }
 
-/** After the guided demo: open paths, so people choose how much time to spend. */
-function ExplorePanel() {
-  const s = useStore();
-  const { lastDemoDone, setOnboarded, setClosing } = s;
-  return (
-    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-      <div className="text-[13px] font-bold text-white/85">{lastDemoDone ? 'Demo complete. Explore on your own' : 'Start the demo, or explore'}</div>
-      <p className="mt-1 text-[12px] leading-relaxed text-white/45">{lastDemoDone ? 'Each one opens the app in that moment. Everything stays clickable.' : 'The guided demo takes about 4 minutes. These open the app in a specific moment.'}</p>
-      <div className="mt-3 space-y-1.5">
-        {EXPLORE.map((e) => (
-          <button
-            key={e.title}
-            data-ctl={`explore-${e.title.toLowerCase().replace(/[^a-z]+/g, '-')}`}
-            onClick={() => {
-              e.enter(s);
-              setOnboarded({ today: true, studio: true });
-            }}
-            className="flex w-full items-center gap-2.5 rounded-xl bg-white/[0.04] px-3 py-2 text-left hover:bg-white/[0.08]"
-          >
-            <span className="min-w-0 flex-1">
-              <span className="block text-[13px] font-semibold text-white/85">{e.title}</span>
-              <span className="block truncate text-[11.5px] text-white/40">{e.sub}</span>
-            </span>
-            {e.lever && <LeverPill l={e.lever} />}
-          </button>
-        ))}
-        <button onClick={() => setClosing(true)} className="flex w-full items-center rounded-xl bg-white/[0.04] px-3 py-2 text-left hover:bg-white/[0.08]">
-          <span className="block text-[13px] font-semibold text-white/85">Why it pays</span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export function Shell({ phone }: { phone: ReactNode }) {
   const { demo } = useStore();
   const [panel, setPanel] = useState(false);
@@ -507,7 +472,13 @@ export function Shell({ phone }: { phone: ReactNode }) {
 
       <aside className="side side-right">
         <AnimatePresence mode="wait">{demo !== null && <DemoCaption key="cap" />}</AnimatePresence>
-        {demo === null && <ExplorePanel />}
+        {demo === null && (
+          <div className="rounded-2xl border border-white/[0.06] p-4 text-[13px] leading-relaxed text-white/50">
+            <b className="text-white/80">How to explore</b>
+            <br />
+            Press <b className="text-white/70">Start demo</b> for the guided tour (about 5 minutes), or use the phone freely. After the demo the app stays in a full state: open the projects, the chats from the bubble, Me, and How Studio works.
+          </div>
+        )}
       </aside>
 
       <ClosingCard />

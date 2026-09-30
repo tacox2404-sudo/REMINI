@@ -18,7 +18,7 @@ export function useFlows() {
   /** Quick enhance, exactly as Remini does it: pick, enhance, result. */
   const quickEnhance = useCallback(
     (title = 'Enhance') => {
-      const kept = new Set(s.creationsRef.current.flatMap((c) => c.photos.map((p) => p.original)));
+      const kept = new Set([...s.creationsRef.current.flatMap((c) => c.photos.map((p) => p.original)), ...s.keptRef.current.map((k) => k.replace('archive_restored', 'archive_old').replace('enhance2_after.jpg|me_ref_4.jpg', A.enhance2Before))]);
       push({
         name: 'picker',
         title,
@@ -33,7 +33,7 @@ export function useFlows() {
           runGenerating({ steps: ['Uploading', src.includes('archive_old') ? 'Restoring faces' : 'Enhancing details'], duration: 1600, preview: src }, () => {
             spendFree();
             track('enhance_completed');
-            replaceTop({ name: 'result', kind: 'enhance', title: 'Enhanced', ...pair });
+            replaceTop({ name: 'result', kind: 'enhance', title: src.includes('archive_old') ? 'Restored' : 'Enhanced', ...pair });
           });
         },
       });

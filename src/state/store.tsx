@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
 import { chatReply, type ChatCtx } from './chat';
-import { A, FRIEND, OTHERS, SEGMENTS, SELFIES, STYLE_SETS, TRIP_PHOTOS_OF_ME, eightiesProject, familyArchive, look, meProfile, paolaProfile, personalChat, photo, styleCreation, styleOf, tripAlbum, tripProject, INTENTS } from './data';
+import { A, FRIEND, OTHERS, SEGMENTS, SELFIES, STYLE_SETS, TRIP_PHOTOS_OF_ME, eightiesProject, familyArchive, familyProject, look, meProfile, paolaProfile, personalChat, photo, styleCreation, styleOf, tripAlbum, tripProject, INTENTS } from './data';
 import type { ChatMsg, Creation, Generating, Identity, Intent, Lever, LogEvent, Mode, Route, Segment, Sheet, Tab } from './types';
 
 export const FREE_LIMIT = 5;
@@ -21,7 +21,7 @@ function useSyncState<T>(initial: T | (() => T)) {
  * Where a user is in the journey (the moments of the strategy). Each stage
  * includes everything before it. The guided demo jumps straight to a stage.
  */
-export const STAGE = { NEW: 0, KEPT: 1, SECOND: 2, BUILT: 3, LIMIT: 4, TRIAL: 5, JOINED: 6, MADE: 7, DAY6: 8, BACK: 9, CANCELLED: 10 } as const;
+export const STAGE = { NEW: 0, KEPT: 1, SECOND: 2, BUILT: 3, LIMIT: 4, TRIAL: 5, ME: 6, TRIP: 7, JOINED: 8, MADE: 9, BACK: 10, CANCELLED: 11 } as const;
 export type Stage = (typeof STAGE)[keyof typeof STAGE];
 
 let chatSeq = 0;
@@ -42,7 +42,9 @@ function useStoreValue() {
   const [styleShared, setStyleShared, styleSharedRef] = useSyncState(false);
   const [newLooks, setNewLooks] = useState(false);
   const [returning, setReturning] = useState(false);
-  const [trialEnding, setTrialEnding] = useState(false);
+  /** Photos kept in Studio but not in a project yet. */
+  const [kept, setKept, keptRef] = useSyncState<string[]>([]);
+  const [studioSeen, setStudioSeen] = useState(false);
   const [returningFree, setReturningFree] = useState(false);
   const [cancelled, setCancelled] = useState(false);
   const [segment, setSegment] = useState<Segment | null>(null);
@@ -143,43 +145,43 @@ function useStoreValue() {
   }, [setCreations]);
   const findCreation = useCallback((id: string) => creationsRef.current.find((c) => c.id === id), [creationsRef]);
 
-  /** Build the state of a journey stage directly (used by the guided demo). */
+  /**
+   * Build the state of a journey stage directly (used by the guided demo).
+   * Projects (a personal family archive) → Profiles (Me, through a trend) →
+   * Together (the trip, shared) → coming back, still on Pro.
+   */
   const setStage = useCallback((st: Stage) => {
+    const family =
+      st >= STAGE.TRIAL ? familyProject(12, 12) : st >= STAGE.LIMIT ? familyProject(12, 5) : st >= STAGE.BUILT ? familyProject(12, 2) : familyProject(2, 2);
     const trip =
       st >= STAGE.BACK
         ? tripProject({ own: 17, done: 17, paola: true, paolaMore: 'done', luca: true, invited: ['Marco'] })
-        : st >= STAGE.DAY6
-          ? tripProject({ own: 17, done: 17, paola: true, paolaMore: 'waiting', invited: OTHERS })
-          : st >= STAGE.JOINED
-            ? tripProject({ own: 17, done: 17, paola: true, invited: OTHERS })
-            : st >= STAGE.TRIAL
-              ? tripProject({ own: 17, done: 17 })
-              : st >= STAGE.LIMIT
-                ? tripProject({ own: 17, done: 5 })
-                : st >= STAGE.BUILT
-                  ? tripProject({ own: 17, done: 2 })
-                  : st >= STAGE.SECOND
-                    ? tripProject({ own: 2, done: 2 })
-                    : tripProject({ own: 1, done: 1 });
+        : st >= STAGE.JOINED
+          ? tripProject({ own: 17, done: 17, paola: true, invited: OTHERS })
+          : tripProject({ own: 17, done: 17 });
     const cs: Creation[] = [personalChat()];
-    if (st >= STAGE.KEPT) cs.unshift(trip);
+    if (st >= STAGE.SECOND) cs.unshift(family);
+    if (st >= STAGE.ME) cs.unshift(styleCreation('y2k', st >= STAGE.BACK ? [A.y2kMe, A.y2kMe2] : [A.y2kMe]));
+    if (st >= STAGE.TRIP) cs.unshift(trip);
     if (st >= STAGE.MADE) cs.unshift(eightiesProject([look(A.remix90s, '80s film · your version'), look(A.together90s, `You & ${FRIEND}`)]));
+    if (st >= STAGE.BACK) cs.forEach((c) => (c.lastEdit = c.id === 'trip' ? '9 Oct' : '22 Sep'));
     setCreations(cs);
+    setKept(st === STAGE.KEPT ? [A.restored(3)] : []);
+    setStudioSeen(st >= STAGE.KEPT);
     const ids: Identity[] = [];
-    if (st >= STAGE.MADE) ids.push(meProfile(st >= STAGE.BACK));
+    if (st >= STAGE.ME) ids.push(meProfile(st >= STAGE.BACK));
     if (st >= STAGE.JOINED) ids.push(paolaProfile());
     setIdentities(ids);
     setPaolaJoined(st >= STAGE.JOINED);
     setStyleShared(st >= STAGE.JOINED);
     setNewLooks(st >= STAGE.BACK);
-    setTrialEnding(st === STAGE.DAY6);
     setReturning(st === STAGE.BACK);
     setCancelled(st === STAGE.CANCELLED);
     setReturningFree(false);
     setIsPro(st >= STAGE.TRIAL && st < STAGE.CANCELLED);
     setFreeUsed(st >= STAGE.LIMIT ? FREE_LIMIT : st >= STAGE.SECOND ? 2 : st >= STAGE.KEPT ? 1 : 0);
     setOnboarded({ today: true, studio: st >= STAGE.KEPT });
-  }, [setCreations, setIdentities, setPaolaJoined, setStyleShared, setIsPro, setFreeUsed]);
+  }, [setCreations, setIdentities, setKept, setPaolaJoined, setStyleShared, setIsPro, setFreeUsed]);
 
   /** An earlier install, still free, opening the app after Studio launches. */
   const startReturningFree = useCallback(() => {
@@ -210,20 +212,38 @@ function useStoreValue() {
   /** Any single enhance uses one free action. */
   const spendFree = useCallback(() => setFreeUsed((n) => Math.min(FREE_LIMIT, n + 1)), [setFreeUsed]);
 
-  /** Keep the first photo: a project starts with just that photo. */
+  /** Keep a photo in Studio, without a project yet. */
+  const keepLoose = useCallback((src: string) => {
+    setKept((k) => (k.includes(src) ? k : [src, ...k]));
+    track('kept_in_studio', 't');
+  }, [setKept, track]);
+
+  /** Kept elsewhere in the app: starts the trip directly (free play only). */
   const startTrip = useCallback(() => {
     if (!findCreation('trip')) upsertCreation(tripProject({ own: 1, done: 1 }));
-    track('project_started_from_result', 't');
+    track('project_started', 't');
     return 'trip';
   }, [findCreation, track, upsertCreation]);
 
-  /** A second photo from the same trip joins the project: now it's worth building. */
-  const addToTrip = useCallback(() => {
-    const c = findCreation('trip');
-    if (c && c.photos.length < 2) upsertCreation({ ...tripProject({ own: 2, done: 2 }), photos: [...c.photos, photo(A.trip(1), 'enhanced')], cover: A.trip(1) });
-    track('second_photo_kept', 't');
-    return 'trip';
+  /** A second old photo, like one you kept: together they start the Family archive. */
+  const startFamily = useCallback(() => {
+    if (!findCreation('family')) upsertCreation(familyProject(2, 2));
+    setKept((k) => k.filter((x) => !x.includes('archive_')));
+    track('project_started_from_two_photos', 't');
+    return 'family';
+  }, [findCreation, setKept, track, upsertCreation]);
+
+  /** The user adds the rest of the album. */
+  const addRestOfFamily = useCallback(() => {
+    const c = findCreation('family');
+    if (!c) return;
+    const full = familyProject(12, 0);
+    upsertCreation({ ...c, photos: [...c.photos, ...full.photos.slice(c.photos.length)], goal: 12 });
+    track('project_built_from_gallery', 't');
   }, [findCreation, track, upsertCreation]);
+
+  /** A trip photo kept: a project named after the place. */
+  const addToTrip = startTrip;
 
   /** The user chooses to add the rest of the trip from the gallery. */
   const addRestOfTrip = useCallback(() => {
@@ -516,8 +536,9 @@ function useStoreValue() {
     setStyleShared(false);
     setNewLooks(false);
     setReturning(false);
-    setTrialEnding(false);
     setReturningFree(false);
+    setKept([]);
+    setStudioSeen(false);
     setCancelled(false);
     setSegment(null);
     setOnboarded({ today: true, studio: false });
@@ -532,7 +553,7 @@ function useStoreValue() {
     mode, setMode, tab, goTab, stack, stackRef, navDir, push, pop, replaceTop, resetStack,
     sheet, openSheet, closeSheet, generating, runGenerating, toast, showToast, clearToast: useCallback(() => setToast(null), []),
     showLevers, setShowLevers, events, track, clearEvents: useCallback(() => setEvents([]), []),
-    identities, identitiesRef, creations, creationsRef, paolaJoined, styleShared, newLooks, returning, cancelled, trialEnding, returningFree, startReturningFree, keepPastWork, addToTrip, addRestOfTrip, segment, onboarded, setOnboarded,
+    identities, identitiesRef, creations, creationsRef, paolaJoined, styleShared, newLooks, returning, cancelled, returningFree, startReturningFree, kept, keptRef, keepLoose, startFamily, addRestOfFamily, studioSeen, setStudioSeen, keepPastWork, addToTrip, addRestOfTrip, segment, onboarded, setOnboarded,
     freeUsed, isPro, processing, demo, setDemo, splash, setSplash, lastDemoDone, setLastDemoDone, closing, setClosing, chatTyping,
     setStage, answerSegment, spendFree, startTrip, keepLook, keepSet, keepRestore, keepInProject, processPhotos, enhanceAll, startTrial, finishAfterTrial, cancelPro,
     inviteFriends, friendJoins, shareStyle, withMe, saveMe, applyFriendStyle, makeDuo, improveMe, removeProfile, tryNewLooks, continueCreation, createFromIntent,

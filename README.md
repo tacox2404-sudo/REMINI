@@ -46,31 +46,23 @@ The photos live in `public/assets/` (web-sized JPGs); the full-size originals ar
 
 ### Guided demo path
 
-Nine steps, 15 beats, each tagged with the lever it moves:
+Nine chapters, 22 beats. The chapters follow the idea (Projects, Profiles, Together, Remini chat), and the ones Studio adds are marked NEW in the caption:
 
-1. **Remini today**: the home, and a quick enhance saved to the camera roll.
-2. **Keep**: the same enhance with Studio. Keep puts the first photo in a new project, Philippines trip. A second photo from the trip is added to it.
-3. **The project**: you add the rest from your gallery (17 photos, 2 done), then the Studio home.
-4. **The free limit** (trial start): "5 of 17 done, finish your trip with Pro", with Together shown.
-5. **Together**:
-   - Invite via WhatsApp (installs). Joining and adding photos is free for friends.
-   - Paola joins the trip and, separately, shares her own 80s look (conversion).
-   - Your version and a duo shoot go into a separate project, 80s with Paola.
-6. **Day 6 of the trial** (conversion): the trial ends tomorrow, and the projects keep going.
-7. **Coming back** (paid weeks):
-   - Welcome back two weeks later: Luca's photos, and new looks you can try (made only if you tap).
-   - Me, kept and improving: from 4 selfies to 6 photos.
-8. **After cancelling**: projects stay viewable and downloadable.
-9. **Why it pays**: the impact model on one page (scenarios and levers, plus where the value comes from).
+1. **Remini today**: the home, and an old family photo restored and saved.
+2. **Keep** (new): the same restore with Studio. Save and Share as before, plus Keep in Studio.
+3. **Meet Studio** (new): the first Keep opens a one-screen introduction, then Studio with the photo in Kept.
+4. **Projects** (new): a second old photo is kept, and Studio suggests a Family archive. You add the album (12 photos), then the free limit lands inside it (5 of 12).
+5. **Profiles** (new): on Pro, the Y2K Yearbook trend saves Me once from 4 selfies. Me is kept and used everywhere.
+6. **Together** (new): the Philippines trip as a shared project.
+   - A WhatsApp invite; joining is free.
+   - Paola joins the trip.
+   - Paola shares her 80s look; you make your version with your face.
+   - A duo shoot, kept as its own project, 80s with Paola.
+7. **Remini chat** (new): the bubble opens your chats, one per project; the trip's chat is shared.
+8. **Coming back**: three weeks later, still on Pro. Notifications, Welcome back, and Me improved.
+9. **After cancelling**: projects stay viewable and downloadable.
 
-After the demo, **Explore on your own** opens specific moments:
-- a returning free user
-- onboarding with Studio on the paywall
-- Remini chat
-- the shared trip
-- the restore and profile paths
-- notifications
-- AI Photos today
+When the demo ends, the app stays in a full state to explore on the phone. The business levers and the impact model are only shown when **Why it matters** is switched on.
 
 ### Screenshots
 

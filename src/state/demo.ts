@@ -1,14 +1,12 @@
 import { A, FRIEND } from './data';
 import { STAGE, type Stage, type Store } from './store';
-import type { Lever, Mode, Route } from './types';
+import type { Mode, Route } from './types';
 
 export interface Beat {
   step: number;
   title: string;
   caption: string;
   target: string | null;
-  /** The business lever this moment moves, shown as a chip next to the caption. */
-  lever?: Lever;
   enter: (s: Store) => void;
 }
 
@@ -24,14 +22,29 @@ function scene(s: Store, mode: Mode, stage: Stage, routes: Route[] = []) {
   s.resetStack(routes);
 }
 
-const first: Route = { name: 'result', kind: 'enhance', title: 'Enhanced', image: A.enhance2After, before: A.enhance2Before };
-const second: Route = { name: 'result', kind: 'enhance', title: 'Enhanced', image: A.trip(1) };
+const first: Route = { name: 'result', kind: 'enhance', title: 'Restored', image: A.restored(3), before: A.old(3) };
+const second: Route = { name: 'result', kind: 'enhance', title: 'Restored', image: A.restored(1), before: A.old(1) };
+const family: Route[] = [{ name: 'studio' }, { name: 'creation', id: 'family' }];
 const trip: Route[] = [{ name: 'studio' }, { name: 'creation', id: 'trip' }];
+const y2k: Route = { name: 'result', kind: 'trend', image: A.y2kMe, title: 'Y2K Yearbook', trendId: 'y2k' };
+const remix: Route = { name: 'result', kind: 'remix', image: A.remix90s, title: '80s film · your version', styleId: 'st-80s', projectId: 'eighties' };
 const duo: Route = { name: 'result', kind: 'together', image: A.together90s, title: `You & ${FRIEND}`, projectId: 'eighties' };
 
-export const STEP_NAMES = ['Remini today', 'Keep', 'The project', 'The free limit', 'Together', 'Day 6 of the trial', 'Coming back', 'After cancelling', 'Why it pays'];
+/** The chapters follow the idea: what's new, then Projects, Profiles, Together and Remini chat. */
+export const CHAPTERS: { name: string; isNew?: boolean }[] = [
+  { name: 'Remini today' },
+  { name: 'Keep', isNew: true },
+  { name: 'Meet Studio', isNew: true },
+  { name: 'Projects', isNew: true },
+  { name: 'Profiles', isNew: true },
+  { name: 'Together', isNew: true },
+  { name: 'Remini chat', isNew: true },
+  { name: 'Coming back' },
+  { name: 'After cancelling' },
+];
 
 export const BEATS: Beat[] = [
+  // 1. Remini today
   {
     step: 1,
     title: 'Remini today',
@@ -42,139 +55,181 @@ export const BEATS: Beat[] = [
   {
     step: 1,
     title: 'One photo, one result',
-    caption: 'A quick enhance: one photo, one result, saved to the camera roll. Nothing carries on after it.',
+    caption: 'An old family photo, restored and saved to the camera roll. Great result, and nothing carries on after it.',
     target: 'save-gallery',
     enter: (s) => scene(s, 'today', STAGE.NEW, [first]),
   },
+  // 2. Keep
   {
     step: 2,
     title: 'Keep, next to Save and Share',
-    caption: 'The same enhance, with Studio. Save and Share stay as they are. Keep puts the photo in a new project, named after the trip.',
-    target: 'keep-new-trip',
+    caption: 'The same restore, with Studio. Save and Share work exactly as before. One thing is new: Keep in Studio.',
+    target: 'keep-this',
+    enter: (s) => scene(s, 'studio', STAGE.NEW, [first]),
+  },
+  // 3. Meet Studio
+  {
+    step: 3,
+    title: 'Welcome to Studio',
+    caption: 'The first Keep opens Studio, and one screen explains it: where the photos you keep live and keep going, with projects, profiles and friends.',
+    target: null,
     enter: (s) => {
-      scene(s, 'studio', STAGE.NEW, [first]);
-      s.openSheet({ type: 'keepThis', photo: A.enhance2After, title: 'Enhanced', before: A.enhance2Before });
+      scene(s, 'studio', STAGE.KEPT, [{ name: 'studioIntro' }]);
+      s.setStudioSeen(false);
     },
   },
   {
-    step: 2,
-    title: 'A second photo, same trip',
-    caption: 'Another photo from the trip, another Keep. Now the trip is worth building.',
-    target: 'keep-add-trip',
+    step: 3,
+    title: 'Your photo, kept',
+    caption: 'The photo sits in Kept: no project yet, nothing to organise. Projects, Profiles and Together are ready below.',
+    target: 'kept',
+    enter: (s) => scene(s, 'studio', STAGE.KEPT, [{ name: 'studio' }]),
+  },
+  // 4. Projects
+  {
+    step: 4,
+    title: 'A second old photo',
+    caption: 'You restore another old photo and keep it. Studio sees they belong together and suggests a project: Family archive.',
+    target: 'keep-start-project',
     enter: (s) => {
       scene(s, 'studio', STAGE.KEPT, [second]);
-      s.openSheet({ type: 'keepThis', photo: A.trip(1), title: 'Enhanced' });
+      s.openSheet({ type: 'keepThis', photo: A.restored(1), title: 'Restored' });
     },
-  },
-  {
-    step: 3,
-    title: 'Building the trip',
-    caption: 'You add the rest from your gallery: 17 photos, 2 done. Enhance all does the others in one go.',
-    target: 'enhance-all',
-    enter: (s) => scene(s, 'studio', STAGE.BUILT, trip),
-  },
-  {
-    step: 3,
-    title: 'This is Studio',
-    caption: 'What you choose to keep, in projects that keep going. Below: your profiles, and Together, for friends.',
-    target: 'projects',
-    enter: (s) => scene(s, 'studio', STAGE.BUILT, [{ name: 'studio' }]),
   },
   {
     step: 4,
-    title: 'The free limit, inside the trip',
-    caption: 'Free limits stay the same. They land on something you care about: 5 of 17 done. Pro finishes the trip and brings your friends in.',
+    title: 'A job that keeps going',
+    caption: 'Two photos, one project. Add the rest of the album and it becomes a real job: 12 photos, 2 restored. Restore all does the rest.',
+    target: 'enhance-all',
+    enter: (s) => scene(s, 'studio', STAGE.BUILT, family),
+  },
+  {
+    step: 4,
+    title: 'The free limit, inside the project',
+    caption: 'Free limits stay the same. They just land on something you care about: 5 of 12 restored. Pro finishes the archive, and adds Together.',
     target: 'paywall-unfinished',
-    lever: 't',
     enter: (s) => {
-      scene(s, 'studio', STAGE.LIMIT, trip);
-      s.openSheet({ type: 'paywall', creationId: 'trip', stage: 'offer' });
+      scene(s, 'studio', STAGE.LIMIT, family);
+      s.openSheet({ type: 'paywall', creationId: 'family', stage: 'offer' });
+    },
+  },
+  // 5. Profiles
+  {
+    step: 5,
+    title: 'A trend, with your face',
+    caption: 'On Pro you try the Y2K Yearbook trend. The first time, Remini saves your profile, Me, from 4 selfies, as AI Photos does. Keep starts a Y2K set.',
+    target: 'keep-this',
+    enter: (s) => {
+      scene(s, 'studio', STAGE.TRIAL, [{ name: 'trend', trendId: 'y2k' }, y2k]);
+      s.saveMe();
     },
   },
   {
     step: 5,
-    title: 'Invite the friends who were there',
-    caption: 'Trial on: the trip is finished and Together unlocks. Friends get a WhatsApp link straight into the trip. Joining and adding photos is free.',
-    target: 'invitee-rules',
-    lever: 'I',
+    title: 'Me, saved once',
+    caption: 'Me is the profile Remini already makes, now kept in Studio. Every trend, pack and duo shoot uses it, with no new uploads, and it gets better as you add photos.',
+    target: 'me-likeness',
+    enter: (s) => scene(s, 'studio', STAGE.ME, [{ name: 'studio' }, { name: 'identity', id: 'me' }]),
+  },
+  // 6. Together
+  {
+    step: 6,
+    title: 'A trip is made to share',
+    caption: 'Your Philippines trip becomes a project too. Unlike the archive, it has other people in it: invite the friends who were there.',
+    target: 'invite-card',
+    enter: (s) => scene(s, 'studio', STAGE.TRIP, trip),
+  },
+  {
+    step: 6,
+    title: 'An invite on WhatsApp',
+    caption: 'Friends without Remini get a link straight into the trip. Joining, adding their photos and their own face is free.',
+    target: 'invite-preview',
     enter: (s) => {
-      scene(s, 'studio', STAGE.TRIAL, trip);
-      s.openSheet({ type: 'withFriend', title: 'Philippines trip', image: A.trip(1), link: '', projectId: 'trip' });
+      scene(s, 'studio', STAGE.TRIP, trip);
+      s.openSheet({ type: 'withFriend', title: 'Philippines trip', image: A.trip(1), link: '', projectId: 'trip', via: 'WhatsApp' });
     },
   },
   {
-    step: 5,
-    title: 'Paola joins, and shares a look',
-    caption: 'Paola joins the trip for free and adds her photos. Separately, she shares an 80s look she made of herself.',
+    step: 6,
+    title: 'Paola joins the trip',
+    caption: 'Paola arrives with everyone’s photos already there, and adds her own.',
+    target: 'project-members',
+    enter: (s) => scene(s, 'studio', STAGE.JOINED, trip),
+  },
+  {
+    step: 6,
+    title: 'Styles from friends',
+    caption: 'Friends share looks they made. Paola shares her 80s film, and you can make your own version with your face. Remix, without a public feed.',
     target: 'shared-style',
-    lever: 'c',
     enter: (s) => scene(s, 'studio', STAGE.JOINED, [{ name: 'studio' }]),
   },
   {
-    step: 5,
-    title: 'Your version, then a duo shoot',
-    caption: 'Her style with your face, then a duo shoot of you both. It gets its own project, 80s with Paola, apart from the trip.',
+    step: 6,
+    title: 'Her style, your face',
+    caption: 'Your version of Paola’s 80s film, made with Me. Keep it, or make a duo shoot of the two of you.',
+    target: 'make-duo',
+    enter: (s) => scene(s, 'studio', STAGE.JOINED, [{ name: 'studio' }, remix]),
+  },
+  {
+    step: 6,
+    title: 'A duo shoot, its own project',
+    caption: 'You and Paola, each with your own profile. It becomes a new project, 80s with Paola, apart from the trip.',
     target: 'keep-in-project',
-    lever: 'c',
     enter: (s) => {
       scene(s, 'studio', STAGE.JOINED, [{ name: 'studio' }, duo]);
       s.saveMe();
     },
   },
+  // 7. Remini chat
   {
-    step: 6,
-    title: 'Your trial ends tomorrow',
-    caption: 'Day 6: Paola added 8 more photos and you have made things together. There is a reason to keep going after the first job is done.',
-    target: 'trial-ending',
-    lever: 'c',
-    enter: (s) => scene(s, 'studio', STAGE.DAY6, [{ name: 'studio' }]),
+    step: 7,
+    title: 'Remini chat, per project',
+    caption: 'The chat bubble is where it always was. It now opens your chats: one just for you, and one inside each project.',
+    target: 'chats-list',
+    enter: (s) => scene(s, 'studio', STAGE.MADE, [{ name: 'chats' }]),
   },
   {
     step: 7,
-    title: 'Welcome back',
-    caption: 'Two weeks later: Luca joined the trip with 6 photos, and there are new looks to try with your updated Me.',
-    target: 'welcome-card',
-    lever: 'w',
-    enter: (s) => scene(s, 'studio', STAGE.BACK, [{ name: 'studio' }]),
+    title: 'Shared with the people in it',
+    caption: 'In the trip, everyone can ask Remini, on all the photos. It only offers what Remini already does.',
+    target: 'chat-spurs',
+    enter: (s) => scene(s, 'studio', STAGE.MADE, [...trip, { name: 'chat', creationId: 'trip' }]),
   },
+  // 8. Coming back
   {
-    step: 7,
-    title: 'Me, kept and improving',
-    caption: 'The profile Remini already makes, now kept: from 4 selfies to 6 photos, each one added by you. New looks are made only when you tap.',
-    target: 'me-history',
-    lever: 'w',
-    enter: (s) => scene(s, 'studio', STAGE.BACK, [{ name: 'studio' }, { name: 'identity', id: 'me' }]),
+    step: 8,
+    title: 'Three weeks later',
+    caption: 'Still on Pro. The reasons to come back are your own: friends adding to your projects, and new looks to try with your updated Me.',
+    target: 'notif-trip',
+    enter: (s) => scene(s, 'studio', STAGE.BACK, [{ name: 'lock' }]),
   },
   {
     step: 8,
-    title: 'Nothing is held back',
-    caption: 'If you cancel, every project stays to view and download, ready for when you come back.',
-    target: 'after-cancel',
-    lever: 'w',
-    enter: (s) => scene(s, 'studio', STAGE.CANCELLED, [{ name: 'studio' }]),
+    title: 'Welcome back',
+    caption: 'Studio opens on what changed: Luca joined the trip with 6 photos. New looks are only made if you tap.',
+    target: 'welcome-card',
+    enter: (s) => scene(s, 'studio', STAGE.BACK, [{ name: 'studio' }]),
   },
   {
+    step: 8,
+    title: 'Me, better than before',
+    caption: 'From 4 selfies to 6 photos, each one added by you. Every project and trend now looks more like you.',
+    target: 'me-history',
+    enter: (s) => scene(s, 'studio', STAGE.BACK, [{ name: 'studio' }, { name: 'identity', id: 'me' }]),
+  },
+  // 9. After cancelling
+  {
     step: 9,
-    title: 'Why it pays',
-    caption: 'The impact model: pick a scenario or move the levers.',
-    target: null,
-    enter: (s) => {
-      scene(s, 'studio', STAGE.CANCELLED);
-      s.setClosing(true);
-    },
+    title: 'Nothing is held back',
+    caption: 'If you ever cancel, every project stays to view and download, ready for when you come back. After the demo, everything stays clickable.',
+    target: 'after-cancel',
+    enter: (s) => scene(s, 'studio', STAGE.CANCELLED, [{ name: 'studio' }]),
   },
 ];
 
-export const TOTAL_STEPS = Math.max(...BEATS.map((b) => b.step));
+export const TOTAL_STEPS = CHAPTERS.length;
 
-/** After the demo: open paths to explore at your own pace. */
-export const EXPLORE: { title: string; sub: string; lever?: Lever; enter: (s: Store) => void }[] = [
-  { title: 'A returning free user', sub: 'An earlier install finds Studio and puts past restores in a project', lever: 't', enter: (s) => { scene(s, 'studio', STAGE.NEW); s.startReturningFree(); } },
-  { title: 'Onboarding, with Studio', sub: 'The first question, then the onboarding paywall showing Studio', lever: 't', enter: (s) => scene(s, 'studio', STAGE.NEW, [{ name: 'onboarding', step: 'question' }]) },
-  { title: 'Remini chat', sub: 'One chat for you, one inside each project', enter: (s) => scene(s, 'studio', STAGE.MADE, [{ name: 'chats' }]) },
-  { title: 'The shared trip', sub: 'Members, what friends added, the shared chat', enter: (s) => scene(s, 'studio', STAGE.DAY6, trip) },
-  { title: 'Restore old photos', sub: 'The family archive path', enter: (s) => scene(s, 'studio', STAGE.NEW, [{ name: 'first', step: 'intro', path: 'restore' }]) },
-  { title: 'Profile photos', sub: 'The creator path: a Casual Headshot set', enter: (s) => scene(s, 'studio', STAGE.NEW, [{ name: 'first', step: 'intro', path: 'profile' }]) },
-  { title: 'Notifications', sub: 'The lock screen two weeks later', lever: 'w', enter: (s) => scene(s, 'studio', STAGE.BACK, [{ name: 'lock' }]) },
-  { title: 'AI Photos today', sub: 'The profile Remini already makes', enter: (s) => scene(s, 'today', STAGE.NEW, [{ name: 'today', screen: 'photos' }]) },
-];
+/** When the demo finishes, the app stays in a full state to explore on the phone. */
+export function afterDemo(s: Store) {
+  scene(s, 'studio', STAGE.BACK, [{ name: 'studio' }]);
+}

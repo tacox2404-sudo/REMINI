@@ -116,6 +116,7 @@ export type Route =
   | { name: 'photo'; creationId: string; photoId: string }
   | { name: 'chat'; creationId: string }
   | { name: 'chats' }
+  | { name: 'studioIntro' }
   | { name: 'lock' }
   | { name: 'about' }
   | { name: 'animate'; src: string; creationId: string }

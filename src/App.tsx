@@ -14,7 +14,7 @@ import { OnboardingScreen } from './screens/Onboarding';
 import { CreationScreen, PhotoScreen } from './screens/Creation';
 import { LockScreen } from './screens/Outside';
 import { SheetHost } from './screens/Sheets';
-import { ReturningCard, StudioEntryCard, StudioScreen } from './screens/Studio';
+import { ReturningCard, StudioEntryCard, StudioIntro, StudioScreen } from './screens/Studio';
 import { Shell } from './shell/Shell';
 
 function renderRoute(r: Route) {
@@ -45,6 +45,8 @@ function renderRoute(r: Route) {
       return <ChatScreen creationId={r.creationId} />;
     case 'chats':
       return <ChatsScreen />;
+    case 'studioIntro':
+      return <StudioIntro />;
     case 'lock':
       return <LockScreen />;
     case 'about':

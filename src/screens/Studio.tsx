@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { A, DATES, FRIEND, OTHERS, PAOLA_STYLE, progressOf } from '../state/data';
+import { A, FRIEND, OTHERS, PAOLA_STYLE, progressOf } from '../state/data';
 import { useStore } from '../state/store';
 import type { Creation, Identity } from '../state/types';
 import { I } from '../components/Icons';
@@ -83,10 +83,76 @@ export function ProfileCard({ p }: { p: Identity }) {
   );
 }
 
+/** The first time Studio opens: what it is and how it works, around the photo just kept. */
+export function StudioIntro() {
+  const { kept, replaceTop, resetStack, setStudioSeen, track, stack, pop } = useStore();
+  const fromStudio = stack.length > 1 && stack[stack.length - 2]?.name === 'studio';
+  const photo = kept[0];
+  const rows: [keyof typeof I, string, string, boolean?][] = [
+    ['Studio', 'Projects', 'A job that keeps going: a trip, a family archive, a set of looks. With progress and Enhance all.'],
+    ['Photos', 'Profiles', 'Me: the face profile Remini already makes, now kept and getting better as you add photos.'],
+    ['Users', 'Together', 'Invite friends into a project and create with them. Part of Pro.', true],
+  ];
+  return (
+    <div data-demo="studio-intro" className="relative flex min-h-full flex-col overflow-hidden">
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-[360px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,46,126,0.35),transparent)]" />
+      <NavHeader title="" onBack={() => resetStack([], -1)} transparent />
+      <div className="relative px-5">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-brand"><I.Studio size={20} /></span>
+          <span className="rounded-md bg-white px-1.5 py-[1px] text-[10px] font-extrabold text-[#FF2E7E]">NEW IN REMINI</span>
+        </motion.div>
+        <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="mt-3 text-[40px] font-extrabold leading-[1.02] tracking-tight">
+          Welcome to <span className="bg-brand bg-clip-text text-transparent">Studio</span>
+        </motion.h1>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.16 }} className="mt-2 text-[15px] leading-snug text-white/70">
+          Where the photos you keep live, and keep going. On your own or with friends.
+        </motion.p>
+        {photo && !fromStudio && (
+          <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.24 }} className="mt-4 flex items-center gap-3 rounded-2xl bg-white/[0.06] p-2.5">
+            <Img src={photo} className="h-12 w-12 rounded-xl" label={false} />
+            <span className="flex-1 text-[13.5px]"><b>Your first photo is here.</b> <span className="text-white/60">Kept, not in a project yet.</span></span>
+            <I.Check size={18} className="text-[#2ED47A]" />
+          </motion.div>
+        )}
+        <div className="mt-4 space-y-2">
+          {rows.map(([icon, t, d, pro], i) => {
+            const Icon = I[icon];
+            return (
+              <motion.div key={t} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.32 + i * 0.1 }} className="flex gap-3 rounded-2xl bg-card p-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.08]"><Icon size={19} /></span>
+                <span className="min-w-0">
+                  <span className="flex items-center gap-1.5 text-[15px] font-bold">{t} {pro && <ProBadge className="!h-[17px] !text-[9px]" />}</span>
+                  <span className="block text-[12.5px] leading-snug text-white/60">{d}</span>
+                </span>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="relative mt-auto px-5 pb-6 pt-4">
+        <PillWhite
+          demo="open-studio"
+          onClick={() => {
+            if (fromStudio) return pop();
+            setStudioSeen(true);
+            track('studio_opened_first_time');
+            replaceTop({ name: 'studio' });
+          }}
+        >
+          {fromStudio ? 'Back to Studio' : 'Open Studio'}
+        </PillWhite>
+        <p className="mt-2 text-center text-[11.5px] text-mute">Free limits stay as they are. You choose what to keep.</p>
+      </div>
+    </div>
+  );
+}
+
 /** Studio: a personal space for what you choose to keep, alone or with friends. */
 export function StudioScreen() {
-  const { creations, identities, isPro, cancelled, returning, trialEnding, newLooks, paolaJoined, styleShared, push, pop, openSheet, applyFriendStyle, tryNewLooks, showToast, track } = useStore();
+  const { creations, identities, isPro, cancelled, returning, newLooks, paolaJoined, styleShared, kept, push, pop, openSheet, applyFriendStyle, tryNewLooks } = useStore();
   const eighties = creations.find((c) => c.id === 'eighties');
+
   const projects = creations.filter((c) => !c.chatOnly);
   const trip = projects.find((c) => c.id === 'trip');
   const me = identities.find((i) => i.id === 'me');
@@ -95,7 +161,15 @@ export function StudioScreen() {
 
   return (
     <div>
-      <NavHeader title="" onBack={pop} />
+      <NavHeader
+        title=""
+        onBack={pop}
+        right={
+          <button data-demo="how-it-works" onClick={() => push({ name: 'studioIntro' })} className="mr-1 h-8 rounded-full bg-white/[0.08] px-3 text-[12.5px] font-semibold text-white/80">
+            How Studio works
+          </button>
+        }
+      />
       <div className="px-4 pb-1">
         <div className="flex items-center gap-2">
           <h1 className="text-[30px] font-bold leading-none tracking-tight">Studio</h1>
@@ -109,37 +183,6 @@ export function StudioScreen() {
           <LeverTag l="w" />
           <div className="text-[14px] font-bold">You’re on Free. Nothing is held back.</div>
           <div className="mt-0.5 text-[12.5px] text-mute">Every project stays here to view and download. Restart Pro whenever you want to continue.</div>
-        </div>
-      )}
-
-      {trialEnding && (
-        <div data-demo="trial-ending" className="relative mx-4 mt-3 rounded-[22px] bg-gradient-to-br from-[#2a1320] to-card p-4 ring-1 ring-[#FF2E7E]/25">
-          <LeverTag l="c" />
-          <div className="text-[13px] font-semibold text-[#FFB020]">Day 6 of 7 · your trial ends tomorrow, {DATES.trialEnds}</div>
-          <div className="mt-2 space-y-2">
-            {trip && (
-              <button onClick={() => push({ name: 'creation', id: 'trip' })} className="flex w-full items-center gap-3 text-left">
-                <Img src={A.trip(5)} className="h-11 w-11 rounded-xl" label={false} />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[14.5px] font-bold leading-tight">{FRIEND} added 8 photos to {trip.title}</span>
-                  <span className="block text-[12px] text-mute">{waiting} waiting · the trip keeps going</span>
-                </span>
-              </button>
-            )}
-            {eighties && (
-              <button onClick={() => push({ name: 'creation', id: 'eighties' })} className="flex w-full items-center gap-3 text-left">
-                <Img src={eighties.cover} className="h-11 w-11 rounded-xl" label={false} />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[14.5px] font-bold leading-tight">{eighties.title}</span>
-                  <span className="block text-[12px] text-mute">{eighties.looks.length} made together</span>
-                </span>
-              </button>
-            )}
-          </div>
-          <PillWhite className="mt-3 !h-11" onClick={() => { track('trial_kept', 'c'); showToast('Pro continues · see you next week'); }}>
-            Keep Pro
-          </PillWhite>
-          <p className="mt-2 text-center text-[11.5px] text-mute">If you stop, everything here stays yours to view and download.</p>
         </div>
       )}
 
@@ -177,11 +220,28 @@ export function StudioScreen() {
         </div>
       )}
 
+      {kept.length > 0 && (
+        <>
+          <SectionHeader demo="kept" title="Kept" sub="Photos you kept, not in a project yet. Keep more and group them." />
+          <HScroll>
+            {kept.map((k) => (
+              <Img key={k} src={k} className="h-[120px] w-[96px] shrink-0 rounded-[16px]" label={false} />
+            ))}
+          </HScroll>
+        </>
+      )}
+
       <SectionHeader demo="projects" title={<span className="relative">Projects<LeverTag l="t" className="-right-5 -top-1" /></span>} sub="Jobs that keep going, with progress. They save themselves." />
       <HScroll>
         {projects.map((c) => (
           <CreationCard key={c.id} c={c} />
         ))}
+        {!projects.length && (
+          <div className="flex w-[200px] shrink-0 flex-col justify-center rounded-[20px] bg-card p-3.5 text-[12.5px] leading-snug text-white/60">
+            <b className="text-[14px] text-white">No projects yet</b>
+            When you keep photos that belong together, Studio suggests a project.
+          </div>
+        )}
         <button data-demo="new-project" onClick={() => push({ name: 'create' })} className="relative flex w-[150px] shrink-0 flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-white/20 p-3 text-center">
           <span className="grid h-11 w-11 place-items-center rounded-full bg-white text-black">
             <I.Plus />
@@ -303,8 +363,19 @@ export function ReturningCard() {
 
 /** Entry on Remini's home once something is kept. */
 export function StudioEntryCard() {
-  const { creations: all, push } = useStore();
+  const { creations: all, push, kept } = useStore();
   const creations = all.filter((c) => !c.chatOnly);
+  if (!creations.length && kept.length)
+    return (
+      <button data-demo="studio-entry" onClick={() => push({ name: 'studio' })} className="relative mx-4 mt-2 flex w-[calc(100%-2rem)] items-center gap-3 rounded-[20px] bg-card p-3 text-left ring-1 ring-[#FF2E7E]/30">
+        <Img src={kept[0]} className="h-14 w-14 shrink-0 rounded-xl" label={false} />
+        <span className="min-w-0 flex-1">
+          <span className="block text-[12px] font-semibold text-[#FF6A8E]">Your Studio</span>
+          <span className="block text-[15px] font-bold">{kept.length} photo{kept.length > 1 ? 's' : ''} kept</span>
+        </span>
+        <I.Chevron size={18} className="text-mute" />
+      </button>
+    );
   if (!creations.length) return null;
   const c = creations.find((x) => progressOf(x).done < progressOf(x).total) ?? creations[0];
   const pr = progressOf(c);

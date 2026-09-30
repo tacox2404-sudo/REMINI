@@ -1,4 +1,6 @@
 import { A, FRIEND, TRIPS, progressOf } from '../state/data';
+
+const OLD = [1, 2, 3, 4].map(A.old);
 import { FREE_LIMIT, useStore } from '../state/store';
 import type { ProjectPhoto } from '../state/types';
 import { BeforeAfter } from '../components/BeforeAfter';
@@ -29,7 +31,7 @@ function PhotoTile({ ph, family, onOpen }: { ph: ProjectPhoto; family: boolean; 
 }
 
 export function CreationScreen({ id }: { id: string }) {
-  const { creations, pop, push, enhanceAll, continueCreation, openSheet, isPro, cancelled, freeUsed, processing, addRestOfTrip, showToast, track } = useStore();
+  const { creations, pop, push, enhanceAll, continueCreation, openSheet, isPro, cancelled, freeUsed, processing, addRestOfTrip, addRestOfFamily, showToast, track } = useStore();
   const c = creations.find((x) => x.id === id);
   if (!c) return <NavHeader title="" onBack={pop} />;
   const pr = progressOf(c);
@@ -40,7 +42,8 @@ export function CreationScreen({ id }: { id: string }) {
   const shown = c.photos.filter((p) => (seen.has(p.original) ? false : (seen.add(p.original), true))).slice(0, 8);
   const extra = c.photos.length - shown.length;
   const isTrip = c.id === 'trip';
-  const tripStarting = isTrip && c.photos.length < 3;
+  const isFamily = c.id === 'family';
+  const tripStarting = (isTrip || isFamily) && c.photos.length < 3;
   const invite = () => (isPro ? openSheet({ type: 'withFriend', title: c.title, image: c.cover, link: '', projectId: c.id }) : openSheet({ type: 'together' }));
 
   return (
@@ -111,28 +114,33 @@ export function CreationScreen({ id }: { id: string }) {
       {tripStarting && (
         <div data-demo="add-rest" className="relative mx-4 mt-4 rounded-2xl bg-card p-3.5 ring-1 ring-[#FF2E7E]/30">
           <LeverTag l="t" />
-          <div className="text-[15px] font-bold">{c.photos.length === 1 ? 'Your trip starts here' : 'Two photos from the same trip'}</div>
-          <div className="mt-0.5 text-[12.5px] text-mute">{c.photos.length === 1 ? 'Keep more photos from it, or add them from your gallery.' : 'Add the rest from your gallery and enhance them together.'}</div>
+          <div className="text-[15px] font-bold">{isFamily ? 'Two old photos, one archive' : c.photos.length === 1 ? 'Your trip starts here' : 'Two photos from the same trip'}</div>
+          <div className="mt-0.5 text-[12.5px] text-mute">{isFamily ? 'Add the rest of the album and restore it together.' : 'Add the rest from your gallery and enhance them together.'}</div>
           <button
             onClick={() =>
               push({
                 name: 'picker',
-                title: 'Photos from 12–18 Sep',
+                title: isFamily ? 'Old photos in your gallery' : 'Photos from 12–18 Sep',
                 min: 1,
-                max: 6,
-                preselect: 6,
-                pool: TRIPS,
-                cta: 'Add to the trip',
+                max: isFamily ? 4 : 6,
+                preselect: isFamily ? 4 : 6,
+                pool: isFamily ? OLD : TRIPS,
+                cta: isFamily ? 'Add to the archive' : 'Add to the trip',
                 onDone: () => {
                   pop();
-                  addRestOfTrip();
-                  showToast('Philippines trip: 17 photos');
+                  if (isFamily) {
+                    addRestOfFamily();
+                    showToast('Family archive: 12 photos');
+                  } else {
+                    addRestOfTrip();
+                    showToast('Philippines trip: 17 photos');
+                  }
                 },
               })
             }
             className="mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-white text-[14px] font-semibold text-black"
           >
-            <I.Plus size={16} /> Add the rest of the trip
+            <I.Plus size={16} /> {isFamily ? 'Add the rest of the album' : 'Add the rest of the trip'}
           </button>
         </div>
       )}

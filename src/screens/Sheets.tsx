@@ -62,12 +62,16 @@ function PlanBlock({ trial, setTrial }: { trial: boolean; setTrial: (v: boolean)
   );
 }
 
-/** "Keep this in a project?": people choose what to keep and where. */
+/** "Keep in Studio": loose, in a project, or as the start of a new one. People choose. */
 function KeepThis({ photo, title }: { photo: string; title: string }) {
-  const { creations, closeSheet, push, keepLook, startTrip, addToTrip, showToast, resetStack, track } = useStore();
+  const { creations, kept, closeSheet, push, keepLook, keepLoose, addToTrip, startFamily, showToast, resetStack } = useStore();
   const projects = creations.filter((c) => !c.chatOnly);
   const trip = projects.find((c) => c.id === 'trip');
-  const fromTrip = photo.includes('enhance2') || photo.includes('trip_');
+  const isTripPhoto = (x: string) => x.includes('enhance2') || x.includes('trip_');
+  const isOld = (x: string) => x.includes('archive_');
+  const fromTrip = isTripPhoto(photo);
+  const family = projects.find((c) => c.id === 'family');
+  const keptOld = isOld(photo) && !family ? kept.find((x) => isOld(x) && x !== photo) : undefined;
   const open = (id: string) => {
     closeSheet();
     resetStack([{ name: 'studio' }, { name: 'creation', id }]);
@@ -77,27 +81,48 @@ function KeepThis({ photo, title }: { photo: string; title: string }) {
       <div className="flex items-center gap-3">
         <Img src={photo} className="h-14 w-14 rounded-xl" label={false} />
         <div>
-          <h3 className="text-[20px] font-bold leading-tight">Keep this in a project?</h3>
-          <p className="text-[13px] text-mute">A project keeps going. Add more photos whenever you like.</p>
+          <h3 className="text-[20px] font-bold leading-tight">Keep in Studio</h3>
+          <p className="text-[13px] text-mute">On its own, or in a project that keeps going.</p>
         </div>
       </div>
 
+      {keptOld && (
+        <button
+          data-demo="keep-start-project"
+          onClick={() => {
+            const id = startFamily();
+            showToast('Family archive started');
+            open(id);
+          }}
+          className="relative mt-4 block w-full rounded-2xl bg-white p-3.5 text-left text-black"
+        >
+          <LeverTag l="t" />
+          <div className="text-[12px] font-bold uppercase tracking-wider text-[#FF2E7E]">Like a photo you kept</div>
+          <div className="mt-0.5 text-[17px] font-bold leading-tight">Start a project: Family archive</div>
+          <div className="text-[12.5px] text-black/60">Both are old family photos. Add the rest of the album later.</div>
+          <div className="mt-2.5 flex gap-1.5">
+            {[keptOld, photo].map((s) => (
+              <Img key={s} src={s} className="h-14 w-14 rounded-xl" label={false} />
+            ))}
+          </div>
+        </button>
+      )}
+
       {fromTrip && !trip && (
         <button
-          data-demo="keep-new-trip"
+          data-demo="keep-start-trip"
           onClick={() => {
-            const id = startTrip();
-            showToast('Kept in Philippines trip');
+            const id = addToTrip();
+            showToast('Philippines trip started');
             open(id);
           }}
           className="relative mt-4 flex w-full items-center gap-3 rounded-2xl bg-white p-3.5 text-left text-black"
         >
-          <LeverTag l="t" />
           <span className="grid h-11 w-11 place-items-center rounded-xl bg-black text-white"><I.Plus /></span>
           <span className="flex-1">
             <span className="block text-[12px] font-bold uppercase tracking-wider text-[#FF2E7E]">New project</span>
             <span className="block text-[17px] font-bold leading-tight">Philippines trip</span>
-            <span className="block text-[12.5px] text-black/60">Named from where the photo was taken</span>
+            <span className="block text-[12.5px] text-black/60">Taken in El Nido, 12–18 Sep</span>
           </span>
         </button>
       )}
@@ -112,17 +137,12 @@ function KeepThis({ photo, title }: { photo: string; title: string }) {
           }}
           className="relative mt-4 flex w-full items-center gap-3 rounded-2xl bg-white p-3.5 text-left text-black"
         >
-          <LeverTag l="t" />
           <Img src={trip.cover} className="h-11 w-11 rounded-xl" label={false} />
-          <span className="flex-1">
-            <span className="block text-[12px] font-bold uppercase tracking-wider text-[#FF2E7E]">Same trip</span>
-            <span className="block text-[17px] font-bold leading-tight">Add to Philippines trip</span>
-            <span className="block text-[12.5px] text-black/60">{trip.photos.length} photo{trip.photos.length > 1 ? 's' : ''} there now</span>
-          </span>
+          <span className="flex-1 text-[16px] font-bold">Add to Philippines trip</span>
         </button>
       )}
 
-      {projects.filter((c) => !(fromTrip && c.id === 'trip')).length > 0 && (
+      {projects.filter((c) => !(fromTrip && c.id === 'trip')).length > 0 && !keptOld && (
         <div className="mt-4 space-y-1.5">
           <div className="text-[12px] font-semibold uppercase tracking-wider text-mute">Your projects</div>
           {projects
@@ -148,26 +168,29 @@ function KeepThis({ photo, title }: { photo: string; title: string }) {
         </div>
       )}
 
-      <button
-        onClick={() => {
-          closeSheet();
-          push({ name: 'create' });
-        }}
-        className="mt-2 flex w-full items-center gap-3 rounded-2xl bg-white/[0.05] p-2.5 text-left"
-      >
-        <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/10"><I.Plus /></span>
-        <span className="flex-1 text-[15px] font-semibold">Another new project</span>
-      </button>
-      <button
-        onClick={() => {
-          closeSheet();
-          track('saved_to_gallery');
-          showToast('Saved to Gallery');
-        }}
-        className="mt-1 h-11 w-full text-[13px] font-semibold text-white/50"
-      >
-        No thanks, just save it
-      </button>
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <button
+          onClick={() => {
+            keepLoose(photo);
+            closeSheet();
+            showToast('Kept in Studio');
+            resetStack([{ name: 'studio' }]);
+          }}
+          className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-white/[0.07] text-[14px] font-semibold"
+        >
+          <I.Studio size={16} /> Just keep it
+        </button>
+        <button
+          onClick={() => {
+            closeSheet();
+            push({ name: 'create' });
+          }}
+          className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-white/[0.07] text-[14px] font-semibold"
+        >
+          <I.Plus size={16} /> New project
+        </button>
+      </div>
+      <div className="h-3" />
     </div>
   );
 }

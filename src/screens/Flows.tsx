@@ -11,7 +11,7 @@ import { Img } from '../components/Img';
 import { LeverTag, NavHeader, PillBrand, PillGhost, PillWhite } from '../components/ui';
 
 export function ResultScreen({ kind, image, images, title, trendId, before, projectId }: { kind: ResultKind; image: string; images?: string[]; title: string; trendId?: string; styleId?: string; before?: string; projectId?: string }) {
-  const { mode, pop, showToast, track, resetStack, openSheet, keepLook, keepSet, keepRestore, keepInProject, runGenerating, replaceTop, makeDuo, friend, creations } = useStore();
+  const { mode, pop, showToast, track, resetStack, openSheet, keepLook, keepSet, keepRestore, keepInProject, runGenerating, replaceTop, makeDuo, friend, creations, studioSeen, keepLoose } = useStore();
   const studio = mode === 'studio';
   const [saved, setSaved] = useState(false);
   const trend = TRENDS.find((t) => t.id === trendId);
@@ -76,8 +76,17 @@ export function ResultScreen({ kind, image, images, title, trendId, before, proj
         {studio && kind === 'enhance' && (
           <>
             <SaveShare />
-            <PillBrand demo="keep-this" onClick={() => openSheet({ type: 'keepThis', photo: image, title, before })}>
-              <I.Studio size={18} /> Keep in a project
+            <PillBrand
+              demo="keep-this"
+              onClick={() => {
+                // The first Keep opens Studio for the first time.
+                if (!studioSeen) {
+                  keepLoose(image);
+                  resetStack([{ name: 'studioIntro' }]);
+                } else openSheet({ type: 'keepThis', photo: image, title, before });
+              }}
+            >
+              <I.Studio size={18} /> Keep in Studio
               <LeverTag l="t" />
             </PillBrand>
           </>
@@ -90,7 +99,7 @@ export function ResultScreen({ kind, image, images, title, trendId, before, proj
               demo="keep-this"
               onClick={() => toProject(kind === 'restore' ? keepRestore() : kind === 'set' ? keepSet(images ?? [image]) : keepLook(image, title))}
             >
-              <I.Studio size={18} /> {kind === 'restore' ? 'Keep · start a Family archive' : kind === 'set' ? 'Keep · start a LinkedIn set' : 'Keep in a project'}
+              <I.Studio size={18} /> {kind === 'restore' ? 'Keep · start a Family archive' : kind === 'set' ? 'Keep · start a LinkedIn set' : kind === 'trend' ? `Keep · start a ${title} set` : 'Keep in a project'}
               <LeverTag l="t" />
             </PillBrand>
             {kind === 'trend' && trend?.result2 && (
@@ -284,7 +293,7 @@ export function GridScreen({ title, items }: { title: string; items: { src: stri
 }
 
 export function AboutScreen() {
-  const { pop, resetAll, isPro, cancelPro, showToast } = useStore();
+  const { pop, resetAll, isPro, cancelPro, showToast, startReturningFree, setMode, mode, goTab, resetStack, setOnboarded } = useStore();
   return (
     <div className="flex h-full flex-col">
       <NavHeader title="Settings" onBack={pop} />
@@ -301,6 +310,17 @@ export function AboutScreen() {
             Cancel Pro
           </PillGhost>
         )}
+        <PillGhost
+          onClick={() => {
+            if (mode !== 'studio') setMode('studio');
+            startReturningFree();
+            goTab('studio');
+            resetStack([]);
+            setOnboarded({ today: true, studio: true });
+          }}
+        >
+          Try as a returning free user
+        </PillGhost>
         <PillGhost
           onClick={() => {
             resetAll();

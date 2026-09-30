@@ -48,7 +48,7 @@ export const SELFIES = [A.ref(1), A.ref(2), A.ref(3), A.enhanceSrc];
 
 /** Me: saved once from 4 selfies, then updated only by you. */
 export function meProfile(grown = false): Identity {
-  const history = [{ when: DATES.today, text: 'Saved from 4 selfies, as AI Photos does' }];
+  const history = [{ when: DATES.today, text: 'Saved from 4 selfies, for the Y2K Yearbook trend' }];
   if (grown) history.push({ when: '21 Sep', text: 'You added 2 photos of you from Philippines trip' });
   return {
     id: 'me',
@@ -82,7 +82,7 @@ export const PAOLA_STYLE: CommunityStyle = { id: 'st-80s', title: '80s film', cr
 
 export const CAMERA_ROLL: string[] = [...[1, 2, 3, 4, 5, 6].map(A.trip), ...[1, 2, 3, 4].map(A.ref), A.enhanceBefore, A.enhance2Before, ...[1, 2, 3, 4].map(A.old), A.friend];
 /** The gallery as Enhance shows it: the trip first. */
-export const GALLERY = [A.enhance2Before, A.trip(1), A.trip(3), A.old(2), A.trip(4), A.enhanceBefore, A.old(4), A.trip(6), A.old(1)];
+export const GALLERY = [A.old(3), A.old(1), A.trip(1), A.enhance2Before, A.trip(3), A.old(2), A.trip(4), A.enhanceBefore, A.old(4)];
 
 let pid = 0;
 export const photo = (original: string, status: ProjectPhoto['status'], enhanced?: string): ProjectPhoto => ({
@@ -123,26 +123,33 @@ export const styleOf = (src: string) => Object.entries(STYLE_SETS).find(([, v]) 
 export function styleCreation(key: string, srcs: string[]): Creation {
   const set = STYLE_SETS[key];
   if (key === 'headshot') return { ...linkedinSet(0), looks: srcs.map((s) => look(s, 'Casual Headshot', true)) };
-  return { id: set.id, title: set.title, intent: 'looks', cover: srcs[0], photos: [], looks: srcs.map((s) => look(s, set.title, true)), goal: set.srcs.length, lastEdit: 'Just now', style: set.title };
+  return { id: set.id, title: set.title, intent: 'looks', cover: srcs[0], photos: [], looks: srcs.map((s) => look(s, set.title, true)), goal: set.srcs.length, lastEdit: 'Just now', style: set.title, chat: [{ id: 'yc0', from: 'remini', text: `Ask for more in the ${set.title} style, with Me.` }] };
 }
 
-/** The family archive from the restore path: the photos you picked, restored, plus the rest of the album waiting. */
-export function familyArchive(restored = 4): Creation {
-  const photos = [
-    ...[1, 2, 3, 4].map((n, i) => photo(A.old(n), i < restored ? 'enhanced' : 'original', A.restored(n))),
-    ...cycle([1, 2, 3, 4], 8).map((n) => photo(A.old(n), 'original', A.restored(n))),
-  ];
+/** Old family photos in the order they are kept: the first, the second, then the rest of the album. */
+const FAMILY_ORDER = [3, 1, 2, 4];
+
+/** A personal project: old family photos, restored. It starts from the photos you keep. */
+export function familyProject(own: 1 | 2 | 12, done: number): Creation {
+  const nums = own === 12 ? [...FAMILY_ORDER, ...cycle(FAMILY_ORDER, 8)] : FAMILY_ORDER.slice(0, own);
+  const photos = nums.map((n, i) => photo(A.old(n), i < done ? 'enhanced' : 'original', A.restored(n)));
   return {
     id: 'family',
     title: 'Family archive',
+    place: 'Old family photos',
     intent: 'family',
     cover: `${A.restored(3)}|${A.old(3)}`,
     photos,
     looks: [],
-    goal: 12,
+    goal: photos.length,
     lastEdit: 'Just now',
-    chat: [{ id: 'fc0', from: 'remini', text: 'Ask for anything Remini does, on the whole archive.' }],
+    chat: [{ id: 'fc0', from: 'remini', text: 'Ask Remini for anything it does, on the whole archive.' }],
   };
+}
+
+/** The restore path from onboarding: the photos you picked, restored, plus the rest of the album waiting. */
+export function familyArchive(restored = 4): Creation {
+  return familyProject(12, restored);
 }
 
 /** A set of profile photos in the Casual Headshot style, n of 5. */
