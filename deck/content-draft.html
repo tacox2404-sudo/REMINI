@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Content Draft</title>
+<style>
+  :root { --ink:#111; --mute:#666; --line:#ddd; --accent:#e0245e; --bg:#fafafa; --card:#fff; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink:#eee; --mute:#999; --line:#333; --bg:#111; --card:#1a1a1a; } }
+  :root[data-theme="dark"] { --ink:#eee; --mute:#999; --line:#333; --bg:#111; --card:#1a1a1a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, "Segoe UI", Inter, Arial, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .sub { color: var(--mute); margin: 0 0 24px; }
+  .notes { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 16px 20px; margin-bottom: 32px; }
+  .notes h2 { font-size: 16px; margin: 0 0 8px; }
+  .notes li { margin: 4px 0; }
+  .part { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin: 40px 0 12px; }
+  .slide { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px; margin: 12px 0; }
+  .meta { font-size: 12px; color: var(--mute); display: flex; gap: 12px; margin-bottom: 4px; }
+  .title { font-size: 18px; font-weight: 700; margin: 0 0 8px; }
+  .slide ul { margin: 6px 0; padding-left: 20px; }
+  .slide li { margin: 2px 0; }
+  .visual, .src { font-size: 13px; color: var(--mute); margin-top: 8px; }
+  .visual b { color: var(--ink); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 8px 0; }
+  th, td { border-bottom: 1px solid var(--line); text-align: left; padding: 5px 8px; vertical-align: top; }
+  th { font-weight: 600; color: var(--mute); }
+  td.n, th.n { text-align: right; white-space: nowrap; }
+  .hl { background: rgba(224,36,94,.08); }
+  .big { font-size: 22px; font-weight: 800; }
+  @media (max-width: 600px) { table { font-size: 12.5px; } th, td { padding: 4px; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Remini Studio · deck content draft</h1>
+<p class="sub">Step 1 of 4: words and story only, no design. 9 slides in the executive summary, 27 in the full story, 4 in the appendix. Numbers from the Truth doc and <i>Remini_Studio_Impact.xlsx</i> (Summary, Hurdle, Scenarios, Margins, NPV tabs)</p>
+
+<div class="notes">
+  <h2>What I would change, and questions for you</h2>
+  <ul>
+    <li><b>McKinsey guide.</b> The PDF is a set of strategy articles more than a slide manual. Two things I took from it: its exhibit format (full-sentence title, then a small subtitle with the metric and unit, then source notes), now used on every chart slide of the design draft; and the ten questions of "Have you tested your strategy lately?". An optional appendix slide could answer them in one line each (for example, "Does it put you ahead of trends? Yes: single edits are commoditising and creating together is becoming normal"). I would keep it only if you expect a strategy-heavy panel</li>
+    <li><b>Prototype example vs Truth example.</b> The Truth doc says "5 of 17 done, finish your trip". The prototype now hits the limit in the Family archive ("5 of 12 restored"). I used the prototype wording on the Show slides and in the journey table, so words and screens match. The idea is the same; tell me if you would rather keep the Truth wording</li>
+    <li><b>One subtle number choice.</b> The Excel reports revenue per install two ways: without invites (Summary row 17: +14% / +16.6% / +21.2%) and with invites (Hurdle tab: Balanced +16.9% against the +16.0% bar). I compare against the bar with invites included everywhere, since the bar includes them. The bar itself shifts slightly by scenario (15.1% / 16.0% / 17.9%) because margin differs; I quote 16% as the Balanced bar</li>
+    <li><b>Small Excel fix.</b> Summary insight 4 ends mid-sentence ("Invites (about 0.3% more installs)"). Worth completing before anyone opens the file</li>
+    <li><b>Candidates to cut</b> if you want it tighter: merge slides 13 and 14 (profit formulas and returning users), merge 31 and 32 (scenarios and where the value comes from), and cut Show slide 28 if the live demo follows</li>
+    <li><b>Title of the deck.</b> I propose "Remini Studio · bigger jobs worth paying for". Alternative: "From one result to work that keeps going"</li>
+  </ul>
+</div>
+
+<!-- ============ EXECUTIVE SUMMARY ============ -->
+<div class="part">Part 1 · Executive summary</div>
+
+<div class="slide"><div class="meta"><span>1</span><span>Title</span></div>
+  <div class="title">Remini Studio</div>
+  <ul><li>Bigger jobs worth paying for, and a reason to come back</li><li>A new Remini feature for at least $5M of NPV over 2 years</li></ul>
+  <div class="visual"><b>Visual:</b> the Studio home from the prototype, cropped on a phone</div>
+</div>
+
+<div class="slide"><div class="meta"><span>2</span><span>Agenda</span></div>
+  <div class="title">Executive summary</div>
+  <ul><li>The idea and the prize</li><li>Why Remini needs it now</li><li>Why Studio works</li><li>The economics</li><li>Feasibility, test and launch</li></ul>
+</div>
+
+<div class="slide"><div class="meta"><span>3</span><span>The idea</span></div>
+  <div class="title">Remini Studio is a personal space to create, keep and grow work, alone or with friends</div>
+  <table><tr><th>Part</th><th>What it does</th></tr>
+    <tr><td><b>Projects</b></td><td>A job that keeps going: a family archive, a trip, a set of looks. Progress and Enhance all</td></tr>
+    <tr><td><b>Profiles</b></td><td>Me, the face profile Remini already makes, now kept and improving. Friends add their own</td></tr>
+    <tr><td><b>Together</b></td><td>Invite friends into a project, duo shoots, friends' styles with your own face</td></tr>
+    <tr><td><b>AI across it</b></td><td>Remini chat inside every project, shared with the people in it</td></tr></table>
+  <ul><li>Free limits stay the same · people choose what to keep · Studio is private, not a feed</li></ul>
+</div>
+
+<div class="slide"><div class="meta"><span>4</span><span>Show it and the prize</span></div>
+  <div class="title">The free limit lands inside a job people care about, and Studio clears the $5M bar in the base case</div>
+  <ul>
+    <li><span class="big">$5.3M</span> NPV over 2 years in the Balanced case (1.06x the target)</li>
+    <li>Range across the three scenarios: $4.7M to $6.3M</li>
+    <li>Balanced: trial start +10%, conversion held, paid weeks +6% (about 1.7 more paid days)</li>
+  </ul>
+  <div class="visual"><b>Visual:</b> prototype paywall "Finish your Family archive with Pro · 5 of 12 done free", next to the NPV figure</div>
+  <div class="src">Source: Remini_Studio_Impact.xlsx, Summary</div>
+</div>
+
+<div class="slide"><div class="meta"><span>5</span><span>Context</span></div>
+  <div class="title">The market is moving against one-off edits, and Remini's weak spot is keeping value after the first result</div>
+  <table><tr><th>The market</th><th>Remini today</th></tr>
+    <tr><td>One-off AI edits are becoming a commodity</td><td>95% of installs never start a trial</td></tr>
+    <tr><td>Viral moments are large but short</td><td>About 98% of daily users installed earlier; only 0.65% of daily users pay</td></tr>
+    <tr><td>New users are harder to win</td><td>Payers leave after about 4 paid weeks</td></tr>
+    <tr><td>Net revenue retention averaged 87%, the lowest in the portfolio</td><td>A free user is worth cents, a trial about $4</td></tr></table>
+  <ul><li>So what: value has to come from more reasons to use Remini and keep paying, not from more installs</li></ul>
+  <div class="src">Sources: Bending Spoons prospectus (2026), Q2 2026 earnings call, case brief</div>
+</div>
+
+<div class="slide"><div class="meta"><span>6</span><span>Why Studio solves it</span></div>
+  <div class="title">Studio answers each problem with something that carries on after the first result</div>
+  <table><tr><th>What we found</th><th>How Studio answers</th><th>Lever</th></tr>
+    <tr><td>95% never try; Fixers stop at the free limit</td><td>Projects make the job bigger than the allowance, and the limit lands inside it</td><td>Trial start</td></tr>
+    <tr><td>Trial users finish their task before deciding</td><td>Together unlocks in the trial: friends join, share styles, create</td><td>Conversion</td></tr>
+    <tr><td>Payers leave once the job is done</td><td>Unfinished projects, an improving Me, friends' additions</td><td>Paid weeks</td></tr>
+    <tr><td>An extra install is worth about 22 cents</td><td>Invited friends arrive into a project with work already waiting</td><td>Installs</td></tr>
+    <tr><td>Single edits are easy to copy</td><td>A history of your work and your people that is hard to leave</td><td>All</td></tr></table>
+</div>
+
+<div class="slide"><div class="meta"><span>7</span><span>Economics</span></div>
+  <div class="title">Studio needs about 16% more revenue per install, and the base case gets there with moderate moves</div>
+  <table><tr><th></th><th class="n">Trial rush</th><th class="n hl">Balanced</th><th class="n">Engaged</th></tr>
+    <tr><td>Trial start</td><td class="n">+20%</td><td class="n hl">+10%</td><td class="n">+7%</td></tr>
+    <tr><td>Conversion</td><td class="n">−5%</td><td class="n hl">0%</td><td class="n">+3%</td></tr>
+    <tr><td>Paid weeks</td><td class="n">0%</td><td class="n hl">+6%</td><td class="n">+10%</td></tr>
+    <tr><td><b>NPV over 2 years</b></td><td class="n"><b>$4.7M</b></td><td class="n hl"><b>$5.3M</b></td><td class="n"><b>$6.3M</b></td></tr></table>
+  <ul>
+    <li><b>Conversion is the pivot, not trial volume:</b> Trial rush doubles the trial lift yet earns less per install</li>
+    <li><b>The real cost is margin, not headcount:</b> 89% to 86% after AI cost, worth −$1.5M</li>
+    <li><b>Returning users are cheap upside:</b> +$0.8M</li>
+    <li><b>Anchored in evidence:</b> AI Photos lifted trial start by 20% and the lift lasted; Balanced assumes half</li>
+  </ul>
+  <div class="src">Source: Remini_Studio_Impact.xlsx, Summary and Hurdle</div>
+</div>
+
+<div class="slide"><div class="meta"><span>8</span><span>Feasibility and risks</span></div>
+  <div class="title">Studio is mostly built on what Remini already runs, and each new risk has a clear rule</div>
+  <table><tr><th>Already in Remini</th><th>New</th></tr>
+    <tr><td>Face profiles, enhance, AI photos and video, trend packs, duo photoshoots, AI chat</td><td>The Studio area, storage per account, Enhance all, invites and shared projects</td></tr></table>
+  <table><tr><th>Risk</th><th>Rule</th></tr>
+    <tr><td>Other people's faces</td><td>Only a person adds their own face, is notified when it is used, and can remove it</td></tr>
+    <tr><td>Privacy</td><td>Same consent and deletion rules as AI Photos</td></tr>
+    <tr><td>Content</td><td>Projects are private to their members</td></tr>
+    <tr><td>Compute cost</td><td>Free limits and a 7-day trial keep usage bounded</td></tr></table>
+</div>
+
+<div class="slide"><div class="meta"><span>9</span><span>Close</span></div>
+  <div class="title">A random test on new installs settles it within weeks</div>
+  <ul>
+    <li>Months 1 and 2: build · month 3: test on 10% of new installs · month 4: 50% · month 5: everyone</li>
+    <li>Trial start shows within days, conversion and paid weeks within weeks</li>
+    <li>Roll out if revenue per install after costs clears the bar; improve if people use Studio but money does not move; stop if neither moves</li>
+    <li>Next: the live demo</li>
+  </ul>
+</div>
+
+<!-- ============ FULL STORY ============ -->
+<div class="part">Part 2 · Full story</div>
+
+<div class="slide"><div class="meta"><span>10</span><span>Section divider and agenda</span></div>
+  <div class="title">Full story</div>
+  <ul><li>Market · Remini today · Users · Levers</li><li>The problem · Options and choice</li><li>Remini Studio · Why it works · The prototype</li><li>Launch · Impact · Feasibility and risks</li></ul>
+</div>
+
+<div class="slide"><div class="meta"><span>11</span><span>Market</span></div>
+  <div class="title">Four forces make one-off edits and viral waves a weaker base for growth</div>
+  <table><tr><th>Force</th><th>What I found</th><th>What it means for Remini</th></tr>
+    <tr><td>One-off AI edits are a commodity</td><td>ChatGPT's image tool added about 1M users in one hour (Mar 2025); Nano Banana brought 10M+ new Gemini users and 200M+ edits in about a week (Aug 2025)</td><td>A single effect is easy to copy and increasingly free</td></tr>
+    <tr><td>Viral moments are short</td><td>Six viral spikes for Remini after 2023, each large and short-lived</td><td>Remini wins attention, but each wave fades</td></tr>
+    <tr><td>New users are harder to win</td><td>Q2 2026: new users harder to acquire, existing users behave as before</td><td>Growth from installs gets more expensive</td></tr>
+    <tr><td>Keeping revenue is the weak spot</td><td>Net revenue retention averaged 87% from Q1 2023 to Q1 2026, the lowest in the portfolio</td><td>Revenue from each group of users shrinks over time</td></tr></table>
+  <div class="src">Sources: Business Today, 9to5Google, Bending Spoons prospectus (2026), Q2 2026 earnings call</div>
+</div>
+
+<div class="slide"><div class="meta"><span>12</span><span>Remini today: funnel</span></div>
+  <div class="title">Of 350,000 installs a day, 95% never start a trial</div>
+  <table><tr><th>Step, per day</th><th class="n">People</th><th class="n">Share</th></tr>
+    <tr><td>Install</td><td class="n">350,000</td><td class="n">100%</td></tr>
+    <tr><td>Enhance at least one photo</td><td class="n">315,000</td><td class="n">90%</td></tr>
+    <tr><td>Generate at least one AI image or video</td><td class="n">70,000</td><td class="n">20%</td></tr>
+    <tr><td>Start a free trial (60% at onboarding, 40% after using the app)</td><td class="n">17,500</td><td class="n">5%</td></tr>
+    <tr><td>Pay (20% of trials), then about 4 paid weeks</td><td class="n">3,500</td><td class="n">1%</td></tr></table>
+  <div class="visual"><b>Visual:</b> horizontal funnel bars</div>
+  <div class="src">Source: case brief</div>
+</div>
+
+<div class="slide"><div class="meta"><span>13</span><span>Remini today: money</span></div>
+  <div class="title">New installs bring $70,000 a day in subscriptions, and ads add only cents per free user</div>
+  <ul>
+    <li>Subscriptions: 350,000 × 5% trial × 20% conversion × 4 weeks × $5 = <b>$70,000 a day</b>, about $25.6M a year</li>
+    <li>Ads: 332,500 free users × 3.8 ads × $0.005 = about $6,300 a day, 8% of new-user revenue</li>
+    <li>A free user is worth cents; a trial is worth about $4 (20% × $20)</li>
+  </ul>
+  <div class="src">Source: case brief; ads on actual usage (one ad per action after the first)</div>
+</div>
+
+<div class="slide"><div class="meta"><span>14</span><span>Remini today: returning users</span></div>
+  <div class="title">About 98% of daily users installed earlier, and very few of them pay</div>
+  <ul>
+    <li>15M daily users, of which 350,000 are new installs (2.3%)</li>
+    <li>About 98,000 people paying at any moment (3,500 a day × 28 days), 0.65% of daily users</li>
+    <li>A large base already uses Remini every day without paying</li>
+  </ul>
+  <div class="visual"><b>Visual:</b> one bar of 15M daily users split into new, returning free and paying</div>
+</div>
+
+<div class="slide"><div class="meta"><span>15</span><span>Users</span></div>
+  <div class="title">Fixers and Creators have opposite strengths, and both need something that carries on after the first result</div>
+  <table><tr><th></th><th>Fixers</th><th>Creators</th></tr>
+    <tr><td>Why they come</td><td>To improve their photos: old family pictures, blurry shots, a backlog</td><td>To create: AI looks, trends, themselves in new styles</td></tr>
+    <tr><td>How many</td><td>At least 70% of installs enhance and never generate</td><td>Up to 20% of installs</td></tr>
+    <tr><td>Average use</td><td>6 enhancements</td><td>1 AI image</td></tr>
+    <tr><td>Strength</td><td>Stay subscribed longer</td><td>Start trials more often</td></tr>
+    <tr><td>Weakness</td><td>Start trials less often</td><td>Leave at the end of the trial or soon after paying</td></tr>
+    <tr><td>What free users need</td><td>A reason to finish a big job</td><td>Jobs that grow: more photos, people, ideas</td></tr></table>
+  <div class="src">Evidence: usage split (brief), onboarding answers match usage, money behaviour differs (Remini team)</div>
+</div>
+
+<div class="slide"><div class="meta"><span>16</span><span>Levers</span></div>
+  <div class="title">Each 1% on any lever is worth the same $700 a day, and trial start, conversion and paid weeks are the easiest to move</div>
+  <ul><li>Subscriptions = installs × trial start × conversion × paid weeks × price</li></ul>
+  <table><tr><th>Lever</th><th>Today</th><th>Room to grow</th><th>Ease of moving it</th></tr>
+    <tr><td>Trial start</td><td>5%</td><td>Large: 95% never try</td><td>Proven: AI Photos +20%, and it lasted</td></tr>
+    <tr><td>Conversion</td><td>20% of trials</td><td>Medium (24.3% median in comparable apps)</td><td>Moderate: value must show within 7 days</td></tr>
+    <tr><td>Paid weeks</td><td>4</td><td>Medium</td><td>Hardest: people need reasons to come back</td></tr>
+    <tr><td>Installs</td><td>350,000 a day</td><td>Large</td><td>Costly: an extra install is worth about 22 cents</td></tr>
+    <tr><td>Price and paywall</td><td>$5 a week</td><td>Small</td><td>Easy, but moves money among people who already want Remini</td></tr>
+    <tr><td>Ads</td><td>8% of new-user revenue</td><td>Very small</td><td>Capped by the free allowance</td></tr></table>
+  <div class="src">Sources: case brief, Remini team, RevenueCat State of Subscription Apps 2026</div>
+</div>
+
+<div class="slide"><div class="meta"><span>17</span><span>Levers: correlation</span></div>
+  <div class="title">The levers move together, so the change has to come from behaviour, not from forcing one number</div>
+  <ul>
+    <li>More installs without a better experience mean lower conversion, with no real gain</li>
+    <li>The model shows it: Trial rush lifts trials by 20% but converts worse, and earns less per install than Balanced</li>
+    <li>So Studio acts on the whole experience: trial start, conversion, paid weeks and invites together</li>
+  </ul>
+  <div class="visual"><b>Visual:</b> chain installs → trials → subscribers → paid weeks, with the Trial rush example</div>
+</div>
+
+<div class="slide"><div class="meta"><span>18</span><span>The problem, and why now</span></div>
+  <div class="title">Remini delivers a great single result, but little carries on after it</div>
+  <table><tr><th>Where value leaks</th><th>Why it matters now</th></tr>
+    <tr><td>Most people leave before a trial</td><td>Single edits are becoming free elsewhere</td></tr>
+    <tr><td>Trial users finish their task before deciding</td><td>Viral waves fade</td></tr>
+    <tr><td>Subscribers stop once the task is done</td><td>New users cost more to win, and each cohort's revenue shrinks</td></tr></table>
+  <ul><li>Raising the value of each user, today about 22 cents per install, is the growth path that does not depend on more installs or the next viral wave</li></ul>
+</div>
+
+<div class="slide"><div class="meta"><span>19</span><span>What others do</span></div>
+  <div class="title">Remixing and creating together work when tied to your own face, your friends and a purpose; feeds alone do not hold people</div>
+  <table><tr><th>Product</th><th>What it does</th><th>What I take from it</th></tr>
+    <tr><td>CapCut templates</td><td>"Use template" with your own clips</td><td>People love reusing others' creations with their own content</td></tr>
+    <tr><td>Picsart Replay</td><td>Apply another user's exact edits</td><td>User-made recipes have lasted for years</td></tr>
+    <tr><td>Remix (Facemix)</td><td>Your face in any image</td><td>Exists, as a niche social network</td></tr>
+    <tr><td>Sora cameos</td><td>Verified face, friends use it with approval</td><td>1M downloads in under 5 days, then falling: a feed alone does not hold people</td></tr>
+    <tr><td>Meta AI Vibes</td><td>A feed of AI videos to remix</td><td>Cold reception without a personal purpose</td></tr>
+    <tr><td>ChatGPT group chats</td><td>Up to 20 people creating in one chat</td><td>Creating together through chat is becoming normal</td></tr></table>
+  <div class="src">Sources: CapCut help centre, Picsart blog, Remix blog, Axios, CNBC, Sherwood News, TechCrunch, OpenAI</div>
+</div>
+
+<div class="slide"><div class="meta"><span>20</span><span>Options and choice</span></div>
+  <div class="title">A personal space moves the most levers, and the right ones, for both kinds of user</div>
+  <table><tr><th>Option</th><th>Levers it moves</th><th>Serves</th><th>Comment</th></tr>
+    <tr><td>A new viral trend or effect</td><td>Installs, trial start</td><td>Creators</td><td>Waves fade and effects are copied</td></tr>
+    <tr><td>Price, plan or paywall changes</td><td>Trial start, conversion</td><td>Both</td><td>Optimises today's result, not the deeper problem</td></tr>
+    <tr><td>A public feed of AI content</td><td>Installs, paid weeks</td><td>Creators</td><td>Similar feeds had a cold reception</td></tr>
+    <tr class="hl"><td><b>A personal space to create, alone and with friends</b></td><td>Trial start, conversion, paid weeks, installs from invites</td><td>Both</td><td>What each person builds grows over time</td></tr></table>
+</div>
+
+<div class="slide"><div class="meta"><span>21</span><span>The solution</span></div>
+  <div class="title">Remini Studio: projects that keep going, profiles that improve, and friends to create with</div>
+  <table><tr><th>In order of importance</th><th>What it is</th><th>Built on</th></tr>
+    <tr><td>1 · Projects</td><td>A job that keeps going, with progress ("5 of 12 restored") and Enhance all</td><td>New: Studio area and storage</td></tr>
+    <tr><td>2 · Profiles</td><td>Saved faces, yours and friends' with consent, used across projects</td><td>AI Photos face profiles</td></tr>
+    <tr><td>3 · Together</td><td>Invite friends into a project, group and duo shoots, remix friends' styles with your face</td><td>Duo photoshoots, trend packs</td></tr>
+    <tr><td>4 · AI across it</td><td>Remini chat inside each project, shared with its members</td><td>Remini's AI chat</td></tr></table>
+</div>
+
+<div class="slide"><div class="meta"><span>22</span><span>How people use it</span></div>
+  <div class="title">Everything made in Remini can flow into Studio, and people choose what to keep</div>
+  <ul>
+    <li>After any result: Save, Share, or Keep in Studio</li>
+    <li>Kept photos that belong together become a project</li>
+    <li>Opening Studio shows projects with progress, new looks on your profiles, and what friends added</li>
+  </ul>
+  <table><tr><th>Design rules</th></tr>
+    <tr><td>Free limits stay as they are</td></tr><tr><td>People choose what to keep and share</td></tr><tr><td>Only a person can add their own face, and can remove it at any time</td></tr><tr><td>Nothing is held back after cancelling</td></tr><tr><td>Studio is a personal space, not a public feed</td></tr></table>
+</div>
+
+<div class="slide"><div class="meta"><span>23</span><span>Why it works</span></div>
+  <div class="title">Each moment of the journey is designed to move one lever</div>
+  <table><tr><th>Moment</th><th>What the user sees</th><th>What it triggers</th></tr>
+    <tr><td>First results</td><td>"Keep in Studio", then a project suggestion</td><td>A job starts, bigger than one edit</td></tr>
+    <tr><td>Free limit</td><td>"5 of 12 done, finish your archive", with creating together in Pro</td><td>Trial start</td></tr>
+    <tr><td>Trial week</td><td>Together unlocked: invites, duo shoots, shared chat, remix</td><td>Conversion, and installs from invited friends</td></tr>
+    <tr><td>Paid weeks</td><td>Unfinished projects, new looks on saved profiles, friends' additions</td><td>Paid weeks</td></tr>
+    <tr><td>After cancelling</td><td>Projects stay viewable and downloadable</td><td>A reason to come back later</td></tr></table>
+</div>
+
+<div class="slide"><div class="meta"><span>24</span><span>The prototype · Keep</span></div>
+  <div class="title">Keep turns a single result into the start of a project</div>
+  <div class="visual"><b>Visual:</b> three screens: restored photo with Save, Share and Keep in Studio · Welcome to Studio · "Start a project: Family archive"</div>
+</div>
+
+<div class="slide"><div class="meta"><span>25</span><span>The prototype · Projects</span></div>
+  <div class="title">The free limit lands inside the project, with creating together as the reason to try Pro</div>
+  <div class="visual"><b>Visual:</b> two screens: Family archive at 2 of 12 with Restore all · paywall at 5 of 12 with "With Pro, make it together"</div>
+</div>
+
+<div class="slide"><div class="meta"><span>26</span><span>The prototype · Profiles</span></div>
+  <div class="title">Me is saved once, and every new look needs no upload</div>
+  <div class="visual"><b>Visual:</b> three screens: Y2K Yearbook result "With Me" · the Y2K set at 2 of 2 · the Me page with its likeness</div>
+</div>
+
+<div class="slide"><div class="meta"><span>27</span><span>The prototype · Together</span></div>
+  <div class="title">Friends join a project for free and bring their photos and their own styles</div>
+  <div class="visual"><b>Visual:</b> three screens: WhatsApp invite into the trip · Paola joined with her photos · her shared 80s style and the duo shoot</div>
+</div>
+
+<div class="slide"><div class="meta"><span>28</span><span>The prototype · Chat and coming back</span></div>
+  <div class="title">Each project has its own Remini chat, and coming back is about your own work and friends</div>
+  <div class="visual"><b>Visual:</b> three screens: chat list per project · the trip's shared chat · Welcome back</div>
+</div>
+
+<div class="slide"><div class="meta"><span>29</span><span>Launch</span></div>
+  <div class="title">Launch as a random test on new installs, with a clear rule to roll out, improve or stop</div>
+  <table><tr><th>Design</th><th>Measure</th><th>Decide</th></tr>
+    <tr><td>New installs split at random: Studio or today's Remini, everything else identical</td><td>Trial start, conversion, paid weeks, invites, revenue per install after costs</td><td>Roll out if revenue per install after costs clears the bar</td></tr>
+    <tr><td>Results split by onboarding answer (Fixers vs Creators)</td><td>Trial start within days; conversion and retention within weeks</td><td>Improve the design if people use Studio but money does not move</td></tr>
+    <tr><td>A small group keeps the old version longer</td><td>Checks the effect lasts</td><td>Stop if neither trials nor repeat use move</td></tr></table>
+  <ul><li>Rollout: build in months 1 and 2, test on 10% in month 3, 50% in month 4, everyone from month 5</li></ul>
+</div>
+
+<div class="slide"><div class="meta"><span>30</span><span>Impact: the bar</span></div>
+  <div class="title">$5M is about 10% of two years of new-user subscriptions, but timing and cost raise the bar to about 16%</div>
+  <table><tr><th>Step</th><th class="n">Value</th></tr>
+    <tr><td>NPV target</td><td class="n">$5.0M</td></tr>
+    <tr><td>less: returning users</td><td class="n">−$0.8M</td></tr>
+    <tr><td>Needed from new users</td><td class="n">$4.2M</td></tr>
+    <tr><td>Per day once live (after build, test, rollout and 9% discounting)</td><td class="n">$7,369</td></tr>
+    <tr><td>plus Studio's running cost (lower margin on today's revenue)</td><td class="n">$2,235</td></tr>
+    <tr><td>Extra subscription revenue needed per day</td><td class="n">$11,201</td></tr>
+    <tr><td><b>Change in revenue per install needed</b></td><td class="n"><b>+16.0%</b></td></tr></table>
+  <div class="visual"><b>Visual:</b> waterfall</div>
+  <div class="src">Source: Remini_Studio_Impact.xlsx, Hurdle (Balanced margin)</div>
+</div>
+
+<div class="slide"><div class="meta"><span>31</span><span>Impact: scenarios</span></div>
+  <div class="title">Balanced clears the bar, Engaged clears it comfortably, and Trial rush falls just short</div>
+  <table><tr><th></th><th class="n">Trial rush</th><th class="n hl">Balanced</th><th class="n">Engaged</th></tr>
+    <tr><td>What happens</td><td>Many curious trials, weaker conversion</td><td class="hl">Projects meet the limit, friends sell the trial</td><td>Fewer extra trials, deeper use</td></tr>
+    <tr><td>Trial start</td><td class="n">+20%</td><td class="n hl">+10%</td><td class="n">+7%</td></tr>
+    <tr><td>Conversion</td><td class="n">−5%</td><td class="n hl">0%</td><td class="n">+3%</td></tr>
+    <tr><td>Paid weeks</td><td class="n">0%</td><td class="n hl">+6%</td><td class="n">+10%</td></tr>
+    <tr><td>Invited installs per 100 trial users</td><td class="n">5</td><td class="n hl">5</td><td class="n">8</td></tr>
+    <tr><td>Revenue per install (invites included)</td><td class="n">+14.3%</td><td class="n hl">+16.9%</td><td class="n">+21.8%</td></tr>
+    <tr><td>Margin after AI cost (today 89%)</td><td class="n">86.6%</td><td class="n hl">85.7%</td><td class="n">84.3%</td></tr>
+    <tr><td><b>NPV over 2 years</b></td><td class="n"><b>$4.7M</b></td><td class="n hl"><b>$5.3M</b></td><td class="n"><b>$6.3M</b></td></tr>
+    <tr><td>NPV / $5M target</td><td class="n">0.94x</td><td class="n hl">1.06x</td><td class="n">1.26x</td></tr></table>
+  <div class="src">Source: Remini_Studio_Impact.xlsx, Scenarios and NPV</div>
+</div>
+
+<div class="slide"><div class="meta"><span>32</span><span>Impact: where the value comes from</span></div>
+  <div class="title">In the base case, new-install revenue drives the value and extra AI usage is the main cost</div>
+  <table><tr><th>Balanced, NPV over 2 years</th><th class="n">Value</th></tr>
+    <tr><td>Subscriptions from new installs</td><td class="n">+$5.9M</td></tr>
+    <tr><td>Returning users starting a trial</td><td class="n">+$0.8M</td></tr>
+    <tr><td>Invited friends</td><td class="n">+$0.1M</td></tr>
+    <tr><td>Ads</td><td class="n">−$0.01M</td></tr>
+    <tr><td>Extra AI usage (lower margin)</td><td class="n">−$1.5M</td></tr>
+    <tr><td><b>NPV</b></td><td class="n"><b>$5.3M</b></td></tr></table>
+  <div class="visual"><b>Visual:</b> waterfall</div>
+  <div class="src">Source: Remini_Studio_Impact.xlsx, Summary section 3</div>
+</div>
+
+<div class="slide"><div class="meta"><span>33</span><span>Impact: margins</span></div>
+  <div class="title">Studio's real cost is margin: AI creation costs about 25 times an enhancement</div>
+  <ul>
+    <li>Per action: enhancement $0.0024 · AI creation $0.060 (90% images at $0.039, 10% short videos at $0.25)</li>
+    <li>AI creation is 74% of AI cost in Balanced</li>
+    <li>Margin after AI compute and storage: 89% today, 85.7% in Balanced, worth −$1.5M of NPV</li>
+    <li>Bounded by the free limits and the 7-day trial; costs at public list prices, so the real margin may be higher</li>
+  </ul>
+  <div class="src">Source: Remini_Studio_Impact.xlsx, Margins and Inputs</div>
+</div>
+
+<div class="slide"><div class="meta"><span>34</span><span>Impact: modelling choices</span></div>
+  <div class="title">The model is deliberately simple, and what it leaves out is upside</div>
+  <table><tr><th>Choice</th><th>How it is modelled</th></tr>
+    <tr><td>Timing</td><td>2 months to build, a test month on 10%, a rollout month at 50%, then everyone</td></tr>
+    <tr><td>Discounting</td><td>9% a year (estimate from Bending Spoons' debt and equity cost)</td></tr>
+    <tr><td>Costs</td><td>Only what Studio adds: AI compute and storage</td></tr>
+    <tr><td>Returning users</td><td>Assumption: 1 in 20,000 a day starts a trial, about 730 a day at launch, fading 5% a month. The least evidenced input</td></tr>
+    <tr><td>Invites and ads</td><td>Invites add about 0.3% more installs; ads move by a few dollars a day</td></tr>
+    <tr><td>Left out, all upside</td><td>Invites by invited friends, people coming back after cancelling, cheaper internal compute</td></tr></table>
+</div>
+
+<div class="slide"><div class="meta"><span>35</span><span>Feasibility</span></div>
+  <div class="title">Most of Studio already runs in Remini; what is new is the space, the storage and the sharing</div>
+  <table><tr><th>Piece</th><th>In Remini today</th><th>What is new</th></tr>
+    <tr><td>Face profiles</td><td>Yes, several per account</td><td>Reused in projects; friends add their own</td></tr>
+    <tr><td>Enhance, AI photos, video, retouch</td><td>Yes</td><td>Results can go into a project</td></tr>
+    <tr><td>Trend packs and duo photoshoots</td><td>Yes</td><td>Run on saved profiles, including groups</td></tr>
+    <tr><td>AI chat</td><td>Yes</td><td>Inside a project, shared with members</td></tr>
+    <tr><td>Projects with progress</td><td>No</td><td>Studio area and storage per account</td></tr>
+    <tr><td>Enhance all</td><td>No</td><td>Batch on the existing model</td></tr>
+    <tr><td>Invites and shared projects</td><td>No</td><td>Links, members, notifications</td></tr>
+    <tr><td>User-made styles and remix</td><td>Partly: a trend pack is a saved recipe</td><td>Users share a recipe; others apply it to their profile</td></tr></table>
+</div>
+
+<div class="slide"><div class="meta"><span>36</span><span>Risks</span></div>
+  <div class="title">The operating risks are real, and each one has a clear rule</div>
+  <table><tr><th>Risk</th><th>How I would handle it</th></tr>
+    <tr><td>Other people's faces</td><td>Only the person adds their own face, is notified when it is used and can remove it; friends by invite only</td></tr>
+    <tr><td>Privacy of saved faces</td><td>Same consent and deletion rules as AI Photos, with a clear "delete my profile"</td></tr>
+    <tr><td>Inappropriate content</td><td>Projects are private to their members; shared styles are recipes within Remini</td></tr>
+    <tr><td>Compute and storage cost</td><td>Grows with use; free limits stay, and trials are time-limited</td></tr>
+    <tr><td>Building it</td><td>Existing product teams, reusing existing models and profiles</td></tr></table>
+</div>
+
+<!-- ============ APPENDIX ============ -->
+<div class="part">Appendix</div>
+
+<div class="slide"><div class="meta"><span>A1</span><span>Fact sheet</span></div>
+  <div class="title">The case numbers behind the story</div>
+  <table><tr><th>Number</th><th>Value</th><th>Source</th></tr>
+    <tr><td>Daily / monthly active users</td><td>15M / 100M</td><td>Brief</td></tr>
+    <tr><td>Installs</td><td>350,000 a day</td><td>Brief</td></tr>
+    <tr><td>Installs starting a trial</td><td>5% (60% at onboarding)</td><td>Brief</td></tr>
+    <tr><td>Trials converting</td><td>20%</td><td>Brief</td></tr>
+    <tr><td>Weekly price / revenue per subscriber</td><td>$5 / $20, about 4 paid weeks</td><td>Brief</td></tr>
+    <tr><td>Downloaders who enhance / generate</td><td>90% (6 photos) / 20% (1 item)</td><td>Brief</td></tr>
+    <tr><td>Free allowance</td><td>5 enhancements, 5 generations</td><td>Brief</td></tr>
+    <tr><td>AI Photos</td><td>Trial start +20%, conversion unchanged, lasted</td><td>Remini team</td></tr>
+    <tr><td>Comparable apps</td><td>24.3% median trial-to-paid, weekly plans</td><td>RevenueCat 2026</td></tr></table>
+</div>
+
+<div class="slide"><div class="meta"><span>A2</span><span>Scenario inputs</span></div>
+  <div class="title">Usage growth and invites behind each scenario</div>
+  <table><tr><th></th><th class="n">Trial rush</th><th class="n">Balanced</th><th class="n">Engaged</th></tr>
+    <tr><td>Enhancement usage with Studio</td><td class="n">+25%</td><td class="n">+50%</td><td class="n">+75%</td></tr>
+    <tr><td>AI creation usage with Studio</td><td class="n">+15%</td><td class="n">+30%</td><td class="n">+50%</td></tr>
+    <tr><td>Invited installs per 100 trial users</td><td class="n">5</td><td class="n">5</td><td class="n">8</td></tr>
+    <tr><td>AI cost per trial (today $0.44)</td><td class="n">$0.51</td><td class="n">$0.60</td><td class="n">$0.71</td></tr>
+    <tr><td>Bar for $5M at this margin</td><td class="n">+15.1%</td><td class="n">+16.0%</td><td class="n">+17.9%</td></tr></table>
+  <div class="src">Source: Remini_Studio_Impact.xlsx, Scenarios and Margins</div>
+</div>
+
+<div class="slide"><div class="meta"><span>A3</span><span>Sensitivity</span></div>
+  <div class="title">The least evidenced input, returning users, moves the NPV by less than $1M</div>
+  <ul>
+    <li>Returning users add $0.8M in Balanced</li>
+    <li>If the earlier-install base declined at the full 10.6% monthly turnover instead of 5%, Balanced NPV would fall by about $0.3M</li>
+  </ul>
+  <div class="src">Source: Remini_Studio_Impact.xlsx, Inputs</div>
+</div>
+
+<div class="slide"><div class="meta"><span>A4</span><span>Sources</span></div>
+  <div class="title">Sources</div>
+  <ul><li>Bending Spoons prospectus (2026) · Bending Spoons Q2 2026 earnings call · Business Today (Apr 2025) · 9to5Google (Sep 2025) · RevenueCat, State of Subscription Apps 2026 · CapCut help centre · Picsart blog · Remix blog (Feb 2024) · Axios (Sep 2025) · CNBC (Oct 2025) · Sherwood News (2026) · TechCrunch (Sep 2025) · OpenAI (Nov 2025) · Appfigures (Jan 2023)</li></ul>
+</div>
+
+</main>
+</body>
+</html>
