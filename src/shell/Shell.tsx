@@ -261,7 +261,7 @@ function useDemoDriver() {
     const was = prev.current;
     // Moving forward into a new chapter shows its card first; going back never does.
     if (demo === null) setChapterCard(null);
-    else if (was === null || (demo > was && BEATS[was]?.step !== BEATS[demo].step)) setChapterCard(BEATS[demo].step);
+    else if ((was === null || (demo > was && BEATS[was]?.step !== BEATS[demo].step)) && CHAPTERS[BEATS[demo].step - 1].card) setChapterCard(BEATS[demo].step);
     else setChapterCard(null);
     if (demo === null && prev.current === BEATS.length - 1) {
       setLastDemoDone(true);

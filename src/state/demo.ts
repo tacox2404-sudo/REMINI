@@ -19,7 +19,8 @@ function scene(s: Store, mode: Mode, stage: Stage, routes: Route[] = []) {
   s.setStage(stage);
   if (s.mode !== mode) s.setMode(mode);
   s.goTab(mode === 'studio' ? 'studio' : 'enhance');
-  s.resetStack(routes);
+  // Demo jumps fade in rather than slide, so nothing flies across the screen.
+  s.resetStack(routes, -1);
 }
 
 const first: Route = { name: 'result', kind: 'enhance', title: 'Restored', image: A.restored(3), before: A.old(3) };
@@ -31,13 +32,14 @@ const remix: Route = { name: 'result', kind: 'remix', image: A.remix90s, title: 
 const duo: Route = { name: 'result', kind: 'together', image: A.together90s, title: `You & ${FRIEND}`, projectId: 'eighties' };
 
 /** The chapters follow the idea: what's new, then Projects, Profiles, Together and Remini chat. */
-export const CHAPTERS: { name: string; tagline: string; isNew?: boolean }[] = [
+/** Only the three pillars (card: true) get a chapter card on the phone. */
+export const CHAPTERS: { name: string; tagline: string; isNew?: boolean; card?: boolean }[] = [
   { name: 'Remini today', tagline: 'Great results, one photo at a time' },
   { name: 'Keep', tagline: 'One new button', isNew: true },
   { name: 'Meet Studio', tagline: 'Where kept photos live and keep going', isNew: true },
-  { name: 'Projects', tagline: 'A job bigger than one edit', isNew: true },
-  { name: 'Profiles', tagline: 'Your face, saved once, getting better', isNew: true },
-  { name: 'Together', tagline: 'Projects with the people in them', isNew: true },
+  { name: 'Projects', tagline: 'A job bigger than one edit', isNew: true, card: true },
+  { name: 'Profiles', tagline: 'Your face, saved once, getting better', isNew: true, card: true },
+  { name: 'Together', tagline: 'Projects with the people in them', isNew: true, card: true },
   { name: 'Remini chat', tagline: 'One chat per project', isNew: true },
   { name: 'Coming back', tagline: 'Three weeks later, still on Pro' },
 ];

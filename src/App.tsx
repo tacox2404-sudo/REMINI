@@ -136,7 +136,9 @@ function PhoneContent() {
   );
 }
 
-/** A full-screen chapter card on the phone when the demo enters a new section. It stays until Next, → or a tap. */
+const PILLARS = CHAPTERS.filter((c) => c.card);
+
+/** A full-screen card on the phone when the demo reaches one of Studio's three pillars. It stays until Next, → or a tap. */
 function ChapterCard() {
   const { chapterCard: show, setChapterCard } = useStore();
   const ch = show ? CHAPTERS[show - 1] : null;
@@ -151,21 +153,21 @@ function ChapterCard() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
         >
           <div className="absolute -right-24 -top-24 h-[380px] w-[380px] rounded-full bg-[radial-gradient(closest-side,rgba(255,46,126,0.45),transparent)]" />
-          <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.05, duration: 0.45 }} className="relative w-full">
-            <div className="text-[120px] font-extrabold leading-none tracking-tighter text-white/[0.08]">{String(show).padStart(2, '0')}</div>
-            {ch.isNew && <span className="rounded-md bg-brand px-2 py-[2px] text-[11px] font-extrabold tracking-wider">NEW WITH STUDIO</span>}
-            <div className="mt-3 text-[44px] font-extrabold leading-[1.02] tracking-tight">{ch.name}</div>
+          <div className="relative w-full">
+            <span className="rounded-md bg-brand px-2 py-[2px] text-[11px] font-extrabold tracking-wider">NEW WITH STUDIO</span>
+            <div className="mt-3 text-[48px] font-extrabold leading-[1.02] tracking-tight">{ch.name}</div>
             <div className="mt-2 text-[17px] leading-snug text-white/65">{ch.tagline}</div>
-            <div className="mt-6 flex gap-1.5">
-              {CHAPTERS.map((_, i) => (
-                <span key={i} className={`h-1 flex-1 rounded-full ${i + 1 < (show ?? 0) ? 'bg-white/40' : i + 1 === show ? 'bg-brand' : 'bg-white/10'}`} />
+            <div className="mt-8 flex gap-4 text-[13px] font-semibold">
+              {PILLARS.map((p) => (
+                <span key={p.name} className={p.name === ch.name ? 'text-white' : 'text-white/30'}>
+                  {p.name}
+                </span>
               ))}
             </div>
-            <div className="mt-8 text-[13px] font-semibold text-white/40">Tap to start</div>
-          </motion.div>
+          </div>
         </motion.button>
       )}
     </AnimatePresence>
@@ -173,7 +175,7 @@ function ChapterCard() {
 }
 
 export function Phone() {
-  const { demo } = useStore();
+  const { demo, chapterCard } = useStore();
   const root = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
@@ -184,7 +186,8 @@ export function Phone() {
     return () => window.removeEventListener('resize', fit);
   }, []);
 
-  const target = demo !== null ? BEATS[demo]?.target ?? null : null;
+  // No highlight while a chapter card covers the screen.
+  const target = demo !== null && chapterCard === null ? BEATS[demo]?.target ?? null : null;
 
   return (
     <div className="phone-slot" style={{ ['--s' as string]: scale }}>
