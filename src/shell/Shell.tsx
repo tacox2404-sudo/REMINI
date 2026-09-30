@@ -206,34 +206,29 @@ export function EventLog() {
   );
 }
 
-/** Next: first dismisses a chapter card, then moves to the next beat. */
-function useAdvance() {
-  const { demo, setDemo, chapterCard, setChapterCard } = useStore();
-  return () => {
-    if (demo === null) return;
-    if (chapterCard !== null) return setChapterCard(null);
-    setDemo(demo >= BEATS.length - 1 ? null : demo + 1);
-  };
-}
-
 export function DemoCaption({ compact = false }: { compact?: boolean }) {
-  const { demo, setDemo, chapterCard } = useStore();
-  const advance = useAdvance();
+  const { demo, setDemo } = useStore();
   if (demo === null) return null;
   const b = BEATS[demo];
-  const last = demo === BEATS.length - 1 && chapterCard === null;
-  const onCard = chapterCard !== null;
-  const ch = CHAPTERS[b.step - 1];
+  const last = demo === BEATS.length - 1;
   return (
-    <motion.div key={`${demo}-${onCard}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`rounded-2xl bg-white text-black shadow-2xl ${compact ? 'p-3' : 'p-4'}`}>
-      <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-black/45">
-        <span className="flex items-center gap-1.5">
-          {b.step} / {TOTAL_STEPS} · {CHAPTERS[b.step - 1].name}
-          {CHAPTERS[b.step - 1].isNew && <span className="rounded bg-[#FF2E7E] px-1.5 py-[1px] text-[9.5px] font-extrabold tracking-wider text-white">NEW</span>}
-        </span>
-      </div>
-      <div data-ctl={compact ? undefined : 'demo-title'} className={`mt-1 font-bold leading-tight ${compact ? 'text-[15px]' : 'text-[18px]'}`}>{onCard ? ch.name : b.title}</div>
-      {!compact && <p className="mt-1.5 text-[14px] leading-snug text-black/70">{onCard ? ch.tagline : b.caption}</p>}
+    <motion.div key={demo} initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className={`rounded-2xl bg-white text-black shadow-2xl ${compact ? 'p-3' : 'p-4'}`}>
+      {CHAPTERS[b.step - 1].card ? (
+        // Projects, Profiles and Together: the three pillars get a big, coloured section title.
+        <div className="flex h-[28px] items-center gap-2">
+          <span className="bg-gradient-to-r from-[#FF5A4E] to-[#FF2E7E] bg-clip-text text-[26px] font-extrabold leading-none tracking-tight text-transparent">{CHAPTERS[b.step - 1].name}</span>
+          <span className="rounded bg-[#FF2E7E] px-1.5 py-[1px] text-[9.5px] font-extrabold tracking-wider text-white">NEW</span>
+        </div>
+      ) : (
+        <div className="flex h-[28px] items-center justify-between text-[11px] font-bold uppercase tracking-wider text-black/45">
+          <span className="flex items-center gap-1.5">
+            {CHAPTERS[b.step - 1].name}
+            {CHAPTERS[b.step - 1].isNew && <span className="rounded bg-[#FF2E7E] px-1.5 py-[1px] text-[9.5px] font-extrabold tracking-wider text-white">NEW</span>}
+          </span>
+        </div>
+      )}
+      <div data-ctl={compact ? undefined : 'demo-title'} className={`mt-1 font-bold leading-tight ${compact ? 'text-[15px]' : 'text-[18px]'}`}>{b.title}</div>
+      {!compact && <p className="mt-1.5 min-h-[132px] text-[14px] leading-snug text-black/70">{b.caption}</p>}
       <div className="mt-3 flex items-center gap-2">
         <div className="flex flex-1 gap-1">
           {Array.from({ length: TOTAL_STEPS }, (_, i) => (
@@ -243,8 +238,8 @@ export function DemoCaption({ compact = false }: { compact?: boolean }) {
         <button disabled={demo === 0} onClick={() => setDemo(demo - 1)} className="h-8 rounded-full bg-black/[0.06] px-3 text-[13px] font-semibold disabled:opacity-30">
           ←
         </button>
-        <button data-ctl={compact ? undefined : 'demo-next'} onClick={advance} className="h-8 rounded-full bg-black px-3.5 text-[13px] font-semibold text-white">
-          {last ? 'Finish' : onCard ? 'Start →' : 'Next →'}
+        <button data-ctl={compact ? undefined : 'demo-next'} onClick={() => setDemo(last ? null : demo + 1)} className="h-8 rounded-full bg-black px-3.5 text-[13px] font-semibold text-white">
+          {last ? 'Finish' : 'Next →'}
         </button>
       </div>
     </motion.div>
@@ -253,16 +248,10 @@ export function DemoCaption({ compact = false }: { compact?: boolean }) {
 
 function useDemoDriver() {
   const s = useStore();
-  const { demo, setDemo, setLastDemoDone, setOnboarded, setClosing, setChapterCard } = s;
+  const { demo, setDemo, setLastDemoDone, setOnboarded, setClosing } = s;
   const prev = useRef<number | null>(null);
-  const advance = useAdvance();
 
   useEffect(() => {
-    const was = prev.current;
-    // Moving forward into a new chapter shows its card first; going back never does.
-    if (demo === null) setChapterCard(null);
-    else if ((was === null || (demo > was && BEATS[was]?.step !== BEATS[demo].step)) && CHAPTERS[BEATS[demo].step - 1].card) setChapterCard(BEATS[demo].step);
-    else setChapterCard(null);
     if (demo === null && prev.current === BEATS.length - 1) {
       setLastDemoDone(true);
       afterDemo(s);
@@ -283,13 +272,13 @@ function useDemoDriver() {
     const onKey = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
       if (demo === null) return;
-      if (e.key === 'ArrowRight') advance();
+      if (e.key === 'ArrowRight') setDemo(demo >= BEATS.length - 1 ? null : demo + 1);
       else if (e.key === 'ArrowLeft') setDemo(Math.max(0, demo - 1));
       else if (e.key === 'Escape') setDemo(null);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [advance, demo, setDemo]);
+  }, [demo, setDemo]);
 }
 
 const fmtM = (x: number) => `${x < 0 ? '−' : ''}$${Math.abs(x) < 1e5 ? `${Math.round(Math.abs(x) / 1e3)}k` : `${Math.abs(x / 1e6).toFixed(1)}M`}`;

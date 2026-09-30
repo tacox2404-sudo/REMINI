@@ -52,8 +52,6 @@ function useStoreValue() {
   const [chatTyping, setChatTyping] = useState<string | null>(null);
   const [lastDemoDone, setLastDemoDone] = useState(false);
   const [closing, setClosing] = useState(false);
-  /** The chapter card shown when the demo enters a new section; dismissed by Next, → or a tap. */
-  const [chapterCard, setChapterCard] = useState<number | null>(null);
   const [freeUsed, setFreeUsed, freeUsedRef] = useSyncState(0);
   const [isPro, setIsPro, isProRef] = useSyncState(false);
   const [demo, setDemo] = useState<number | null>(null);
@@ -556,7 +554,7 @@ function useStoreValue() {
     sheet, openSheet, closeSheet, generating, runGenerating, toast, showToast, clearToast: useCallback(() => setToast(null), []),
     showLevers, setShowLevers, events, track, clearEvents: useCallback(() => setEvents([]), []),
     identities, identitiesRef, creations, creationsRef, paolaJoined, styleShared, newLooks, returning, cancelled, returningFree, startReturningFree, kept, keptRef, keepLoose, startFamily, addRestOfFamily, studioSeen, setStudioSeen, keepPastWork, addToTrip, addRestOfTrip, segment, onboarded, setOnboarded,
-    freeUsed, isPro, processing, demo, setDemo, splash, setSplash, lastDemoDone, setLastDemoDone, closing, setClosing, chapterCard, setChapterCard, chatTyping,
+    freeUsed, isPro, processing, demo, setDemo, splash, setSplash, lastDemoDone, setLastDemoDone, closing, setClosing, chatTyping,
     setStage, answerSegment, spendFree, startTrip, keepLook, keepSet, keepRestore, keepInProject, processPhotos, enhanceAll, startTrial, finishAfterTrial, cancelPro,
     inviteFriends, friendJoins, shareStyle, withMe, saveMe, applyFriendStyle, makeDuo, improveMe, removeProfile, tryNewLooks, continueCreation, createFromIntent,
     sendChat, keepFromChat, chatCtx, updateCreation, upsertCreation, setFlags, resetAll, clearTimers, friend: FRIEND,

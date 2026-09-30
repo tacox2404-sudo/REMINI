@@ -19,8 +19,7 @@ function scene(s: Store, mode: Mode, stage: Stage, routes: Route[] = []) {
   s.setStage(stage);
   if (s.mode !== mode) s.setMode(mode);
   s.goTab(mode === 'studio' ? 'studio' : 'enhance');
-  // Demo jumps fade in rather than slide, so nothing flies across the screen.
-  s.resetStack(routes, -1);
+  s.resetStack(routes);
 }
 
 const first: Route = { name: 'result', kind: 'enhance', title: 'Restored', image: A.restored(3), before: A.old(3) };
@@ -32,7 +31,7 @@ const remix: Route = { name: 'result', kind: 'remix', image: A.remix90s, title: 
 const duo: Route = { name: 'result', kind: 'together', image: A.together90s, title: `You & ${FRIEND}`, projectId: 'eighties' };
 
 /** The chapters follow the idea: what's new, then Projects, Profiles, Together and Remini chat. */
-/** Only the three pillars (card: true) get a chapter card on the phone. */
+/** The three pillars (card: true) get a bigger, coloured title in the demo caption. */
 export const CHAPTERS: { name: string; tagline: string; isNew?: boolean; card?: boolean }[] = [
   { name: 'Remini today', tagline: 'Great results, one photo at a time' },
   { name: 'Keep', tagline: 'One new button', isNew: true },
@@ -106,8 +105,8 @@ export const BEATS: Beat[] = [
   },
   {
     step: 4,
-    title: 'The free limit, inside the project',
-    caption: 'Free limits stay the same. They just land on something you care about: 5 of 12 restored. Pro finishes the archive, and adds Together.',
+    title: 'Free limit, in the project',
+    caption: 'Free limits stay the same. They land on something you care about: 5 of 12 restored. Pro finishes it and adds Together.',
     target: 'paywall-unfinished',
     enter: (s) => {
       scene(s, 'studio', STAGE.LIMIT, family);

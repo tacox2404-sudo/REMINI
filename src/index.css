@@ -97,7 +97,9 @@ button {
   max-height: calc(100vh - 32px);
 }
 .side-right {
-  justify-content: center;
+  /* Pinned from the top so the caption and its buttons don't move between beats. */
+  justify-content: flex-start;
+  padding-top: 26vh;
 }
 .side-right > :last-child:not(:first-child) {
   max-height: 55vh;

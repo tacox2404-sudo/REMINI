@@ -99,25 +99,22 @@ export function Toast() {
   );
 }
 
-/**
- * Pulsing ring around the element marked `data-demo=<target>`, used by the guided demo.
- * It waits for the screen to settle (layers fading in, sheets sliding up) before it
- * appears, then only follows real movement, so it never flies across the phone.
- */
+/** Pulsing ring around the element marked `data-demo=<target>`, used by the guided demo. */
 export function Spotlight({ target, root }: { target: string | null; root: RefObject<HTMLDivElement> }) {
   const [rect, setRect] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
 
   useLayoutEffect(() => {
-    setRect(null);
-    if (!target) return;
+    if (!target) {
+      setRect(null);
+      return;
+    }
     let scrolled = false;
-    let last: { x: number; y: number; w: number; h: number } | null = null;
     const measure = () => {
       const r = root.current;
       // Only elements on the visible screen (hidden stack layers keep theirs mounted).
       const all = Array.from(r?.querySelectorAll<HTMLElement>(`[data-demo="${target}"]`) ?? []).filter((e) => e.getClientRects().length > 0);
       const el = all.length ? all[all.length - 1] : null;
-      if (!r || !el) return;
+      if (!r || !el) return setRect(null);
       if (!scrolled) {
         scrolled = true;
         // Scroll only the app's own scroll containers, never the phone frame.
@@ -131,42 +128,26 @@ export function Spotlight({ target, root }: { target: string | null; root: RefOb
           const d = el.getBoundingClientRect().left - h.getBoundingClientRect().left;
           if (d < 0 || d + el.offsetWidth > h.clientWidth) h.scrollLeft += d - 16;
         }
-        return; // measure after the scroll has applied
       }
       const a = r.getBoundingClientRect();
       const b = el.getBoundingClientRect();
       const scale = a.width / r.offsetWidth || 1;
-      const next = { x: (b.left - a.left) / scale, y: (b.top - a.top) / scale, w: b.width / scale, h: b.height / scale };
-      if (last && Math.abs(last.x - next.x) < 2 && Math.abs(last.y - next.y) < 2 && Math.abs(last.w - next.w) < 2 && Math.abs(last.h - next.h) < 2) return;
-      last = next;
-      setRect(next);
+      setRect({ x: (b.left - a.left) / scale, y: (b.top - a.top) / scale, w: b.width / scale, h: b.height / scale });
     };
-    // Scroll to the element right away, while the screen is still fading in; show the ring once it has settled.
-    const early = [0, 60, 160].map((ms) => window.setTimeout(() => !scrolled && measure(), ms));
-    let t = 0;
-    const start = window.setTimeout(() => {
-      measure();
-      measure();
-      t = window.setInterval(measure, 200);
-    }, 520);
-    return () => {
-      early.forEach(clearTimeout);
-      clearTimeout(start);
-      clearInterval(t);
-    };
+    measure();
+    const t = window.setInterval(measure, 150);
+    return () => clearInterval(t);
   }, [target, root]);
 
   return (
     <AnimatePresence>
-      {rect && target && (
+      {rect && (
         <motion.div
-          key={target}
           className="pointer-events-none absolute z-[80] rounded-[20px]"
-          style={{ left: rect.x - 6, top: rect.y - 6, width: rect.w + 12, height: rect.h + 12 }}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0 } }}
-          transition={{ duration: 0.25 }}
+          animate={{ opacity: 1, left: rect.x - 6, top: rect.y - 6, width: rect.w + 12, height: rect.h + 12 }}
+          exit={{ opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           <div className="spot-ring absolute inset-0 rounded-[20px]" />
         </motion.div>

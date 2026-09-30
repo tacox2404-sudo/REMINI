@@ -4,7 +4,7 @@ import { StatusBar, TopBar } from './components/Chrome';
 import { ChatBubble, TodayHome, TodayScreen, ToolBar } from './screens/Today';
 import { FirstCreationScreen } from './screens/First';
 import { GeneratingOverlay, Spotlight, Toast } from './components/Overlays';
-import { BEATS, CHAPTERS } from './state/demo';
+import { BEATS } from './state/demo';
 import { useStore } from './state/store';
 import type { Route } from './state/types';
 import { AboutScreen, AnimateScreen, GridScreen, PickerScreen, ResultScreen, Splash, TrendScreen } from './screens/Flows';
@@ -136,46 +136,8 @@ function PhoneContent() {
   );
 }
 
-const PILLARS = CHAPTERS.filter((c) => c.card);
-
-/** A full-screen card on the phone when the demo reaches one of Studio's three pillars. It stays until Next, → or a tap. */
-function ChapterCard() {
-  const { chapterCard: show, setChapterCard } = useStore();
-  const ch = show ? CHAPTERS[show - 1] : null;
-  return (
-    <AnimatePresence>
-      {ch && (
-        <motion.button
-          key={show}
-          data-ctl="chapter-card"
-          onClick={() => setChapterCard(null)}
-          className="absolute inset-0 z-[95] flex flex-col justify-end overflow-hidden bg-ink px-7 pb-20 text-left"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
-        >
-          <div className="absolute -right-24 -top-24 h-[380px] w-[380px] rounded-full bg-[radial-gradient(closest-side,rgba(255,46,126,0.45),transparent)]" />
-          <div className="relative w-full">
-            <span className="rounded-md bg-brand px-2 py-[2px] text-[11px] font-extrabold tracking-wider">NEW WITH STUDIO</span>
-            <div className="mt-3 text-[48px] font-extrabold leading-[1.02] tracking-tight">{ch.name}</div>
-            <div className="mt-2 text-[17px] leading-snug text-white/65">{ch.tagline}</div>
-            <div className="mt-8 flex gap-4 text-[13px] font-semibold">
-              {PILLARS.map((p) => (
-                <span key={p.name} className={p.name === ch.name ? 'text-white' : 'text-white/30'}>
-                  {p.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        </motion.button>
-      )}
-    </AnimatePresence>
-  );
-}
-
 export function Phone() {
-  const { demo, chapterCard } = useStore();
+  const { demo } = useStore();
   const root = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
@@ -186,8 +148,7 @@ export function Phone() {
     return () => window.removeEventListener('resize', fit);
   }, []);
 
-  // No highlight while a chapter card covers the screen.
-  const target = demo !== null && chapterCard === null ? BEATS[demo]?.target ?? null : null;
+  const target = demo !== null ? BEATS[demo]?.target ?? null : null;
 
   return (
     <div className="phone-slot" style={{ ['--s' as string]: scale }}>
@@ -196,7 +157,6 @@ export function Phone() {
           <PhoneContent />
           <div className="dynamic-island" />
           <Spotlight target={target} root={root} />
-          <ChapterCard />
         </div>
       </div>
     </div>

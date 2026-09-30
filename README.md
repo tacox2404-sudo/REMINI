@@ -46,7 +46,7 @@ The photos live in `public/assets/` (web-sized JPGs); the full-size originals ar
 
 ### Guided demo path
 
-Eight chapters, 21 beats. Each new chapter opens with a full-screen chapter card on the phone. The chapters follow the idea (Projects, Profiles, Together, Remini chat), and the ones Studio adds are marked NEW in the caption:
+Eight chapters, 21 beats. The chapters follow the idea (Projects, Profiles, Together, Remini chat), and the ones Studio adds are marked NEW in the caption:
 
 1. **Remini today**: the home, and an old family photo restored and saved.
 2. **Keep** (new): the same restore with Studio. Save and Share as before, plus Keep in Studio.
