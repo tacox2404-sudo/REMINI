@@ -46,17 +46,31 @@ The photos live in `public/assets/` (web-sized JPGs); the full-size originals ar
 
 ### Guided demo path
 
-Nine steps, 23 beats, following the moments of the strategy:
+Nine steps, 15 beats, each tagged with the lever it moves:
 
-1. **Remini today**: home, AI Photos with its 4-selfie profile, a quick enhance saved to the camera roll.
-2. **Start as usual**: "What brings you to Remini?" (Look great; Restore and Profile photos also work) → a quick enhance with Save, Share and the new Keep → "Keep this in a project?" with 16 more photos from the same trip.
-3. **What Studio is**: the Philippines trip project (1 of 17) → the Studio home: Projects, Profiles, Together.
-4. **The free limit**: Enhance all runs the free enhancements, then the limit lands inside the trip ("5 of 17 done") with Together showcased.
-5. **Trial week, together**: the trip finishes → invite via WhatsApp → Paola joins with her photos and her own face → she shares her 80s style → you use it with your face (Me is saved from 4 selfies the first time) → a duo shoot → the shared project chat.
-6. **Chats and Me**: the bubble opens your chats (personal + per project) → Me: add the photos of you from the trip.
-7. **Coming back**: notifications → Welcome back (8 new photos from Paola, new looks with your updated Me) → how Me has grown.
+1. **Remini today**: the home, and a quick enhance saved to the camera roll.
+2. **Keep**: the same enhance with Studio. Keep puts the first photo in a new project, Philippines trip. A second photo from the trip is added to it.
+3. **The project**: you add the rest from your gallery (17 photos, 2 done), then the Studio home.
+4. **The free limit** (trial start): "5 of 17 done, finish your trip with Pro", with Together shown.
+5. **Together**:
+   - Invite via WhatsApp (installs). Joining and adding photos is free for friends.
+   - Paola joins the trip and, separately, shares her own 80s look (conversion).
+   - Your version and a duo shoot go into a separate project, 80s with Paola.
+6. **Day 6 of the trial** (conversion): the trial ends tomorrow, and the projects keep going.
+7. **Coming back** (paid weeks):
+   - Welcome back two weeks later: Luca's photos, and new looks you can try (made only if you tap).
+   - Me, kept and improving: from 4 selfies to 6 photos.
 8. **After cancelling**: projects stay viewable and downloadable.
-9. **Why it pays**: the impact model (same formulas as `Remini_Studio_Impact.xlsx`): Trial rush $4.7M, Balanced $5.3M, Engaged $6.3M, bar +16.0% revenue per install.
+9. **Why it pays**: the impact model on one page (scenarios and levers, plus where the value comes from).
+
+After the demo, **Explore on your own** opens specific moments:
+- a returning free user
+- onboarding with Studio on the paywall
+- Remini chat
+- the shared trip
+- the restore and profile paths
+- notifications
+- AI Photos today
 
 ### Screenshots
 

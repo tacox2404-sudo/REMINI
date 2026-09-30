@@ -1,4 +1,4 @@
-import { A, FRIEND, PAOLA_STYLE, progressOf } from '../state/data';
+import { A, FRIEND, TRIPS, progressOf } from '../state/data';
 import { FREE_LIMIT, useStore } from '../state/store';
 import type { ProjectPhoto } from '../state/types';
 import { BeforeAfter } from '../components/BeforeAfter';
@@ -29,7 +29,7 @@ function PhotoTile({ ph, family, onOpen }: { ph: ProjectPhoto; family: boolean; 
 }
 
 export function CreationScreen({ id }: { id: string }) {
-  const { creations, pop, push, enhanceAll, continueCreation, openSheet, isPro, cancelled, freeUsed, processing, styleShared, applyFriendStyle, showToast, track } = useStore();
+  const { creations, pop, push, enhanceAll, continueCreation, openSheet, isPro, cancelled, freeUsed, processing, addRestOfTrip, showToast, track } = useStore();
   const c = creations.find((x) => x.id === id);
   if (!c) return <NavHeader title="" onBack={pop} />;
   const pr = progressOf(c);
@@ -40,6 +40,7 @@ export function CreationScreen({ id }: { id: string }) {
   const shown = c.photos.filter((p) => (seen.has(p.original) ? false : (seen.add(p.original), true))).slice(0, 8);
   const extra = c.photos.length - shown.length;
   const isTrip = c.id === 'trip';
+  const tripStarting = isTrip && c.photos.length < 3;
   const invite = () => (isPro ? openSheet({ type: 'withFriend', title: c.title, image: c.cover, link: '', projectId: c.id }) : openSheet({ type: 'together' }));
 
   return (
@@ -93,6 +94,7 @@ export function CreationScreen({ id }: { id: string }) {
               {c.shared.members.length} in{c.shared.invited.length ? ` · ${c.shared.invited.join(', ')} invited` : ''}
             </span>
           </div>
+          {isTrip && <div className="mt-2 text-[11.5px] text-mute">Friends join free: adding photos and their own face costs nothing.</div>}
           {c.shared.feed.length > 0 && (
             <div className="mt-2.5 space-y-1">
               {c.shared.feed.slice(0, 3).map((f, i) => (
@@ -106,7 +108,36 @@ export function CreationScreen({ id }: { id: string }) {
         </div>
       )}
 
-      {isTrip && !c.shared && !cancelled && (
+      {tripStarting && (
+        <div data-demo="add-rest" className="relative mx-4 mt-4 rounded-2xl bg-card p-3.5 ring-1 ring-[#FF2E7E]/30">
+          <LeverTag l="t" />
+          <div className="text-[15px] font-bold">{c.photos.length === 1 ? 'Your trip starts here' : 'Two photos from the same trip'}</div>
+          <div className="mt-0.5 text-[12.5px] text-mute">{c.photos.length === 1 ? 'Keep more photos from it, or add them from your gallery.' : 'Add the rest from your gallery and enhance them together.'}</div>
+          <button
+            onClick={() =>
+              push({
+                name: 'picker',
+                title: 'Photos from 12–18 Sep',
+                min: 1,
+                max: 6,
+                preselect: 6,
+                pool: TRIPS,
+                cta: 'Add to the trip',
+                onDone: () => {
+                  pop();
+                  addRestOfTrip();
+                  showToast('Philippines trip: 17 photos');
+                },
+              })
+            }
+            className="mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-white text-[14px] font-semibold text-black"
+          >
+            <I.Plus size={16} /> Add the rest of the trip
+          </button>
+        </div>
+      )}
+
+      {isTrip && !tripStarting && !c.shared && !cancelled && (
         <button data-demo={isPro ? 'invite-card' : 'together-teaser'} onClick={invite} className="relative mx-4 mt-4 flex w-[calc(100%-2rem)] items-center gap-3 rounded-2xl bg-card p-3.5 text-left ring-1 ring-white/10">
           <LeverTag l={isPro ? 'I' : 't'} />
           <div className="flex -space-x-2">
@@ -120,22 +151,6 @@ export function CreationScreen({ id }: { id: string }) {
           </span>
           <I.Chevron size={18} className="text-mute" />
         </button>
-      )}
-
-      {isTrip && styleShared && (
-        <div data-demo="shared-style" className="relative mx-4 mt-3 flex overflow-hidden rounded-2xl bg-card">
-          <Img src={PAOLA_STYLE.cover} className="h-[132px] w-[100px] shrink-0" label={false} />
-          <div className="flex flex-1 flex-col p-3">
-            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-white/60">
-              <Avatar name={FRIEND} size={18} /> {FRIEND} shared her style
-            </div>
-            <div className="mt-1 text-[17px] font-bold leading-tight">{PAOLA_STYLE.title}</div>
-            <button data-demo="use-style" onClick={() => applyFriendStyle((r) => push(r))} className="relative mt-auto flex h-9 items-center justify-center rounded-full bg-white text-[13.5px] font-semibold text-black active:scale-95">
-              Use it with my face
-              <LeverTag l="c" />
-            </button>
-          </div>
-        </div>
       )}
 
       {photoBased && c.looks.length > 0 && (
@@ -177,7 +192,7 @@ export function CreationScreen({ id }: { id: string }) {
               </div>
             )}
           </div>
-          {remaining > 0 && !cancelled && (
+          {remaining > 0 && !cancelled && !tripStarting && (
             <div className="space-y-2 px-4 pt-4">
               <PillWhite demo="enhance-all" disabled={processing === c.id} onClick={() => enhanceAll(c.id)}>
                 <I.Enhance size={18} /> {c.intent === 'family' ? 'Restore all' : 'Enhance all'} · {remaining} waiting

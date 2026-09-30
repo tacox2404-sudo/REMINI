@@ -35,24 +35,28 @@ export const TRENDS: Trend[] = [
   { id: 'y2k', title: 'Y2K Yearbook', tagline: 'Glossy 2000s, neon and chrome', cover: A.generic(10), result: A.y2kMe, result2: A.y2kMe2, hot: true },
 ];
 
-/** Photos of you that turn up in the trip: offered to Me, never added without asking. */
-export const TRIP_PHOTOS_OF_ME = [A.enhance2After, A.ref(4), A.enhanceSrc];
+/**
+ * One clean timeline: the trip was 12–18 Sep, "today" in the demo is Sunday
+ * 20 Sep, the trial's last day is 26 Sep, and coming back is 10 Oct.
+ */
+export const DATES = { today: '20 Sep', trialEnds: '27 Sep', back: 'Saturday 10 October' };
 
-/** Me, the first time it is saved: from 4 selfies, as AI Photos does today. */
+/** The two photos of you in the trip: offered to Me, never added without asking. */
+export const TRIP_PHOTOS_OF_ME = [A.enhance2After, A.trip(1)];
+/** The 4 selfies Me starts from, as AI Photos asks today. */
+export const SELFIES = [A.ref(1), A.ref(2), A.ref(3), A.enhanceSrc];
+
+/** Me: saved once from 4 selfies, then updated only by you. */
 export function meProfile(grown = false): Identity {
-  const history = [{ when: grown ? '14 Sep' : 'Today', text: 'Saved from 4 selfies, as AI Photos does' }];
-  if (grown)
-    history.push(
-      { when: '15 Sep', text: 'You added 3 photos of you from Philippines trip' },
-      { when: '2 days ago', text: 'You approved 2 photos Paola took of you' },
-    );
+  const history = [{ when: DATES.today, text: 'Saved from 4 selfies, as AI Photos does' }];
+  if (grown) history.push({ when: '21 Sep', text: 'You added 2 photos of you from Philippines trip' });
   return {
     id: 'me',
     name: 'Me',
     owner: 'me',
-    subtitle: grown ? 'Updated 2 days ago' : 'Saved today',
+    subtitle: grown ? 'Updated 21 Sep' : `Saved ${DATES.today}`,
     cover: A.ref(1),
-    refs: grown ? [...[1, 2, 3, 4].map(A.ref), ...TRIP_PHOTOS_OF_ME, A.enhanceBefore, A.enhance2Before] : [1, 2, 3, 4].map(A.ref),
+    refs: grown ? [...SELFIES, ...TRIP_PHOTOS_OF_ME] : SELFIES,
     history,
   };
 }
@@ -66,15 +70,15 @@ export function paolaProfile(): Identity {
     subtitle: 'Added by Paola · she can remove it anytime',
     cover: A.friend,
     refs: [A.friend],
-    history: [{ when: 'Today', text: 'Paola added her own face for duo shoots' }],
+    history: [{ when: DATES.today, text: 'Paola added her own face for duo shoots' }],
   };
 }
 
 let lid = 0;
 export const look = (src: string, title: string, isNew = false): Look => ({ id: `lk${++lid}`, src, title, isNew });
 
-/** Paola's own 80s creation. It only exists in the app after she shares it. */
-export const PAOLA_STYLE: CommunityStyle = { id: 'st-80s', title: '80s film', creator: FRIEND, cover: A.friend90s, result: A.remix90s, projectId: 'trip' };
+/** Paola's own 80s creation, made with her free allowance. It only exists in your app after she shares it. */
+export const PAOLA_STYLE: CommunityStyle = { id: 'st-80s', title: '80s film', creator: FRIEND, cover: A.friend90s, result: A.remix90s, projectId: 'eighties' };
 
 export const CAMERA_ROLL: string[] = [...[1, 2, 3, 4, 5, 6].map(A.trip), ...[1, 2, 3, 4].map(A.ref), A.enhanceBefore, A.enhance2Before, ...[1, 2, 3, 4].map(A.old), A.friend];
 /** The gallery as Enhance shows it: the trip first. */
@@ -158,60 +162,76 @@ export function linkedinSet(n = 3): Creation {
 }
 
 export interface TripState {
-  /** Photos of yours enhanced so far (out of 17). */
+  /** How many of your own trip photos are in the project: the first kept, the second, or the whole trip. */
+  own: 1 | 2 | 17;
+  /** Your photos enhanced so far. */
   done: number;
-  /** Friends who joined from the invite. */
-  joined?: string[];
   /** Friends invited who haven't joined yet. */
   invited?: string[];
-  /** Paola's photos: added when she joins. */
+  /** Paola joined (free) and added 4 photos. */
   paola?: boolean;
-  /** 8 more photos Paola added while you were away, not enhanced yet. */
-  paolaMore?: boolean;
-  looks?: Look[];
+  /** 8 more photos Paola added during the trial: waiting, or enhanced. */
+  paolaMore?: 'waiting' | 'done';
+  /** Luca joined later and added 6 photos, waiting. */
+  luca?: boolean;
 }
 
-/** The Philippines trip: the project that starts from one enhanced photo. */
+/** The Philippines trip: a project that starts from one kept photo. */
 export function tripProject(s: TripState): Creation {
-  const mine = [photo(A.enhance2Before, s.done > 0 ? 'enhanced' : 'original', A.enhance2After), ...cycle(TRIPS, 16).map((src, i) => photo(src, i + 1 < s.done ? 'enhanced' : 'original'))];
+  const mine = [photo(A.enhance2Before, s.done > 0 ? 'enhanced' : 'original', A.enhance2After)];
+  if (s.own >= 2) mine.push(photo(A.trip(1), s.done > 1 ? 'enhanced' : 'original'));
+  if (s.own === 17) mine.push(...cycle([2, 3, 4, 5, 6, 1], 15).map((n, i) => photo(A.trip(n), i + 2 < s.done ? 'enhanced' : 'original')));
   const theirs = s.paola ? [2, 3, 4, 5].map((n) => photo(A.trip(n), 'enhanced')) : [];
-  const more = s.paolaMore ? cycle([2, 3, 4, 5, 6, 1], 8).map((n) => photo(A.trip(n), 'original')) : [];
-  const joined = s.joined ?? [];
+  const more = s.paolaMore ? cycle([5, 6, 2, 3], 8).map((n) => photo(A.trip(n), s.paolaMore === 'done' ? 'enhanced' : 'original')) : [];
+  const luca = s.luca ? cycle([4, 2, 6], 6).map((n) => photo(A.trip(n), 'original')) : [];
+  const joined = [...(s.paola ? [FRIEND] : []), ...(s.luca ? ['Luca'] : [])];
   const feed: { who: string; text: string; when: string }[] = [];
-  if (s.paolaMore) feed.push({ who: FRIEND, text: 'added 8 photos from the last night', when: '2d' });
-  if (joined.includes('Luca')) feed.push({ who: 'Luca', text: 'joined from your link', when: '3d' });
-  if (joined.includes(FRIEND)) feed.push({ who: FRIEND, text: 'joined · 4 photos and her face', when: s.paolaMore ? '5d' : 'now' });
-  const photos = [...mine, ...theirs, ...more];
+  if (s.luca) feed.push({ who: 'Luca', text: 'joined free · added 6 photos', when: '9 Oct' });
+  if (s.paolaMore) feed.push({ who: FRIEND, text: 'added 8 photos from the last night', when: '25 Sep' });
+  if (s.paola) feed.push({ who: FRIEND, text: 'joined free · added 4 photos and her face', when: DATES.today });
+  const photos = [...mine, ...theirs, ...more, ...luca];
   return {
     id: 'trip',
     title: 'Philippines trip',
     place: 'El Nido · 12–18 Sep',
     intent: 'trip',
-    cover: A.trip(1),
+    cover: s.own >= 2 ? A.trip(1) : A.enhance2After,
     photos,
-    looks: s.looks ?? [],
+    looks: [],
     goal: photos.length,
-    lastEdit: s.paolaMore ? '2 days ago' : 'Just now',
+    lastEdit: s.luca ? '9 Oct' : 'Just now',
     shared: joined.length || (s.invited ?? []).length ? { members: ['You', ...joined], invited: s.invited ?? [], feed } : undefined,
     chat: [
-      { id: 'tc0', from: 'remini', text: joined.length ? 'This chat is shared with everyone in the trip. Ask for anything Remini does, on the whole project.' : 'Ask for anything Remini does, on the whole trip.' },
+      { id: 'tc0', from: 'remini', text: joined.length ? 'This chat is shared with everyone in the trip. Ask Remini for anything it does, on all the photos.' : 'Ask Remini for anything it does, on all the photos of the trip.' },
       ...(s.paola
         ? [
             { id: 'tc1', from: FRIEND, text: 'Enhance all the photos' },
             { id: 'tc2', from: 'remini', text: 'Done: every photo in the trip, from both of you, is enhanced.', action: 'enhanced' as const },
           ]
         : []),
-      ...((s.looks ?? []).length
-        ? [
-            { id: 'tc3', from: 'me', text: `Duo shoot with ${FRIEND}` },
-            { id: 'tc4', from: 'remini', text: `Here is “You & ${FRIEND}”, made with both your profiles.`, images: [A.together90s], kept: true },
-          ]
-        : []),
     ],
   };
 }
 
+/** Made with Paola, separate from the trip: her 80s style, your version, a duo shoot. */
+export function eightiesProject(looks: Look[]): Creation {
+  return {
+    id: 'eighties',
+    title: '80s with Paola',
+    intent: 'looks',
+    cover: looks[looks.length - 1]?.src ?? A.friend90s,
+    photos: [],
+    looks,
+    goal: looks.length,
+    lastEdit: 'Just now',
+    style: '80s film',
+    shared: { members: ['You', FRIEND], invited: [], feed: [{ who: FRIEND, text: 'shared her 80s film style', when: DATES.today }] },
+    chat: [{ id: 'ec0', from: 'remini', text: 'This chat is shared with Paola. Ask for more in the 80s film style.' }],
+  };
+}
+
 export function progressOf(c: Creation) {
+  if (c.id === 'eighties') return { done: c.looks.length, total: Math.max(1, c.looks.length), label: `${c.looks.length} made together` };
   if (c.intent === 'trip' || c.intent === 'family') {
     const done = c.photos.filter((p) => p.status === 'enhanced').length;
     const total = Math.max(c.goal, c.photos.length);

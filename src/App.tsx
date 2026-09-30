@@ -14,7 +14,7 @@ import { OnboardingScreen } from './screens/Onboarding';
 import { CreationScreen, PhotoScreen } from './screens/Creation';
 import { LockScreen } from './screens/Outside';
 import { SheetHost } from './screens/Sheets';
-import { StudioEntryCard, StudioScreen } from './screens/Studio';
+import { ReturningCard, StudioEntryCard, StudioScreen } from './screens/Studio';
 import { Shell } from './shell/Shell';
 
 function renderRoute(r: Route) {
@@ -58,11 +58,11 @@ function renderRoute(r: Route) {
 
 /** Both modes open on Remini's usual home; With Studio adds the entry to your kept work. */
 function TabRoot() {
-  const { mode } = useStore();
+  const { mode, returningFree } = useStore();
   return (
     <>
       <TopBar />
-      {mode === 'studio' && <StudioEntryCard />}
+      {mode === 'studio' && (returningFree ? <ReturningCard /> : <StudioEntryCard />)}
       <TodayHome />
     </>
   );

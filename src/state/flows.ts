@@ -18,12 +18,14 @@ export function useFlows() {
   /** Quick enhance, exactly as Remini does it: pick, enhance, result. */
   const quickEnhance = useCallback(
     (title = 'Enhance') => {
+      const kept = new Set(s.creationsRef.current.flatMap((c) => c.photos.map((p) => p.original)));
       push({
         name: 'picker',
         title,
         max: 1,
         preselect: 1,
-        pool: GALLERY,
+        // Photos already in a project move to the end, so the next one is ready to pick.
+        pool: [...GALLERY.filter((g) => !kept.has(g)), ...GALLERY.filter((g) => kept.has(g))],
         cta: title === 'Retouch' ? 'Retouch' : 'Enhance',
         onDone: (picked) => {
           const src = picked[0] ?? GALLERY[0];
@@ -36,7 +38,7 @@ export function useFlows() {
         },
       });
     },
-    [push, replaceTop, runGenerating, spendFree, track],
+    [push, replaceTop, runGenerating, s, spendFree, track],
   );
 
   /** Today: upload 8–12 selfies every time and wait for a model. */

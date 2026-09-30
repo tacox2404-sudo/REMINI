@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
-import { A, FRIEND, OTHERS, TRIPS, progressOf } from '../state/data';
+import { A, FRIEND, OTHERS, progressOf } from '../state/data';
 import { FREE_LIMIT, useStore } from '../state/store';
 import type { Sheet } from '../state/types';
 import { I } from '../components/Icons';
@@ -64,10 +64,10 @@ function PlanBlock({ trial, setTrial }: { trial: boolean; setTrial: (v: boolean)
 
 /** "Keep this in a project?": people choose what to keep and where. */
 function KeepThis({ photo, title }: { photo: string; title: string }) {
-  const { creations, closeSheet, push, keepLook, startTrip, showToast, resetStack, track } = useStore();
+  const { creations, closeSheet, push, keepLook, startTrip, addToTrip, showToast, resetStack, track } = useStore();
   const projects = creations.filter((c) => !c.chatOnly);
-  const hasTrip = projects.some((c) => c.id === 'trip');
-  const fromTrip = photo.includes('enhance2') || photo.includes('trip_') || photo.includes('me_ref_4');
+  const trip = projects.find((c) => c.id === 'trip');
+  const fromTrip = photo.includes('enhance2') || photo.includes('trip_');
   const open = (id: string) => {
     closeSheet();
     resetStack([{ name: 'studio' }, { name: 'creation', id }]);
@@ -78,55 +78,73 @@ function KeepThis({ photo, title }: { photo: string; title: string }) {
         <Img src={photo} className="h-14 w-14 rounded-xl" label={false} />
         <div>
           <h3 className="text-[20px] font-bold leading-tight">Keep this in a project?</h3>
-          <p className="text-[13px] text-mute">A project keeps going: all the photos, with progress.</p>
+          <p className="text-[13px] text-mute">A project keeps going. Add more photos whenever you like.</p>
         </div>
       </div>
 
-      {fromTrip && !hasTrip && (
+      {fromTrip && !trip && (
         <button
           data-demo="keep-new-trip"
           onClick={() => {
             const id = startTrip();
-            showToast('Philippines trip started');
+            showToast('Kept in Philippines trip');
             open(id);
           }}
-          className="relative mt-4 block w-full rounded-2xl bg-white p-3.5 text-left text-black"
+          className="relative mt-4 flex w-full items-center gap-3 rounded-2xl bg-white p-3.5 text-left text-black"
         >
           <LeverTag l="t" />
-          <div className="text-[12px] font-bold uppercase tracking-wider text-[#FF2E7E]">Suggested · new project</div>
-          <div className="mt-0.5 text-[18px] font-bold leading-tight">Philippines trip</div>
-          <div className="text-[13px] text-black/60">16 more photos from 12–18 Sep in your gallery</div>
-          <div className="mt-2.5 flex gap-1">
-            {TRIPS.map((s) => (
-              <Img key={s} src={s} degrade className="h-11 flex-1 rounded-lg" label={false} />
-            ))}
-          </div>
+          <span className="grid h-11 w-11 place-items-center rounded-xl bg-black text-white"><I.Plus /></span>
+          <span className="flex-1">
+            <span className="block text-[12px] font-bold uppercase tracking-wider text-[#FF2E7E]">New project</span>
+            <span className="block text-[17px] font-bold leading-tight">Philippines trip</span>
+            <span className="block text-[12.5px] text-black/60">Named from where the photo was taken</span>
+          </span>
         </button>
       )}
 
-      {projects.length > 0 && (
+      {fromTrip && trip && trip.photos.length < 3 && (
+        <button
+          data-demo="keep-add-trip"
+          onClick={() => {
+            addToTrip();
+            showToast('Added to Philippines trip');
+            open('trip');
+          }}
+          className="relative mt-4 flex w-full items-center gap-3 rounded-2xl bg-white p-3.5 text-left text-black"
+        >
+          <LeverTag l="t" />
+          <Img src={trip.cover} className="h-11 w-11 rounded-xl" label={false} />
+          <span className="flex-1">
+            <span className="block text-[12px] font-bold uppercase tracking-wider text-[#FF2E7E]">Same trip</span>
+            <span className="block text-[17px] font-bold leading-tight">Add to Philippines trip</span>
+            <span className="block text-[12.5px] text-black/60">{trip.photos.length} photo{trip.photos.length > 1 ? 's' : ''} there now</span>
+          </span>
+        </button>
+      )}
+
+      {projects.filter((c) => !(fromTrip && c.id === 'trip')).length > 0 && (
         <div className="mt-4 space-y-1.5">
           <div className="text-[12px] font-semibold uppercase tracking-wider text-mute">Your projects</div>
-          {projects.slice(0, 4).map((c) => (
-            <button
-              key={c.id}
-              onClick={() => {
-                if (c.intent === 'trip' || c.intent === 'family') showToast(`Already in ${c.title}`);
-                else {
-                  keepLook(photo, title, c.id);
+          {projects
+            .filter((c) => !(fromTrip && c.id === 'trip'))
+            .slice(0, 3)
+            .map((c) => (
+              <button
+                key={c.id}
+                onClick={() => {
+                  if (c.intent !== 'trip' && c.intent !== 'family') keepLook(photo, title, c.id);
                   showToast(`Kept in ${c.title}`);
-                }
-                open(c.id);
-              }}
-              className="flex w-full items-center gap-3 rounded-2xl bg-white/[0.05] p-2.5 text-left active:bg-white/10"
-            >
-              <Img src={c.cover} className="h-11 w-11 rounded-xl" label={false} />
-              <span className="flex-1">
-                <span className="block text-[15px] font-semibold">{c.title}</span>
-                <span className="block text-[12px] text-mute">{progressOf(c).label}</span>
-              </span>
-            </button>
-          ))}
+                  open(c.id);
+                }}
+                className="flex w-full items-center gap-3 rounded-2xl bg-white/[0.05] p-2.5 text-left active:bg-white/10"
+              >
+                <Img src={c.cover} className="h-11 w-11 rounded-xl" label={false} />
+                <span className="flex-1">
+                  <span className="block text-[15px] font-semibold">{c.title}</span>
+                  <span className="block text-[12px] text-mute">{progressOf(c).label}</span>
+                </span>
+              </button>
+            ))}
         </div>
       )}
 
@@ -168,7 +186,7 @@ function TogetherRow() {
         <span className="text-[14px] font-bold">With Pro, make it together</span>
       </div>
       <ul className="mt-2 space-y-1 text-[12.5px] text-white/70">
-        <li>• Invite the friends who were there into the project</li>
+        <li>• Invite friends or family into the project</li>
         <li>• Duo shoots, and friends’ styles with your own face</li>
         <li>• One Remini chat for everyone in the project</li>
       </ul>
@@ -272,7 +290,7 @@ function Cancelled() {
 }
 
 function PaywallGeneric({ image, reason }: { image?: string; reason: 'onboarding' | 'result' }) {
-  const { closeSheet, resetStack, track } = useStore();
+  const { closeSheet, resetStack, track, mode } = useStore();
   const [trial, setTrial] = useState(true);
   const close = () => {
     closeSheet();
@@ -288,7 +306,7 @@ function PaywallGeneric({ image, reason }: { image?: string; reason: 'onboarding
           <Img src={image} className="absolute inset-0" />
         ) : (
           <div className="grid h-full grid-cols-3 gap-1 px-5">
-            {[A.look(4), A.linkedin(2), A.restored(3)].map((s) => (
+            {[A.generic(20), A.generic(26), A.generic(11)].map((s) => (
               <Img key={s} src={s} className="rounded-xl" label={false} />
             ))}
           </div>
@@ -298,6 +316,13 @@ function PaywallGeneric({ image, reason }: { image?: string; reason: 'onboarding
       </div>
       <h3 className="relative mt-2 text-center text-[26px] font-bold leading-tight tracking-tight">Unlock Remini Pro</h3>
       <p className="mt-1.5 text-center text-[14px] text-white/70">Unlimited enhancements, all AI features, HD downloads</p>
+      {mode === 'studio' && (
+        <div data-demo="onboarding-studio" className="relative mt-3 flex items-center gap-3 rounded-2xl bg-white/[0.06] p-3">
+          <LeverTag l="t" />
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand"><I.Studio size={18} /></span>
+          <span className="text-[12.5px] leading-snug text-white/80"><b className="text-white">Now with Studio:</b> projects that keep going with Enhance all, made together with your friends.</span>
+        </div>
+      )}
       <PlanBlock trial={trial} setTrial={setTrial} />
       <PillBrand className="mt-4" onClick={close}>{trial ? 'Start free trial' : 'Continue'}</PillBrand>
       <button onClick={close} className="mt-1 h-10 w-full text-[13px] font-semibold text-white/50">Not now</button>
@@ -348,7 +373,7 @@ function WithFriend({ title, image, via: initialVia, projectId }: { title: strin
       <div className="px-5 pt-1">
         <button onClick={() => setVia(null)} className="text-[13px] font-semibold text-white/60">‹ Back</button>
         <h3 className="mt-1 text-[20px] font-bold">Invite via {via}</h3>
-        <p className="mt-1 text-[13px] text-mute">Friends without Remini get a link that opens {project.title} with everyone’s photos in it.</p>
+        <p className="mt-1 text-[13px] text-mute">Friends without Remini get a link that opens {project.title} with your photos already in it. Joining is free.</p>
         <div data-demo="invite-preview" className="mt-4 rounded-[22px] bg-[#0b141a] p-3">
           <div className="text-center text-[11px] text-white/40">{via} · Philippines crew 🌴</div>
           <div className="ml-auto mt-2 w-[240px] overflow-hidden rounded-[14px] bg-[#005c4b]">
@@ -389,7 +414,11 @@ function WithFriend({ title, image, via: initialVia, projectId }: { title: strin
             Copy link
           </button>
         </div>
-        {project && <p className="mt-2.5 text-[12px] leading-snug text-mute">Each friend adds their own photos and, if they want, their own face. Only they can add it, and they can remove it anytime.</p>}
+        {project && (
+          <div data-demo="invitee-rules" className="mt-3 rounded-2xl bg-white/[0.05] p-3 text-[12px] leading-snug text-white/70">
+            <b className="text-white">Free for your friends:</b> joining, adding their photos and adding their own face (only they can, and they can remove it). Creating uses their own free allowance, then Pro.
+          </div>
+        )}
       </div>
       {project && paolaJoined && (
         <>

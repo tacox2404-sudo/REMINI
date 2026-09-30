@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { A, FRIEND, OTHERS, PAOLA_STYLE, progressOf } from '../state/data';
+import { A, DATES, FRIEND, OTHERS, PAOLA_STYLE, progressOf } from '../state/data';
 import { useStore } from '../state/store';
 import type { Creation, Identity } from '../state/types';
 import { I } from '../components/Icons';
@@ -48,9 +48,7 @@ export function CreationCard({ c, wide }: { c: Creation; wide?: boolean }) {
       </div>
       <div className="p-3">
         <div className="truncate text-[15px] font-bold">{c.title}</div>
-        <div className="mt-0.5 truncate text-[12px] text-mute">
-          {pr.label} · {c.lastEdit}
-        </div>
+        <div className="mt-0.5 truncate text-[12px] text-mute">{pr.label}</div>
       </div>
     </button>
   );
@@ -87,7 +85,8 @@ export function ProfileCard({ p }: { p: Identity }) {
 
 /** Studio: a personal space for what you choose to keep, alone or with friends. */
 export function StudioScreen() {
-  const { creations, identities, isPro, cancelled, returning, newLooks, paolaJoined, styleShared, push, pop, openSheet } = useStore();
+  const { creations, identities, isPro, cancelled, returning, trialEnding, newLooks, paolaJoined, styleShared, push, pop, openSheet, applyFriendStyle, tryNewLooks, showToast, track } = useStore();
+  const eighties = creations.find((c) => c.id === 'eighties');
   const projects = creations.filter((c) => !c.chatOnly);
   const trip = projects.find((c) => c.id === 'trip');
   const me = identities.find((i) => i.id === 'me');
@@ -113,6 +112,37 @@ export function StudioScreen() {
         </div>
       )}
 
+      {trialEnding && (
+        <div data-demo="trial-ending" className="relative mx-4 mt-3 rounded-[22px] bg-gradient-to-br from-[#2a1320] to-card p-4 ring-1 ring-[#FF2E7E]/25">
+          <LeverTag l="c" />
+          <div className="text-[13px] font-semibold text-[#FFB020]">Day 6 of 7 · your trial ends tomorrow, {DATES.trialEnds}</div>
+          <div className="mt-2 space-y-2">
+            {trip && (
+              <button onClick={() => push({ name: 'creation', id: 'trip' })} className="flex w-full items-center gap-3 text-left">
+                <Img src={A.trip(5)} className="h-11 w-11 rounded-xl" label={false} />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14.5px] font-bold leading-tight">{FRIEND} added 8 photos to {trip.title}</span>
+                  <span className="block text-[12px] text-mute">{waiting} waiting · the trip keeps going</span>
+                </span>
+              </button>
+            )}
+            {eighties && (
+              <button onClick={() => push({ name: 'creation', id: 'eighties' })} className="flex w-full items-center gap-3 text-left">
+                <Img src={eighties.cover} className="h-11 w-11 rounded-xl" label={false} />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14.5px] font-bold leading-tight">{eighties.title}</span>
+                  <span className="block text-[12px] text-mute">{eighties.looks.length} made together</span>
+                </span>
+              </button>
+            )}
+          </div>
+          <PillWhite className="mt-3 !h-11" onClick={() => { track('trial_kept', 'c'); showToast('Pro continues · see you next week'); }}>
+            Keep Pro
+          </PillWhite>
+          <p className="mt-2 text-center text-[11.5px] text-mute">If you stop, everything here stays yours to view and download.</p>
+        </div>
+      )}
+
       {returning && (
         <div data-demo="welcome-card" className="relative mx-4 mt-3 rounded-[22px] bg-gradient-to-br from-[#2a1320] to-card p-4 ring-1 ring-[#FF2E7E]/25">
           <LeverTag l="w" />
@@ -120,20 +150,20 @@ export function StudioScreen() {
           <div className="mt-2 space-y-2">
             {trip && waiting > 0 && (
               <button onClick={() => push({ name: 'creation', id: 'trip' })} className="flex w-full items-center gap-3 text-left">
-                <Img src={A.trip(5)} className="h-11 w-11 rounded-xl" label={false} />
+                <Img src={A.trip(4)} className="h-11 w-11 rounded-xl" label={false} />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[14.5px] font-bold leading-tight">{FRIEND} added 8 photos to {trip.title}</span>
+                  <span className="block text-[14.5px] font-bold leading-tight">Luca joined {trip.title} and added 6 photos</span>
                   <span className="block text-[12px] text-mute">{waiting} waiting to be enhanced</span>
                 </span>
                 <I.Chevron size={16} className="text-mute" />
               </button>
             )}
             {newLooks && me && (
-              <button onClick={() => push({ name: 'result', kind: 'set', image: A.linkedin(1), images: [A.linkedin(1), A.linkedin(2), A.linkedin(3)], title: 'Casual Headshot' })} className="flex w-full items-center gap-3 text-left">
-                <Img src={A.linkedin(1)} className="h-11 w-11 rounded-xl" label={false} />
+              <button data-demo="try-new-looks" onClick={() => tryNewLooks((r) => push(r))} className="flex w-full items-center gap-3 text-left">
+                <Img src={A.generic(21)} className="h-11 w-11 rounded-xl" label={false} />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[14.5px] font-bold leading-tight">New looks with your updated Me</span>
-                  <span className="block text-[12px] text-mute">Casual Headshot · keep them if you like them</span>
+                  <span className="block text-[14.5px] font-bold leading-tight">Try new looks with your updated Me</span>
+                  <span className="block text-[12px] text-mute">Casual Headshot · made only if you tap</span>
                 </span>
                 <I.Chevron size={16} className="text-mute" />
               </button>
@@ -203,27 +233,70 @@ export function StudioScreen() {
           </button>
         ) : (
           <>
-            <div data-demo="friend-joined" className="flex items-center gap-3 rounded-[18px] bg-card p-3">
+            <div className="text-[12px] font-semibold uppercase tracking-wider text-mute">In your projects</div>
+            <button data-demo="friend-joined" onClick={() => push({ name: 'creation', id: 'trip' })} className="flex w-full items-center gap-3 rounded-[18px] bg-card p-3 text-left">
               <Img src={A.friend} className="h-11 w-11 rounded-full" label={false} />
               <div className="min-w-0 flex-1">
-                <div className="text-[14.5px] font-semibold">{FRIEND} joined from your link</div>
-                <div className="text-[12px] text-mute">In {trip?.title ?? 'your trip'} · added her photos and her face</div>
+                <div className="text-[14.5px] font-semibold">{FRIEND} joined {trip?.title ?? 'your trip'}</div>
+                <div className="text-[12px] text-mute">Free, from your link · added 4 photos and her face</div>
               </div>
-            </div>
+              <I.Chevron size={16} className="text-mute" />
+            </button>
             {styleShared && (
-              <button onClick={() => push({ name: 'creation', id: PAOLA_STYLE.projectId })} className="flex w-full items-center gap-3 rounded-[18px] bg-card p-3 text-left">
-                <Img src={PAOLA_STYLE.cover} className="h-11 w-11 rounded-xl" label={false} />
-                <div className="min-w-0 flex-1">
-                  <div className="text-[14.5px] font-semibold">{FRIEND}’s {PAOLA_STYLE.title}</div>
-                  <div className="text-[12px] text-mute">Shared with you in {trip?.title ?? 'your trip'} · use it with your face</div>
+              <>
+                <div className="pt-2 text-[12px] font-semibold uppercase tracking-wider text-mute">Shared with you</div>
+                <div data-demo="shared-style" className="relative flex overflow-hidden rounded-[18px] bg-card">
+                  <Img src={PAOLA_STYLE.cover} className="h-[128px] w-[96px] shrink-0" label={false} />
+                  <div className="flex flex-1 flex-col p-3">
+                    <div className="flex items-center gap-1.5 text-[12px] font-semibold text-white/60">
+                      <Avatar name={FRIEND} size={18} /> {FRIEND}’s own look
+                    </div>
+                    <div className="mt-1 text-[17px] font-bold leading-tight">{PAOLA_STYLE.title}</div>
+                    <div className="text-[11.5px] text-mute">{eighties ? `In ${eighties.title}` : 'Made with her free creations'}</div>
+                    {eighties ? (
+                      <button onClick={() => push({ name: 'creation', id: 'eighties' })} className="mt-auto flex h-9 items-center justify-center rounded-full bg-white/10 text-[13.5px] font-semibold">Open {eighties.title}</button>
+                    ) : (
+                      <button data-demo="make-your-version" onClick={() => applyFriendStyle((r) => push(r))} className="relative mt-auto flex h-9 items-center justify-center rounded-full bg-white text-[13.5px] font-semibold text-black active:scale-95">
+                        Make your version
+                        <LeverTag l="c" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <I.Chevron size={16} className="text-mute" />
-              </button>
+              </>
             )}
           </>
         )}
       </div>
       <div className="h-16" />
+    </div>
+  );
+}
+
+/** An earlier install, still free: Studio is new, and their recent restores can become a project. */
+export function ReturningCard() {
+  const { keepPastWork, resetStack, showToast } = useStore();
+  return (
+    <div data-demo="returning-card" className="relative mx-4 mt-2 rounded-[20px] bg-card p-3.5 ring-1 ring-[#FF2E7E]/30">
+      <LeverTag l="t" />
+      <div className="text-[12px] font-semibold text-[#FF6A8E]">New in Remini · Studio</div>
+      <div className="mt-0.5 text-[15px] font-bold">Your last restores could be a family archive</div>
+      <div className="mt-2 flex gap-1.5">
+        {[1, 2, 3].map((n) => (
+          <Img key={n} src={A.restored(n)} className="h-14 w-14 rounded-xl" label={false} />
+        ))}
+        <span className="grid h-14 w-14 place-items-center rounded-xl bg-white/[0.06] text-[12px] text-mute">+9 old</span>
+      </div>
+      <button
+        onClick={() => {
+          const id = keepPastWork();
+          showToast('Family archive started');
+          resetStack([{ name: 'studio' }, { name: 'creation', id }]);
+        }}
+        className="mt-3 flex h-10 w-full items-center justify-center rounded-full bg-white text-[14px] font-semibold text-black"
+      >
+        Keep them in a project
+      </button>
     </div>
   );
 }

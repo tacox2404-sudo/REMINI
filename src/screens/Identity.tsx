@@ -1,4 +1,4 @@
-import { A, CAMERA_ROLL, INTENTS, TRIP_PHOTOS_OF_ME } from '../state/data';
+import { A, CAMERA_ROLL, INTENTS, SELFIES, TRIP_PHOTOS_OF_ME } from '../state/data';
 import { useStore } from '../state/store';
 import type { Intent } from '../state/types';
 import { I } from '../components/Icons';
@@ -6,10 +6,10 @@ import { Img } from '../components/Img';
 import { LeverTag, NavHeader, PillWhite, ProgressBar } from '../components/ui';
 
 /** Likeness grows with the photos you choose to add. */
-const likeness = (n: number) => (n >= 9 ? { v: 0.94, label: 'Great likeness' } : n >= 7 ? { v: 0.82, label: 'Very good likeness' } : { v: 0.62, label: 'Good likeness' });
+const likeness = (n: number) => (n >= 6 ? { v: 0.88, label: 'Very good likeness' } : { v: 0.62, label: 'Good likeness' });
 
 export function IdentityScreen({ id }: { id: string }) {
-  const { identities, creations, newLooks, pop, push, openSheet, improveMe, removeProfile, showToast } = useStore();
+  const { identities, creations, newLooks, pop, push, openSheet, improveMe, removeProfile, showToast, tryNewLooks } = useStore();
   const p = identities.find((i) => i.id === id) ?? identities[0];
   if (!p) return <NavHeader title="Profile" onBack={pop} />;
   const mine = p.owner === 'me';
@@ -47,7 +47,7 @@ export function IdentityScreen({ id }: { id: string }) {
       {canAddFromTrip && (
         <div data-demo="add-to-me" className="relative mx-4 mt-3 rounded-2xl bg-card p-3.5 ring-1 ring-[#FF2E7E]/25">
           <LeverTag l="w" />
-          <div className="text-[14px] font-bold">3 photos of you in {trip.title}</div>
+          <div className="text-[14px] font-bold">{TRIP_PHOTOS_OF_ME.length} photos of you in {trip.title}</div>
           <div className="mt-2 flex gap-1.5">
             {TRIP_PHOTOS_OF_ME.map((s) => (
               <Img key={s} src={s} className="h-14 w-14 rounded-xl" label={false} />
@@ -61,11 +61,12 @@ export function IdentityScreen({ id }: { id: string }) {
       )}
 
       {mine && newLooks && (
-        <button onClick={() => push({ name: 'result', kind: 'set', image: A.linkedin(1), images: [A.linkedin(1), A.linkedin(2), A.linkedin(3)], title: 'Casual Headshot' })} className="mx-4 mt-3 flex w-[calc(100%-2rem)] items-center gap-3 rounded-2xl bg-card p-3 text-left">
-          <Img src={A.linkedin(1)} className="h-12 w-12 rounded-xl" label={false} />
+        <button data-demo="try-new-looks" onClick={() => tryNewLooks((r) => push(r))} className="relative mx-4 mt-3 flex w-[calc(100%-2rem)] items-center gap-3 rounded-2xl bg-card p-3 text-left">
+          <LeverTag l="w" />
+          <Img src={A.generic(21)} className="h-12 w-12 rounded-xl" label={false} />
           <span className="flex-1">
-            <span className="block text-[14px] font-bold">New looks with your updated Me</span>
-            <span className="block text-[12px] text-mute">Casual Headshot · keep them if you like them</span>
+            <span className="block text-[14px] font-bold">Try new looks with your updated Me</span>
+            <span className="block text-[12px] text-mute">Casual Headshot · made only if you tap</span>
           </span>
           <I.Chevron size={16} className="text-mute" />
         </button>
@@ -129,7 +130,7 @@ export function CreateScreen() {
   const { pop } = s;
   const start = (intent: Intent) => {
     s.track(`new_project: ${intent}`, 't');
-    const pool = intent === 'family' ? [1, 2, 3, 4].map(A.old) : intent === 'trip' ? CAMERA_ROLL : [...[1, 2, 3, 4].map(A.ref), A.enhance2Before, A.trip(1)];
+    const pool = intent === 'family' ? [1, 2, 3, 4].map(A.old) : intent === 'trip' ? CAMERA_ROLL : [...SELFIES, A.enhance2Before, A.trip(1)];
     s.push({
       name: 'picker',
       title: 'Pick a few photos to start',

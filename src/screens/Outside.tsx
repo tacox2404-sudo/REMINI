@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { A, FRIEND } from '../state/data';
+import { A, DATES } from '../state/data';
 import { useStore } from '../state/store';
 import { I } from '../components/Icons';
 import { Img } from '../components/Img';
@@ -28,9 +28,8 @@ export function LockScreen() {
   };
 
   const notes: { k: string; title: string; body: string; when: string; img: string; l: Lever }[] = [
-    { k: 'trip', title: `${FRIEND} added 8 photos to Philippines trip`, body: 'From the last night. They’re waiting in your project.', when: 'now', img: A.trip(5), l: 'w' },
-    { k: 'looks', title: 'New looks with your updated Me', body: 'Casual Headshot, made with your latest photos', when: '1h ago', img: A.linkedin(2), l: 'w' },
-    { k: 'luca', title: 'Luca joined Philippines trip', body: 'From your link. He’s adding his photos.', when: 'Yesterday', img: A.trip(1), l: 'I' },
+    { k: 'trip', title: 'Luca joined Philippines trip', body: 'He added 6 photos. They’re waiting in your project.', when: 'now', img: A.trip(4), l: 'w' },
+    { k: 'looks', title: 'Try new looks with your updated Me', body: 'Casual Headshot. Made only if you tap.', when: '1h ago', img: A.generic(21), l: 'w' },
   ];
 
   return (
@@ -41,7 +40,7 @@ export function LockScreen() {
       </div>
       <div className="relative flex h-full flex-col items-center pt-[64px]">
         <I.Lock size={18} className="text-white/80" />
-        <div className="mt-2 text-[17px] font-semibold text-white/85">Saturday 3 October</div>
+        <div className="mt-2 text-[17px] font-semibold text-white/85">{DATES.back}</div>
         <div className="text-[92px] font-bold leading-[1] tracking-tight" style={{ fontFeatureSettings: '"tnum"' }}>
           9:41
         </div>

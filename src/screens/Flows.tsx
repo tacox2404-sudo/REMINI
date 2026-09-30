@@ -18,7 +18,7 @@ export function ResultScreen({ kind, image, images, title, trendId, before, proj
   const project = creations.find((c) => c.id === projectId);
 
   const toProject = (id: string) => {
-    showToast(`Kept in ${creations.find((c) => c.id === id)?.title ?? 'your project'}`);
+    showToast(`Kept in ${creations.find((c) => c.id === id)?.title ?? (id === 'eighties' ? '80s with Paola' : 'your project')}`);
     window.setTimeout(() => resetStack([{ name: 'studio' }, { name: 'creation', id }]), 600);
   };
   const saveToGallery = () => {
@@ -107,8 +107,8 @@ export function ResultScreen({ kind, image, images, title, trendId, before, proj
         {/* A friend's style with your face, made inside a shared project. */}
         {studio && kind === 'remix' && (
           <>
-            <PillWhite demo="keep-in-trip" onClick={() => toProject(keepInProject(projectId ?? 'trip', image, title))}>
-              <I.Studio size={18} /> Keep in {project?.title ?? 'the trip'}
+            <PillWhite demo="keep-in-project" onClick={() => toProject(keepInProject(projectId ?? 'eighties', image, title))}>
+              <I.Studio size={18} /> {project ? `Keep in ${project.title}` : 'Keep · new project “80s with Paola”'}
               <LeverTag l="w" />
             </PillWhite>
             <PillGhost demo="make-duo" onClick={() => makeDuo((r) => replaceTop(r))}>
@@ -120,8 +120,8 @@ export function ResultScreen({ kind, image, images, title, trendId, before, proj
 
         {studio && kind === 'together' && (
           <>
-            <PillWhite demo="keep-in-trip" onClick={() => { keepInProject(projectId ?? 'trip', A.remix90s, '80s film · your version'); toProject(keepInProject(projectId ?? 'trip', image, title)); }}>
-              <I.Studio size={18} /> Keep in {project?.title ?? 'the trip'}
+            <PillWhite demo="keep-in-project" onClick={() => { keepInProject(projectId ?? 'eighties', A.remix90s, '80s film · your version'); toProject(keepInProject(projectId ?? 'eighties', image, title)); }}>
+              <I.Studio size={18} /> {project ? `Keep in ${project.title}` : 'Keep · new project “80s with Paola”'}
               <LeverTag l="w" />
             </PillWhite>
             <SaveShare />

@@ -33,8 +33,9 @@ export function presetsFor(c: Creation, ctx: ChatCtx): Preset[] {
       { label: 'Y2K Yearbook on me', images: [A.y2kMe], title: 'Y2K Yearbook', needsMe: true },
     ];
   if (c.intent === 'family') return [{ label: 'Restore and colour all of these', batch: true }];
-  if (c.intent === 'trip') {
-    const list: Preset[] = [{ label: 'Enhance all the photos', batch: true }];
+  if (c.intent === 'trip') return [{ label: 'Enhance all the photos', batch: true }];
+  if (c.id === 'eighties') {
+    const list: Preset[] = [];
     if (ctx.styleShared) list.push({ label: `${FRIEND}’s 80s film on me`, images: [A.remix90s], title: '80s film · your version', needsMe: true });
     if (ctx.paolaJoined) list.push({ label: `Duo shoot with ${FRIEND}`, images: [A.together90s], title: `You & ${FRIEND}`, needsMe: true });
     return list;

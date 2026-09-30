@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
 import { chatReply, type ChatCtx } from './chat';
-import { A, FRIEND, OTHERS, SEGMENTS, STYLE_SETS, TRIP_PHOTOS_OF_ME, familyArchive, look, meProfile, paolaProfile, personalChat, photo, styleCreation, styleOf, tripAlbum, tripProject, INTENTS } from './data';
+import { A, FRIEND, OTHERS, SEGMENTS, SELFIES, STYLE_SETS, TRIP_PHOTOS_OF_ME, eightiesProject, familyArchive, look, meProfile, paolaProfile, personalChat, photo, styleCreation, styleOf, tripAlbum, tripProject, INTENTS } from './data';
 import type { ChatMsg, Creation, Generating, Identity, Intent, Lever, LogEvent, Mode, Route, Segment, Sheet, Tab } from './types';
 
 export const FREE_LIMIT = 5;
@@ -21,7 +21,7 @@ function useSyncState<T>(initial: T | (() => T)) {
  * Where a user is in the journey (the moments of the strategy). Each stage
  * includes everything before it. The guided demo jumps straight to a stage.
  */
-export const STAGE = { NEW: 0, KEPT: 1, LIMIT: 2, TRIAL: 3, JOINED: 4, SHARED: 5, MADE: 6, BACK: 7, CANCELLED: 8 } as const;
+export const STAGE = { NEW: 0, KEPT: 1, SECOND: 2, BUILT: 3, LIMIT: 4, TRIAL: 5, JOINED: 6, MADE: 7, DAY6: 8, BACK: 9, CANCELLED: 10 } as const;
 export type Stage = (typeof STAGE)[keyof typeof STAGE];
 
 let chatSeq = 0;
@@ -42,6 +42,8 @@ function useStoreValue() {
   const [styleShared, setStyleShared, styleSharedRef] = useSyncState(false);
   const [newLooks, setNewLooks] = useState(false);
   const [returning, setReturning] = useState(false);
+  const [trialEnding, setTrialEnding] = useState(false);
+  const [returningFree, setReturningFree] = useState(false);
   const [cancelled, setCancelled] = useState(false);
   const [segment, setSegment] = useState<Segment | null>(null);
   const [onboarded, setOnboarded] = useState<Record<Mode, boolean>>({ today: true, studio: false });
@@ -143,33 +145,55 @@ function useStoreValue() {
 
   /** Build the state of a journey stage directly (used by the guided demo). */
   const setStage = useCallback((st: Stage) => {
-    const madeLooks = st >= STAGE.MADE ? [look(A.remix90s, '80s film · your version'), look(A.together90s, `You & ${FRIEND}`)] : [];
     const trip =
       st >= STAGE.BACK
-        ? tripProject({ done: 17, joined: [FRIEND, 'Luca'], invited: ['Marco'], paola: true, paolaMore: true, looks: madeLooks })
-        : st >= STAGE.JOINED
-          ? tripProject({ done: 17, joined: [FRIEND], invited: OTHERS, paola: true, looks: madeLooks })
-          : st >= STAGE.TRIAL
-            ? tripProject({ done: 17 })
-            : st >= STAGE.LIMIT
-              ? tripProject({ done: 5 })
-              : tripProject({ done: 1 });
+        ? tripProject({ own: 17, done: 17, paola: true, paolaMore: 'done', luca: true, invited: ['Marco'] })
+        : st >= STAGE.DAY6
+          ? tripProject({ own: 17, done: 17, paola: true, paolaMore: 'waiting', invited: OTHERS })
+          : st >= STAGE.JOINED
+            ? tripProject({ own: 17, done: 17, paola: true, invited: OTHERS })
+            : st >= STAGE.TRIAL
+              ? tripProject({ own: 17, done: 17 })
+              : st >= STAGE.LIMIT
+                ? tripProject({ own: 17, done: 5 })
+                : st >= STAGE.BUILT
+                  ? tripProject({ own: 17, done: 2 })
+                  : st >= STAGE.SECOND
+                    ? tripProject({ own: 2, done: 2 })
+                    : tripProject({ own: 1, done: 1 });
     const cs: Creation[] = [personalChat()];
     if (st >= STAGE.KEPT) cs.unshift(trip);
+    if (st >= STAGE.MADE) cs.unshift(eightiesProject([look(A.remix90s, '80s film · your version'), look(A.together90s, `You & ${FRIEND}`)]));
     setCreations(cs);
     const ids: Identity[] = [];
     if (st >= STAGE.MADE) ids.push(meProfile(st >= STAGE.BACK));
     if (st >= STAGE.JOINED) ids.push(paolaProfile());
     setIdentities(ids);
     setPaolaJoined(st >= STAGE.JOINED);
-    setStyleShared(st >= STAGE.SHARED);
+    setStyleShared(st >= STAGE.JOINED);
     setNewLooks(st >= STAGE.BACK);
+    setTrialEnding(st === STAGE.DAY6);
     setReturning(st === STAGE.BACK);
     setCancelled(st === STAGE.CANCELLED);
+    setReturningFree(false);
     setIsPro(st >= STAGE.TRIAL && st < STAGE.CANCELLED);
-    setFreeUsed(st >= STAGE.LIMIT ? FREE_LIMIT : st >= STAGE.KEPT ? 1 : 0);
+    setFreeUsed(st >= STAGE.LIMIT ? FREE_LIMIT : st >= STAGE.SECOND ? 2 : st >= STAGE.KEPT ? 1 : 0);
     setOnboarded({ today: true, studio: st >= STAGE.KEPT });
   }, [setCreations, setIdentities, setPaolaJoined, setStyleShared, setIsPro, setFreeUsed]);
+
+  /** An earlier install, still free, opening the app after Studio launches. */
+  const startReturningFree = useCallback(() => {
+    setStage(STAGE.NEW);
+    setReturningFree(true);
+    setFreeUsed(3);
+  }, [setFreeUsed, setStage]);
+
+  const keepPastWork = useCallback(() => {
+    setReturningFree(false);
+    upsertCreation(familyArchive(3));
+    track('returning_user_kept_past_work', 't');
+    return 'family';
+  }, [track, upsertCreation]);
 
   /** Onboarding answer: logged as a segment; it suggests the first thing to do. */
   const answerSegment = useCallback((seg: Segment) => {
@@ -179,16 +203,35 @@ function useStoreValue() {
     setOnboarded((o) => ({ ...o, studio: true }));
     setNavDir(1);
     setStack([{ name: 'first', step: 'intro', path: seg === 'restore' ? 'restore' : seg === 'profile' ? 'profile' : 'enhance' }]);
+    // Remini's onboarding paywall (60% of trials start here), now showing what Studio adds.
+    setSheet({ type: 'paywallGeneric', reason: 'onboarding' });
   }, [setStack, track]);
 
   /** Any single enhance uses one free action. */
   const spendFree = useCallback(() => setFreeUsed((n) => Math.min(FREE_LIMIT, n + 1)), [setFreeUsed]);
 
-  /** Keep a quick enhance: the trip project starts, with the rest of the trip found in the gallery. */
+  /** Keep the first photo: a project starts with just that photo. */
   const startTrip = useCallback(() => {
-    if (!findCreation('trip')) upsertCreation(tripProject({ done: 1 }));
+    if (!findCreation('trip')) upsertCreation(tripProject({ own: 1, done: 1 }));
     track('project_started_from_result', 't');
     return 'trip';
+  }, [findCreation, track, upsertCreation]);
+
+  /** A second photo from the same trip joins the project: now it's worth building. */
+  const addToTrip = useCallback(() => {
+    const c = findCreation('trip');
+    if (c && c.photos.length < 2) upsertCreation({ ...tripProject({ own: 2, done: 2 }), photos: [...c.photos, photo(A.trip(1), 'enhanced')], cover: A.trip(1) });
+    track('second_photo_kept', 't');
+    return 'trip';
+  }, [findCreation, track, upsertCreation]);
+
+  /** The user chooses to add the rest of the trip from the gallery. */
+  const addRestOfTrip = useCallback(() => {
+    const c = findCreation('trip');
+    if (!c) return;
+    const full = tripProject({ own: 17, done: 0 });
+    upsertCreation({ ...c, photos: [...c.photos, ...full.photos.slice(c.photos.length)], goal: 17, cover: A.trip(1) });
+    track('project_built_from_gallery', 't');
   }, [findCreation, track, upsertCreation]);
 
   /** Keep a set of looks (profile path, personal chat): one project per style. */
@@ -290,9 +333,9 @@ function useStoreValue() {
   const shareStyle = useCallback(() => {
     if (styleSharedRef.current) return;
     setStyleShared(true);
-    updateCreation('trip', (c) => (c.shared ? { ...c, shared: { ...c.shared, feed: [{ who: FRIEND, text: 'shared her 80s film style', when: 'now' }, ...c.shared.feed] } } : c));
     track('friend_shared_style', 'c');
-  }, [setStyleShared, styleSharedRef, track, updateCreation]);
+    showToast(`${FRIEND} shared her 80s film with you · in Studio`);
+  }, [setStyleShared, showToast, styleSharedRef, track]);
 
   /** Paola joins from the link: into the trip, with everyone's photos already there. */
   const friendJoins = useCallback((thenShare = true) => {
@@ -301,9 +344,9 @@ function useStoreValue() {
     track('invited_friend_installed', 'I');
     const c = findCreation('trip');
     if (c) {
-      const next = tripProject({ done: 17, joined: [FRIEND], invited: OTHERS, paola: true, looks: c.looks });
+      const next = tripProject({ own: 17, done: 17, paola: true, invited: OTHERS });
       // Keep your own progress as it is; add Paola's photos.
-      upsertCreation({ ...next, photos: [...c.photos, ...next.photos.slice(17)], goal: c.photos.length + 4 });
+      upsertCreation({ ...next, photos: [...c.photos, ...next.photos.slice(17, 21)], goal: c.photos.length + 4 });
     }
     setIdentities((is) => (is.some((i) => i.id === 'paola') ? is : [...is, paolaProfile()]));
     if (thenShare) later(shareStyle, 2600);
@@ -318,7 +361,7 @@ function useStoreValue() {
       min: 4,
       max: 4,
       preselect: 4,
-      pool: [...[1, 2, 3, 4].map(A.ref), A.enhance2Before, A.enhanceBefore],
+      pool: [...SELFIES, A.enhanceBefore, A.trip(1)],
       cta: 'Save as Me',
       onDone: () => {
         pop();
@@ -339,7 +382,7 @@ function useStoreValue() {
     withMe(() =>
       runGenerating({ steps: [`${FRIEND}’s 80s film`, 'With your profile, Me', 'Final touches'], duration: 2000, preview: A.friend90s }, () => {
         track('friend_style_used', 'c');
-        onResult({ name: 'result', kind: 'remix', image: A.remix90s, title: '80s film · your version', styleId: 'st-80s', projectId: 'trip' });
+        onResult({ name: 'result', kind: 'remix', image: A.remix90s, title: '80s film · your version', styleId: 'st-80s', projectId: 'eighties' });
       }),
     );
   }, [runGenerating, track, withMe]);
@@ -349,24 +392,29 @@ function useStoreValue() {
     withMe(() =>
       runGenerating({ steps: [`You and ${FRIEND}, each with your own profile`, 'Duo photoshoot', 'Final touches'], duration: 2000, preview: A.together90s }, () => {
         track('duo_shoot_made', 'c');
-        onResult({ name: 'result', kind: 'together', image: A.together90s, title: `You & ${FRIEND}`, projectId: 'trip' });
+        onResult({ name: 'result', kind: 'together', image: A.together90s, title: `You & ${FRIEND}`, projectId: 'eighties' });
       }),
     );
   }, [runGenerating, track, withMe]);
 
   /** Keep a result inside the project it was made in. */
   const keepInProject = useCallback((id: string, src: string, title: string) => {
+    if (id === 'eighties' && !findCreation(id)) {
+      upsertCreation(eightiesProject([look(src, title, true)]));
+      track('kept_in_project', 'w');
+      return id;
+    }
     updateCreation(id, (c) => ({ ...c, lastEdit: 'Just now', looks: c.looks.some((l) => l.src === src) ? c.looks : [...c.looks, look(src, title, true)] }));
     track('kept_in_project', 'w');
     return id;
-  }, [track, updateCreation]);
+  }, [findCreation, track, updateCreation, upsertCreation]);
 
   // ---------- Me: kept and updated over time ----------
   const improveMe = useCallback(() => {
     setIdentities((is) =>
       is.map((i) =>
         i.id === 'me' && !i.refs.includes(TRIP_PHOTOS_OF_ME[0])
-          ? { ...i, subtitle: 'Updated just now', refs: [...i.refs, ...TRIP_PHOTOS_OF_ME], history: [...i.history, { when: 'Just now', text: 'You added 3 photos of you from Philippines trip' }] }
+          ? { ...i, subtitle: 'Updated just now', refs: [...i.refs, ...TRIP_PHOTOS_OF_ME], history: [...i.history, { when: 'Just now', text: 'You added 2 photos of you from Philippines trip' }] }
           : i,
       ),
     );
@@ -378,13 +426,16 @@ function useStoreValue() {
     track('profile_removed');
   }, [setIdentities, track]);
 
-  /** New looks made on your updated profile: kept only if you want them. */
-  const keepNewLooks = useCallback(() => {
-    setNewLooks(false);
-    const id = keepSet([A.linkedin(1), A.linkedin(2), A.linkedin(3)]);
-    track('new_looks_kept', 'w');
-    return id;
-  }, [keepSet, track]);
+  /** New looks are a suggestion: nothing is generated until you tap. */
+  const tryNewLooks = useCallback((onResult: (r: Route) => void) => {
+    withMe(() =>
+      runGenerating({ steps: ['Casual Headshot', 'With your updated Me', 'Picking your best 3'], duration: 1900, preview: A.linkedin(1) }, () => {
+        setNewLooks(false);
+        track('new_looks_tried', 'w');
+        onResult({ name: 'result', kind: 'set', image: A.linkedin(1), images: [A.linkedin(1), A.linkedin(2), A.linkedin(3)], title: 'Casual Headshot' });
+      }),
+    );
+  }, [runGenerating, track, withMe]);
 
   /** Continue a set of looks with more of the same style; stop when the set is complete. */
   const continueCreation = useCallback((id: string) => {
@@ -465,6 +516,8 @@ function useStoreValue() {
     setStyleShared(false);
     setNewLooks(false);
     setReturning(false);
+    setTrialEnding(false);
+    setReturningFree(false);
     setCancelled(false);
     setSegment(null);
     setOnboarded({ today: true, studio: false });
@@ -479,10 +532,10 @@ function useStoreValue() {
     mode, setMode, tab, goTab, stack, stackRef, navDir, push, pop, replaceTop, resetStack,
     sheet, openSheet, closeSheet, generating, runGenerating, toast, showToast, clearToast: useCallback(() => setToast(null), []),
     showLevers, setShowLevers, events, track, clearEvents: useCallback(() => setEvents([]), []),
-    identities, identitiesRef, creations, creationsRef, paolaJoined, styleShared, newLooks, returning, cancelled, segment, onboarded, setOnboarded,
+    identities, identitiesRef, creations, creationsRef, paolaJoined, styleShared, newLooks, returning, cancelled, trialEnding, returningFree, startReturningFree, keepPastWork, addToTrip, addRestOfTrip, segment, onboarded, setOnboarded,
     freeUsed, isPro, processing, demo, setDemo, splash, setSplash, lastDemoDone, setLastDemoDone, closing, setClosing, chatTyping,
     setStage, answerSegment, spendFree, startTrip, keepLook, keepSet, keepRestore, keepInProject, processPhotos, enhanceAll, startTrial, finishAfterTrial, cancelPro,
-    inviteFriends, friendJoins, shareStyle, withMe, saveMe, applyFriendStyle, makeDuo, improveMe, removeProfile, keepNewLooks, continueCreation, createFromIntent,
+    inviteFriends, friendJoins, shareStyle, withMe, saveMe, applyFriendStyle, makeDuo, improveMe, removeProfile, tryNewLooks, continueCreation, createFromIntent,
     sendChat, keepFromChat, chatCtx, updateCreation, upsertCreation, setFlags, resetAll, clearTimers, friend: FRIEND,
   };
 }
